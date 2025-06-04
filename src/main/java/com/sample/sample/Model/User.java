@@ -1,40 +1,54 @@
 package com.sample.sample.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
+
+import java.util.*;
 
 @Entity
 @Table(name = "users")
 public class User {
 
-    @Id
     @UuidGenerator
-    private String Id;
+    @Id
+    private String id;
 
-    private String userName;
+    private String username;
 
     private String email;
 
-    private String phone;
+    private String password;
 
-    private String  password;
+    private Date created;
+
+    private String role;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
+        this.id = id;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -45,13 +59,6 @@ public class User {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
 
     public String getPassword() {
         return password;
@@ -61,6 +68,8 @@ public class User {
         this.password = password;
     }
 
-
+    public Date getCreated() {
+        return created;
+    }
 
 }
