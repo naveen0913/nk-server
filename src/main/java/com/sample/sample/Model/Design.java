@@ -5,6 +5,7 @@ package com.sample.sample.Model;
 import jakarta.persistence.*;
 
 @Entity
+
 public class Design {
 
     @Id
@@ -13,12 +14,7 @@ public class Design {
 
     private String name;
 
-    // Constructors
-    public Design() {}
 
-    public Design(String name) {
-        this.name = name;
-    }
 
     // Getters and Setters
     public Long getId() {
