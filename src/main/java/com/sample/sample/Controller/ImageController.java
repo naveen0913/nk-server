@@ -1,6 +1,7 @@
 package com.sample.sample.Controller;
 
 import com.sample.sample.Model.Images;
+import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Responses.ImageResponse;
 import com.sample.sample.Service.ImgService;
 import jakarta.persistence.Access;
@@ -33,22 +34,6 @@ public class ImageController {
         return ResponseEntity.ok(imageService.saveImage(name, description, file));
     }
 
-//    @GetMapping
-//    public List<String> listImages() throws IOException {
-//        String folderPath = new ClassPathResource("static/uploads").getFile().getAbsolutePath();
-//        File folder = new File(folderPath);
-//        File[] files = folder.listFiles();
-//
-//        List<String> imageUrls = new ArrayList<>();
-//        if (files != null) {
-//            for (File file : files) {
-//                String filename = file.getName();
-//                String url = "http://localhost:8080/uploads/" + filename;
-//                imageUrls.add(url);
-//            }
-//        }
-//        return imageUrls;
-//    }
 
     @GetMapping
     public List<ImageResponse> listImages() throws IOException {
@@ -61,29 +46,46 @@ public class ImageController {
 
 
         for (Images image : imagesList) {
-            String baseUrl = "http://localhost:8080";
+            String baseUrl = "http://localhost:8081";
             String uploadPath = "uploads";
             String finalUrl = buildImageUrl(baseUrl,uploadPath,image.getImageUrl());
 //            String url = "http://localhost:8080/uploads/" + image.getImageUrl(); // Assuming `getFilename()` exists
             responseList.add(new ImageResponse(image.getId(),image.getName(), image.getDescription(), finalUrl));
         }
 
-
         return responseList;
 
-
     }
+
+    @GetMapping("/{productId}")
+    public AuthResponse getProductById(@PathVariable Long productId){
+        return imageService.getProductById(productId);
+    }
+
+
+    @PutMapping("/{productId}")
+    public AuthResponse updateImage(
+            @PathVariable Long productId,
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam(required = false) MultipartFile file
+    )  {
+        return imageService.updateProduct(productId, name, description, file);
+    }
+
+    @DeleteMapping("/{productId}")
+    public AuthResponse  deleteImage(@PathVariable Long productId) {
+        return imageService.deleteImage(productId);
+    }
+
 
     public String buildImageUrl(String baseUrl, String uploadPath, String filename) {
         // Ensure no double slashes in the final URL
         if (filename.startsWith("/") || filename.startsWith(uploadPath)) {
             filename = filename.replaceFirst("^/+", "").replaceFirst("^" + uploadPath + "/?", "");
         }
-
         return baseUrl + "/" + uploadPath + "/" + filename;
     }
-
-
 
 
 }

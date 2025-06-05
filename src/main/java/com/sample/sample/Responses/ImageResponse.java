@@ -13,7 +13,7 @@ public class ImageResponse {
 
     private String name;
     private String description;
-    private String url;
+    private String imageUrl;
 
 
 
@@ -25,14 +25,18 @@ public class ImageResponse {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
-
-
-    public ImageResponse(Long imgId, String name, String description, String url) {
+    public ImageResponse(Long imgId, String name, String description, String imageUrl) {
         this.imgId = imgId;
         this.name = name;
         this.description = description;
-        this.url = url;
+        this.imageUrl = imageUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
