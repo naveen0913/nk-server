@@ -2,17 +2,16 @@ package com.sample.sample.Controller;
 
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sample.sample.DTO.ProductCustomizationDTO;
+
 import com.sample.sample.Model.ProductCustomization;
-import com.sample.sample.Model.CustomizationOption;
 import com.sample.sample.Service.ProductCustomizationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -22,46 +21,25 @@ public class ProductCustomizationController {
     @Autowired
     private ProductCustomizationService service;
 
-    @PostMapping(consumes = "multipart/form-data")
-    public ProductCustomization createProductCustomization(
-            @RequestPart("bannerImage") MultipartFile bannerImage,
-            @RequestPart("thumbnailImages") List<MultipartFile> thumbnailImages,
-            @RequestPart("customizationData") String customizationDataJson
-    ) throws IOException {
-
-        // Simulate file storage and URLs
-        String bannerImageUrl = "uploads/" + bannerImage.getOriginalFilename();
-        List<String> thumbnailUrls = new ArrayList<>();
-        for (MultipartFile file : thumbnailImages) {
-            thumbnailUrls.add("uploads/" + file.getOriginalFilename());
+    // POST: Save product customization with images and JSON data
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> saveCustomization(
+            @RequestParam("data") String jsonData,
+            @RequestParam("bannerImage") MultipartFile bannerImage,
+            @RequestParam("thumbnails") List<MultipartFile> thumbnails) {
+        try {
+            ProductCustomization saved = service.saveCustomization(jsonData, bannerImage, thumbnails);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save customization: " + e.getMessage());
         }
-
-        // Convert JSON to DTO
-        ObjectMapper objectMapper = new ObjectMapper();
-        ProductCustomizationDTO dto = objectMapper.readValue(customizationDataJson, ProductCustomizationDTO.class);
-
-        // Build entity
-        ProductCustomization customization = new ProductCustomization();
-        customization.setBannerImageUrl(bannerImageUrl);
-        customization.setThumbnailImageUrls(thumbnailUrls);
-        customization.setInput(dto.isInput());
-        customization.setQuantity(dto.isQuantity());
-        customization.setCart(dto.isCart());
-        customization.setUpload(dto.isUpload());
-        customization.setDesign(dto.isDesign());
-        customization.setGiftWrap(dto.isGiftWrap());
-
-        for (CustomizationOption option : dto.getOptions()) {
-            option.setProductCustomization(customization);
-        }
-
-        customization.setOptions(dto.getOptions());
-
-        return service.save(customization);
     }
 
+    // GET: Return all saved customizations
     @GetMapping
-    public List<ProductCustomization> getAll() {
-        return service.getAll();
+    public ResponseEntity<List<ProductCustomization>> getAllCustomizations() {
+        List<ProductCustomization> customizations = service.getAllCustomizations();
+        return ResponseEntity.ok(customizations);
     }
 }

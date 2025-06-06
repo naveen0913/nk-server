@@ -1,11 +1,8 @@
 package com.sample.sample.Model;
 
-
-
-
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import java.util.ArrayList;
+
 import java.util.List;
 
 @Entity
@@ -13,7 +10,7 @@ public class ProductCustomization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productCustomizationId;
+    private Long id;
 
     private String bannerImageUrl;
 
@@ -28,14 +25,17 @@ public class ProductCustomization {
     private boolean giftWrap;
 
     @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CustomizationOption> options = new ArrayList<>();
+    @JsonManagedReference
+    private List<CustomizationOption> options;
 
-    public Long getProductCustomizationId() {
-        return productCustomizationId;
+    // Getters and Setters
+
+    public Long getId() {
+        return id;
     }
 
-    public void setProductCustomizationId(Long productCustomizationId) {
-        this.productCustomizationId = productCustomizationId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getBannerImageUrl() {
