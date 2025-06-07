@@ -27,7 +27,6 @@ public class ProductCustomizationService {
     private String uploadPath;
 
 
-
     public ProductCustomizationService(ProductCustomizationRepo repo) {
         this.repo = repo;
     }
@@ -92,4 +91,5 @@ public class ProductCustomizationService {
     public List<ProductCustomization> getAllCustomizations() {
         return repo.findAll();
     }
+
 }

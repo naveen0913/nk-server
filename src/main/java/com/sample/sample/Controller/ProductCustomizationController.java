@@ -42,4 +42,10 @@ public class ProductCustomizationController {
         List<ProductCustomization> customizations = service.getAllCustomizations();
         return ResponseEntity.ok(customizations);
     }
+
+
+
+
 }
+
+
