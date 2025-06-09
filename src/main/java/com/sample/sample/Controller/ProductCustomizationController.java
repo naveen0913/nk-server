@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/product-customizations")
+@CrossOrigin("*")
 public class ProductCustomizationController {
 
     @Autowired
@@ -24,7 +25,7 @@ public class ProductCustomizationController {
     // POST: Save product customization with images and JSON data
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveCustomization(
-            @RequestParam("data") String jsonData,
+            @RequestParam("jsonData") String jsonData,
             @RequestParam("bannerImage") MultipartFile bannerImage,
             @RequestParam("thumbnails") List<MultipartFile> thumbnails) {
         try {
