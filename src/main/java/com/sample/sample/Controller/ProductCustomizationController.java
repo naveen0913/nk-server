@@ -1,8 +1,5 @@
 package com.sample.sample.Controller;
 
-
-
-
 import com.sample.sample.Model.ProductCustomization;
 import com.sample.sample.Service.ProductCustomizationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +40,4 @@ public class ProductCustomizationController {
         List<ProductCustomization> customizations = service.getAllCustomizations();
         return ResponseEntity.ok(customizations);
     }
-
-
-
-
 }
-
-
