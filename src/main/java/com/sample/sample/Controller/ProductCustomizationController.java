@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/product-customizations")
@@ -39,5 +40,16 @@ public class ProductCustomizationController {
     public ResponseEntity<List<ProductCustomization>> getAllCustomizations() {
         List<ProductCustomization> customizations = service.getAllCustomizations();
         return ResponseEntity.ok(customizations);
+    }
+
+    // GET: Return customization by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCustomizationById(@PathVariable Long id) {
+        Optional<ProductCustomization> customization = service.getCustomizationById(id);
+        if (customization.isPresent()) {
+            return ResponseEntity.ok(customization.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customization not found with ID: " + id);
+        }
     }
 }

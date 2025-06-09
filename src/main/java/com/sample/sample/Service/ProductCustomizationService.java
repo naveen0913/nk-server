@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,5 +92,10 @@ public class ProductCustomizationService {
     public List<ProductCustomization> getAllCustomizations() {
         return repo.findAll();
     }
+
+    public Optional<ProductCustomization> getCustomizationById(Long id) {
+        return repo.findById(id);
+    }
+
 
 }
