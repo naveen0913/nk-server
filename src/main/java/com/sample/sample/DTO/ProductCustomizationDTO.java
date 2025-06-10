@@ -4,6 +4,7 @@ import java.util.List;
 
 public class ProductCustomizationDTO {
 
+    private String description;
     private boolean input;
     private boolean quantity;
     private boolean cart;
@@ -14,7 +15,13 @@ public class ProductCustomizationDTO {
 
     // Getters and Setters
 
+    public String getDescription() {
+        return description;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
     public boolean isInput() {
         return input;
     }

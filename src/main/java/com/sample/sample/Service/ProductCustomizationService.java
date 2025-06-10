@@ -39,6 +39,7 @@ public class ProductCustomizationService {
 
         ProductCustomization entity = new ProductCustomization();
 
+        entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
         entity.setCart(dto.isCart());
@@ -66,6 +67,7 @@ public class ProductCustomizationService {
             co.setDiscount(opt.getDiscount());
             co.setMostPopular(opt.isMostPopular());
             co.setProductCustomization(entity);
+
             return co;
         }).collect(Collectors.toList());
 

@@ -1,5 +1,7 @@
 package com.sample.sample.Model;
 
+
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -23,6 +25,7 @@ public class ProductCustomization {
     private boolean upload;
     private boolean design;
     private boolean giftWrap;
+    private String description;
 
     @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -109,4 +112,11 @@ public class ProductCustomization {
     public void setOptions(List<CustomizationOption> options) {
         this.options = options;
     }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 }
