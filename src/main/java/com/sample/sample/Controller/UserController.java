@@ -48,4 +48,10 @@ public class UserController {
     public AuthResponse getAllUsers(){
         return userService.getAllUsers();
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getUserCount() {
+        long count = userService.getUserCount();
+        return ResponseEntity.ok(count);
+    }
 }

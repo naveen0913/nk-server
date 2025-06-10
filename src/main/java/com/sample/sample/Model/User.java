@@ -1,9 +1,10 @@
 package com.sample.sample.Model;
 
+
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "users")
@@ -19,21 +20,20 @@ public class User {
 
     private String password;
 
+    @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     private String role;
 
-    public String getRole() {
-        return role;
+    @PrePersist
+    protected void onCreate() {
+        this.created = new Date();
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public User() {
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
-    }
+    // Getters and Setters
 
     public String getId() {
         return id;
@@ -59,7 +59,6 @@ public class User {
         this.email = email;
     }
 
-
     public String getPassword() {
         return password;
     }
@@ -72,4 +71,15 @@ public class User {
         return created;
     }
 
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
