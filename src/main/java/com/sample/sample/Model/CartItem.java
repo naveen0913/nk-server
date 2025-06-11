@@ -43,6 +43,10 @@ public class CartItem {
     @JoinColumn(name = "product_id")
     private Images product;
 
+    @OneToMany(mappedBy = "cartItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartOption> cartOptions = new ArrayList<>();
+
+
     public Images getProduct() {
         return product;
     }
