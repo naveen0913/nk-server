@@ -1,19 +1,27 @@
 package com.sample.sample.DTO;
 
-
-
-import com.sample.sample.Model.CustomizationOption;
 import java.util.List;
 
 public class ProductCustomizationDTO {
+
+    private String description;
     private boolean input;
     private boolean quantity;
     private boolean cart;
     private boolean upload;
     private boolean design;
     private boolean giftWrap;
-    private List<CustomizationOption> options;
+    private List<CustomizationOptionDTO> options;
 
+    // Getters and Setters
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
     public boolean isInput() {
         return input;
     }
@@ -62,11 +70,11 @@ public class ProductCustomizationDTO {
         this.giftWrap = giftWrap;
     }
 
-    public List<CustomizationOption> getOptions() {
+    public List<CustomizationOptionDTO> getOptions() {
         return options;
     }
 
-    public void setOptions(List<CustomizationOption> options) {
+    public void setOptions(List<CustomizationOptionDTO> options) {
         this.options = options;
     }
 }

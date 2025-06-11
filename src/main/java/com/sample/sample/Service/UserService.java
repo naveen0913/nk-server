@@ -3,13 +3,12 @@ package com.sample.sample.Service;
 import com.sample.sample.DTO.LoginDTO;
 import com.sample.sample.DTO.SignupDTO;
 import com.sample.sample.JWT.JwtUtil;
+import com.sample.sample.Model.User;
 import com.sample.sample.Repository.UserRepo;
 import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.sample.sample.Model.User;
 
 import java.util.*;
 
@@ -105,5 +104,10 @@ public class UserService{
     public AuthResponse getAllUsers() {
         List<User> users = userRepository.findAll();
         return new AuthResponse(HttpStatus.OK.value(), "users list", users);
+    }
+
+
+    public long getUserCount() {
+        return userRepository.count();
     }
 }

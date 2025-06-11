@@ -1,15 +1,17 @@
 package com.sample.sample.Responses;
 
+
+
 public class AuthResponse {
 
     private int code;
     private String message;
-    private Object Data;
+    private Object data;
 
     public AuthResponse(int code, String message, Object data) {
         this.code = code;
         this.message = message;
-        Data = data;
+        this.data = data;
     }
 
     public int getCode() {
@@ -29,10 +31,10 @@ public class AuthResponse {
     }
 
     public Object getData() {
-        return Data;
+        return data;
     }
 
     public void setData(Object data) {
-        Data = data;
+        this.data = data;
     }
 }
