@@ -2,9 +2,10 @@ package com.sample.sample.Model;
 
 
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
 
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,7 +13,7 @@ public class ProductCustomization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long productCustomizationId;
 
     private String bannerImageUrl;
 
@@ -23,22 +24,28 @@ public class ProductCustomization {
     private boolean quantity;
     private boolean cart;
     private boolean upload;
+    private boolean multiUpload;
     private boolean design;
     private boolean giftWrap;
     private String description;
 
-    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<CustomizationOption> options;
-
-    // Getters and Setters
-
-    public Long getId() {
-        return id;
+    public String getDescription() {
+        return description;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CustomizationOption> options = new ArrayList<>();
+
+    public Long getProductCustomizationId() {
+        return productCustomizationId;
+    }
+
+    public void setProductCustomizationId(Long productCustomizationId) {
+        this.productCustomizationId = productCustomizationId;
     }
 
     public String getBannerImageUrl() {
@@ -112,11 +119,12 @@ public class ProductCustomization {
     public void setOptions(List<CustomizationOption> options) {
         this.options = options;
     }
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
+
+    public boolean isMultiUpload() {
+        return multiUpload;
     }
 
+    public void setMultiUpload(boolean multiUpload) {
+        this.multiUpload = multiUpload;
+    }
 }

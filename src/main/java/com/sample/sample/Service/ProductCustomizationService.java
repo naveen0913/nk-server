@@ -46,6 +46,7 @@ public class ProductCustomizationService {
         entity.setUpload(dto.isUpload());
         entity.setDesign(dto.isDesign());
         entity.setGiftWrap(dto.isGiftWrap());
+        entity.setMultiUpload(dto.isMultiUpload());
 
         // Save banner
         String bannerUrl = saveFile(bannerImage);
