@@ -27,6 +27,15 @@ public class ProductCustomization {
     private boolean multiUpload;
     private boolean design;
     private boolean giftWrap;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomizationOption> options = new ArrayList<>();
