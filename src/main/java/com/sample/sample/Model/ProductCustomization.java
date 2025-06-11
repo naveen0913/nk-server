@@ -24,6 +24,7 @@ public class ProductCustomization {
     private boolean quantity;
     private boolean cart;
     private boolean upload;
+    private boolean multiUpload;
     private boolean design;
     private boolean giftWrap;
 
@@ -108,5 +109,13 @@ public class ProductCustomization {
 
     public void setOptions(List<CustomizationOption> options) {
         this.options = options;
+    }
+
+    public boolean isMultiUpload() {
+        return multiUpload;
+    }
+
+    public void setMultiUpload(boolean multiUpload) {
+        this.multiUpload = multiUpload;
     }
 }
