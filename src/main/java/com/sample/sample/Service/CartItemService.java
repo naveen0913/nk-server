@@ -2,7 +2,6 @@ package com.sample.sample.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.CartDTO;
-import com.sample.sample.DTO.ProductCustomizationDTO;
 import com.sample.sample.Model.CartItem;
 import com.sample.sample.Model.Images;
 import com.sample.sample.Model.User;
@@ -33,62 +32,54 @@ public class CartItemService {
     @Autowired
     private ImageRepo imageRepo;
 
-    @Value("${upload.path:uploads}")
-    private String uploadPath;
+    @Value("${upload.path:C:/uploads/}")
+    private String uploadDir;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    public CartItem addCartItem(Long productId, String userId, String cartPayload, List<MultipartFile> customImages) throws IOException {
+        // Convert JSON string to DTO
+        ObjectMapper objectMapper = new ObjectMapper();
+        CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
 
-    public CartItem addCartItem(Long productId, String userId, String cartItemDTO, List<MultipartFile> customImages) throws IOException {
+        // Map DTO to Entity
         CartItem cartItem = new CartItem();
-        CartDTO dto = mapper.readValue(cartItemDTO, CartDTO.class);
+        cartItem.setCartItemName(cartDTO.getCartItemName());
+        cartItem.setCartQuantity(cartDTO.getCartQuantity());
+        cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
+        cartItem.setTotalPrice(cartDTO.getTotalPrice());
+        cartItem.setCustomName(cartDTO.getCustomName());
+        cartItem.setOptionCount(cartDTO.getOptionCount());
+        cartItem.setOptionPrice(cartDTO.getOptionPrice());
+        cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
+        cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
+        cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
 
-        Images product = imageRepo.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-
-
-        // Fetch user by ID
+        // Fetch User
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Fetch Product (Images)
+        Images product = imageRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
         cartItem.setUser(user);
         cartItem.setProduct(product);
 
-        cartItem.setCartItemName(dto.getCartItemName());
-        cartItem.setCartQuantity(dto.getCartQuantity());
-        cartItem.setCartGiftWrap(dto.isCartGiftWrap());
-        cartItem.setLabelDesigns(dto.getLabelDesigns());
-        cartItem.setOptionCount(dto.getOptionCount());
-        cartItem.setOptionPrice(dto.getOptionPrice());
-        cartItem.setOptiondiscount(dto.getOptiondiscount());
-        cartItem.setTotalPrice(dto.getTotalPrice());
-cartItem.setCustomName(dto.getCartItemName());
-
-        // Handle image upload
+        // Process Images
         List<String> imageUrls = new ArrayList<>();
         if (customImages != null && !customImages.isEmpty()) {
             for (MultipartFile file : customImages) {
-                try {
-                    String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                    Path filePath = Paths.get(uploadPath, filename);
+                if (!file.isEmpty()) {
+                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    Path filePath = Paths.get(uploadDir + fileName);
+                    Files.createDirectories(filePath.getParent());
                     Files.write(filePath, file.getBytes());
-                    imageUrls.add("/uploads/" + filename); // adjust if your static mapping is different
-                } catch (IOException e) {
-                    throw new RuntimeException("Error saving image: " + e.getMessage());
+                    imageUrls.add(fileName);
                 }
             }
         }
         cartItem.setCustomImages(imageUrls);
 
-
+        // Save Cart Item
         return cartItemRepository.save(cartItem);
     }
-
-
-
-
-
-
-
-
-
 }

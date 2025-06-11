@@ -17,9 +17,7 @@ public class Images {
     private String description;
     private String imageUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "cart_item_id")
-    private CartItem cartItem;
+
 
     // Getters and Setters
     public Long getId() {
@@ -54,11 +52,5 @@ public class Images {
         this.imageUrl = imageUrl;
     }
 
-    public CartItem getCartItem() {
-        return cartItem;
-    }
 
-    public void setCartItem(CartItem cartItem) {
-        this.cartItem = cartItem;
-    }
 }
