@@ -1,10 +1,11 @@
 package com.sample.sample.Model;
 
-
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -20,18 +21,12 @@ public class User {
 
     private String password;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     private String role;
 
-    @PrePersist
-    protected void onCreate() {
-        this.created = new Date();
-    }
-
-    public User() {
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItem> cartItems = new ArrayList<>();
 
     // Getters and Setters
 
@@ -81,5 +76,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
     }
 }

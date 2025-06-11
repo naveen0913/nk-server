@@ -1,20 +1,27 @@
 package com.sample.sample.Model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
+
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "images")
 public class Images {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
     private String description;
+    private String imageUrl;
 
+    @ManyToOne
+    @JoinColumn(name = "cart_item_id")
+    private CartItem cartItem;
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -47,5 +54,11 @@ public class Images {
         this.imageUrl = imageUrl;
     }
 
-    private String imageUrl;
+    public CartItem getCartItem() {
+        return cartItem;
+    }
+
+    public void setCartItem(CartItem cartItem) {
+        this.cartItem = cartItem;
+    }
 }

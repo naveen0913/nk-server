@@ -4,6 +4,8 @@ package com.sample.sample.Model;
 
 
 
+
+
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,21 +15,33 @@ public class ProductCustomization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productCustomizationId;
+    private Long id;
+
+    private String description;
+
+    private boolean input;
+    private boolean quantity;
+    private boolean upload;
+    private boolean design;
+    private boolean giftWrap;
+    private boolean multiUpload;
 
     private String bannerImageUrl;
 
     @ElementCollection
-    private List<String> thumbnailImageUrls;
+    private List<String> thumbnailImageUrls = new ArrayList<>();
 
-    private boolean input;
-    private boolean quantity;
-    private boolean cart;
-    private boolean upload;
-    private boolean multiUpload;
-    private boolean design;
-    private boolean giftWrap;
-    private String description;
+    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CustomizationOption> options = new ArrayList<>();
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getDescription() {
         return description;
@@ -35,33 +49,6 @@ public class ProductCustomization {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CustomizationOption> options = new ArrayList<>();
-
-    public Long getProductCustomizationId() {
-        return productCustomizationId;
-    }
-
-    public void setProductCustomizationId(Long productCustomizationId) {
-        this.productCustomizationId = productCustomizationId;
-    }
-
-    public String getBannerImageUrl() {
-        return bannerImageUrl;
-    }
-
-    public void setBannerImageUrl(String bannerImageUrl) {
-        this.bannerImageUrl = bannerImageUrl;
-    }
-
-    public List<String> getThumbnailImageUrls() {
-        return thumbnailImageUrls;
-    }
-
-    public void setThumbnailImageUrls(List<String> thumbnailImageUrls) {
-        this.thumbnailImageUrls = thumbnailImageUrls;
     }
 
     public boolean isInput() {
@@ -78,14 +65,6 @@ public class ProductCustomization {
 
     public void setQuantity(boolean quantity) {
         this.quantity = quantity;
-    }
-
-    public boolean isCart() {
-        return cart;
-    }
-
-    public void setCart(boolean cart) {
-        this.cart = cart;
     }
 
     public boolean isUpload() {
@@ -112,19 +91,35 @@ public class ProductCustomization {
         this.giftWrap = giftWrap;
     }
 
-    public List<CustomizationOption> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<CustomizationOption> options) {
-        this.options = options;
-    }
-
     public boolean isMultiUpload() {
         return multiUpload;
     }
 
     public void setMultiUpload(boolean multiUpload) {
         this.multiUpload = multiUpload;
+    }
+
+    public String getBannerImageUrl() {
+        return bannerImageUrl;
+    }
+
+    public void setBannerImageUrl(String bannerImageUrl) {
+        this.bannerImageUrl = bannerImageUrl;
+    }
+
+    public List<String> getThumbnailImageUrls() {
+        return thumbnailImageUrls;
+    }
+
+    public void setThumbnailImageUrls(List<String> thumbnailImageUrls) {
+        this.thumbnailImageUrls = thumbnailImageUrls;
+    }
+
+    public List<CustomizationOption> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<CustomizationOption> options) {
+        this.options = options;
     }
 }

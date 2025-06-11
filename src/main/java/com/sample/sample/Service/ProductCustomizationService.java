@@ -7,6 +7,7 @@ import com.sample.sample.Model.ProductCustomization;
 import com.sample.sample.Repository.ProductCustomizationRepo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,51 +28,57 @@ public class ProductCustomizationService {
     @Value("${upload.path:uploads}")
     private String uploadPath;
 
-
     public ProductCustomizationService(ProductCustomizationRepo repo) {
         this.repo = repo;
     }
 
+    @Transactional
     public ProductCustomization saveCustomization(String dtoJson,
                                                   MultipartFile bannerImage,
                                                   List<MultipartFile> thumbnails) throws Exception {
         ProductCustomizationDTO dto = mapper.readValue(dtoJson, ProductCustomizationDTO.class);
 
         ProductCustomization entity = new ProductCustomization();
-
         entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
-        entity.setCart(dto.isCart());
+        // Removed: entity.setCart(dto.isCart());
         entity.setUpload(dto.isUpload());
         entity.setDesign(dto.isDesign());
         entity.setGiftWrap(dto.isGiftWrap());
         entity.setMultiUpload(dto.isMultiUpload());
 
-        // Save banner
-        String bannerUrl = saveFile(bannerImage);
-        entity.setBannerImageUrl(bannerUrl);
+        // Save banner image
+        if (bannerImage != null && !bannerImage.isEmpty()) {
+            String bannerUrl = saveFile(bannerImage);
+            entity.setBannerImageUrl(bannerUrl);
+        }
 
         // Save thumbnails
         List<String> thumbUrls = new ArrayList<>();
-        for (MultipartFile thumb : thumbnails) {
-            thumbUrls.add(saveFile(thumb));
+        if (thumbnails != null) {
+            for (MultipartFile thumb : thumbnails) {
+                if (thumb != null && !thumb.isEmpty()) {
+                    thumbUrls.add(saveFile(thumb));
+                }
+            }
         }
         entity.setThumbnailImageUrls(thumbUrls);
 
-        // Save options
-        List<CustomizationOption> optionEntities = dto.getOptions().stream().map(opt -> {
-            CustomizationOption co = new CustomizationOption();
-            co.setOptionLabel(opt.getOptionLabel());
-            co.setOriginalPrice(opt.getOriginalPrice());
-            co.setOldPrice(opt.getOldPrice());
-            co.setDiscount(opt.getDiscount());
-            co.setMostPopular(opt.isMostPopular());
-            co.setProductCustomization(entity);
-
-            return co;
-        }).collect(Collectors.toList());
-
+        // Save customization options
+        List<CustomizationOption> optionEntities = new ArrayList<>();
+        if (dto.getOptions() != null) {
+            optionEntities = dto.getOptions().stream().map(opt -> {
+                CustomizationOption co = new CustomizationOption();
+                co.setOptionLabel(opt.getOptionLabel());
+                co.setOriginalPrice(opt.getOriginalPrice());
+                co.setOldPrice(opt.getOldPrice());
+                co.setDiscount(opt.getDiscount());
+                co.setMostPopular(opt.isMostPopular());
+                co.setProductCustomization(entity);
+                return co;
+            }).collect(Collectors.toList());
+        }
         entity.setOptions(optionEntities);
 
         return repo.save(entity);
@@ -91,7 +98,6 @@ public class ProductCustomizationService {
         return "/uploads/" + filename;
     }
 
-
     public List<ProductCustomization> getAllCustomizations() {
         return repo.findAll();
     }
@@ -99,6 +105,4 @@ public class ProductCustomizationService {
     public Optional<ProductCustomization> getCustomizationById(Long id) {
         return repo.findById(id);
     }
-
-
 }

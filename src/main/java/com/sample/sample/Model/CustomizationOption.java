@@ -1,7 +1,9 @@
 package com.sample.sample.Model;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
+
+
 import jakarta.persistence.*;
 
 @Entity
@@ -19,10 +21,10 @@ public class CustomizationOption {
 
     @ManyToOne
     @JoinColumn(name = "product_customization_id")
-    @JsonBackReference
     private ProductCustomization productCustomization;
 
     // Getters and Setters
+
     public Long getId() {
         return id;
     }
