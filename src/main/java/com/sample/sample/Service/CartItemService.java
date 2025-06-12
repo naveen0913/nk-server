@@ -10,7 +10,10 @@ import com.sample.sample.Repository.ImageRepo;
 import com.sample.sample.Repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -82,4 +85,30 @@ public class CartItemService {
         // Save Cart Item
         return cartItemRepository.save(cartItem);
     }
+
+
+
+
+    public List<CartItem> getUserCartList(String userId) {
+        return cartItemRepository.getAllItemsByUser(userId);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
+
+    // Delete a cart item by its ID
+    public void deleteCartItem(Long cartItemId) {
+        if (!cartItemRepository.existsById(cartItemId)) {
+            throw new RuntimeException("Cart Item not found with id: " + cartItemId);
+        }
+        cartItemRepository.deleteById(cartItemId);
+    }
+
+    // Delete all cart items
+    public void deleteAllCartItems() {
+        cartItemRepository.deleteAll();
+    }
+
+
 }

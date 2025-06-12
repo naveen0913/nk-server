@@ -1,14 +1,17 @@
 package com.sample.sample.Model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+
+
+
 public class User {
 
     @UuidGenerator
@@ -26,7 +29,10 @@ public class User {
     private String role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems = new ArrayList<>();
+    @JsonManagedReference // 👉 Parent side
+    private List<CartItem> cartItems;
+
+
 
     // Getters and Setters
 

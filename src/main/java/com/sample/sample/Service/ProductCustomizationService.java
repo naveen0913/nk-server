@@ -79,7 +79,7 @@ public class ProductCustomizationService {
                 return co;
             }).collect(Collectors.toList());
         }
-        entity.setOptions(optionEntities);
+
 
         return repo.save(entity);
     }

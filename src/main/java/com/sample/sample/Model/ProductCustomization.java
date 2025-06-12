@@ -31,8 +31,6 @@ public class ProductCustomization {
     @ElementCollection
     private List<String> thumbnailImageUrls = new ArrayList<>();
 
-    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CustomizationOption> options = new ArrayList<>();
 
     // Getters and Setters
     public Long getId() {
@@ -115,11 +113,5 @@ public class ProductCustomization {
         this.thumbnailImageUrls = thumbnailImageUrls;
     }
 
-    public List<CustomizationOption> getOptions() {
-        return options;
-    }
 
-    public void setOptions(List<CustomizationOption> options) {
-        this.options = options;
-    }
 }

@@ -1,6 +1,7 @@
 package com.sample.sample.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -45,6 +46,9 @@ public class CartItem {
 
     @OneToMany(mappedBy = "cartItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartOption> cartOptions = new ArrayList<>();
+
+
+
 
 
     public Images getProduct() {
