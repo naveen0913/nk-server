@@ -4,6 +4,7 @@ package com.sample.sample.Model;
 
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,10 +19,10 @@ public class CustomizationOption {
     private Double oldPrice;
     private Double discount;
     private boolean mostPopular;
-
     @ManyToOne
     @JoinColumn(name = "product_customization_id")
-    private ProductCustomization productCustomization;
+    @JsonBackReference
+    private ProductCustomization productCustomization; // store ID directly
 
     // Getters and Setters
 
@@ -65,14 +66,6 @@ public class CustomizationOption {
         this.discount = discount;
     }
 
-    public boolean isMostPopular() {
-        return mostPopular;
-    }
-
-    public void setMostPopular(boolean mostPopular) {
-        this.mostPopular = mostPopular;
-    }
-
     public ProductCustomization getProductCustomization() {
         return productCustomization;
     }
@@ -80,4 +73,13 @@ public class CustomizationOption {
     public void setProductCustomization(ProductCustomization productCustomization) {
         this.productCustomization = productCustomization;
     }
+
+    public boolean isMostPopular() {
+        return mostPopular;
+    }
+
+    public void setMostPopular(boolean mostPopular) {
+        this.mostPopular = mostPopular;
+}
+
 }
