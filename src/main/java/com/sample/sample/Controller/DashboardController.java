@@ -15,10 +15,10 @@ public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
 
-    @GetMapping
-    public DashboardResponse getDashboardData() {
-        long totalProducts = dashboardService.getTotalProducts();
-        long totalUsers = dashboardService.getTotalUsers();
-        return new DashboardResponse(totalProducts, totalUsers);
-    }
+//    @GetMapping
+//    public DashboardResponse getDashboardData() {
+//        long totalProducts = dashboardService.getTotalProducts();
+//        long totalUsers = dashboardService.getTotalUsers();
+//        return new DashboardResponse(totalProducts, totalUsers);
+//    }
 }

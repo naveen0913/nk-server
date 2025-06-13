@@ -48,8 +48,6 @@ public class CartItem {
 
 
 
-
-
     public Images getProduct() {
         return product;
     }

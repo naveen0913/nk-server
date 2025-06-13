@@ -1,11 +1,8 @@
 package com.sample.sample.Model;
 
 
-
-
-
-
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +25,34 @@ public class ProductCustomization {
 
     private String bannerImageUrl;
 
+    @OneToOne(optional = false) // Product must exist
+    @JoinColumn(name = "product_id", referencedColumnName = "productId")
+    @JsonIgnore //it will hides product response
+    private Products product;
+
     @ElementCollection
     private List<String> thumbnailImageUrls = new ArrayList<>();
 
+    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CustomizationOption> customizationOptions = new ArrayList<>();
+
+    public List<CustomizationOption> getCustomizationOptions() {
+        return customizationOptions;
+    }
+
+    public void setCustomizationOptions(List<CustomizationOption> customizationOptions) {
+        this.customizationOptions = customizationOptions;
+    }
+
+
+
+    public Products getProduct() {
+        return product;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
+    }
 
     // Getters and Setters
     public Long getId() {

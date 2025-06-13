@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.ProductCustomizationDTO;
 import com.sample.sample.Model.CustomizationOption;
 import com.sample.sample.Model.ProductCustomization;
+import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductCustomizationRepo;
+import com.sample.sample.Repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,20 +25,25 @@ import java.util.stream.Collectors;
 public class ProductCustomizationService {
 
     private final ProductCustomizationRepo repo;
+    private final ProductsRepository productsRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Value("${upload.path:uploads}")
     private String uploadPath;
 
-    public ProductCustomizationService(ProductCustomizationRepo repo) {
+    public ProductCustomizationService(ProductCustomizationRepo repo, ProductsRepository productsRepository) {
         this.repo = repo;
+        this.productsRepository = productsRepository;
     }
 
     @Transactional
-    public ProductCustomization saveCustomization(String dtoJson,
+    public ProductCustomization saveCustomization( Long productId, String dtoJson,
                                                   MultipartFile bannerImage,
                                                   List<MultipartFile> thumbnails) throws Exception {
         ProductCustomizationDTO dto = mapper.readValue(dtoJson, ProductCustomizationDTO.class);
+
+        Products product = productsRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
         ProductCustomization entity = new ProductCustomization();
         entity.setDescription(dto.getDescription());
@@ -47,6 +54,7 @@ public class ProductCustomizationService {
         entity.setDesign(dto.isDesign());
         entity.setGiftWrap(dto.isGiftWrap());
         entity.setMultiUpload(dto.isMultiUpload());
+        entity.setProduct(product);
 
         // Save banner image
         if (bannerImage != null && !bannerImage.isEmpty()) {
@@ -80,6 +88,7 @@ public class ProductCustomizationService {
             }).collect(Collectors.toList());
         }
 
+        entity.setCustomizationOptions(optionEntities);
 
         return repo.save(entity);
     }

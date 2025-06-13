@@ -1,15 +1,18 @@
-package com.sample.sample.Responses;
+package com.sample.sample.Model;
+
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.sample.sample.Model.ProductCustomization;
+import jakarta.persistence.*;
 
-public class ImageResponse {
+@Entity
+public class Products {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
-    private String productName;
-    private String productdescription;
-    private String productUrl;
 
-    private ProductCustomization productCustomization;
+    private String productName;
+    private String productDescription;
+    private String productUrl;
 
     public ProductCustomization getProductCustomization() {
         return productCustomization;
@@ -19,13 +22,10 @@ public class ImageResponse {
         this.productCustomization = productCustomization;
     }
 
-    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, ProductCustomization productCustomization) {
-        this.productId = productId;
-        this.productName = productName;
-        this.productdescription = productdescription;
-        this.productUrl = productUrl;
-        this.productCustomization = productCustomization;
-    }
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER, optional = true)
+    @JsonBackReference
+    private ProductCustomization productCustomization;
+
 
     public Long getProductId() {
         return productId;
@@ -43,12 +43,12 @@ public class ImageResponse {
         this.productName = productName;
     }
 
-    public String getProductdescription() {
-        return productdescription;
+    public String getProductDescription() {
+        return productDescription;
     }
 
-    public void setProductdescription(String productdescription) {
-        this.productdescription = productdescription;
+    public void setProductDescription(String productDescription) {
+        this.productDescription = productDescription;
     }
 
     public String getProductUrl() {
@@ -59,3 +59,4 @@ public class ImageResponse {
         this.productUrl = productUrl;
     }
 }
+

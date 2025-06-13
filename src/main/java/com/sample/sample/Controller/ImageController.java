@@ -34,28 +34,28 @@ public class ImageController {
         return ResponseEntity.ok(imageService.saveImage(name, description, file));
     }
 
-
-    @GetMapping
-    public List<ImageResponse> listImages() throws IOException {
-        List<Images> imagesList = imageService.getAllImages();
-        List<ImageResponse> responseList = new ArrayList<>();
-
-        String folderPath = new ClassPathResource("static/uploads").getFile().getAbsolutePath();
-        File folder = new File(folderPath);
-        File[] files = folder.listFiles();
-
-
-        for (Images image : imagesList) {
-            String baseUrl = "http://localhost:8081";
-            String uploadPath = "uploads";
-            String finalUrl = buildImageUrl(baseUrl,uploadPath,image.getImageUrl());
-//            String url = "http://localhost:8080/uploads/" + image.getImageUrl(); // Assuming `getFilename()` exists
-            responseList.add(new ImageResponse(image.getId(),image.getName(), image.getDescription(), finalUrl));
-        }
-
-        return responseList;
-
-    }
+//
+//    @GetMapping
+//    public List<ImageResponse> listImages() throws IOException {
+//        List<Images> imagesList = imageService.getAllImages();
+//        List<ImageResponse> responseList = new ArrayList<>();
+//
+//        String folderPath = new ClassPathResource("static/uploads").getFile().getAbsolutePath();
+//        File folder = new File(folderPath);
+//        File[] files = folder.listFiles();
+//
+//
+//        for (Images image : imagesList) {
+//            String baseUrl = "http://localhost:8081";
+//            String uploadPath = "uploads";
+//            String finalUrl = buildImageUrl(baseUrl,uploadPath,image.getImageUrl());
+////            String url = "http://localhost:8080/uploads/" + image.getImageUrl(); // Assuming `getFilename()` exists
+//            responseList.add(new ImageResponse(image.getId(),image.getName(), image.getDescription(), finalUrl,));
+//        }
+//
+//        return responseList;
+//
+//    }
 
     @GetMapping("/{productId}")
     public AuthResponse getProductById(@PathVariable Long productId){

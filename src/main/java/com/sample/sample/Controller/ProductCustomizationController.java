@@ -21,13 +21,14 @@ public class ProductCustomizationController {
     private ProductCustomizationService service;
 
     // POST: Save product customization with images and JSON data
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> saveCustomization(
+            @PathVariable Long productId,
             @RequestParam("jsonData") String jsonData,
             @RequestParam("bannerImage") MultipartFile bannerImage,
             @RequestParam("thumbnails") List<MultipartFile> thumbnails) {
         try {
-            ProductCustomization saved = service.saveCustomization(jsonData, bannerImage, thumbnails);
+            ProductCustomization saved = service.saveCustomization(productId,jsonData, bannerImage, thumbnails);
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

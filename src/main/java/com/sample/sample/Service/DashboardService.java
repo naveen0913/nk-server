@@ -18,7 +18,7 @@ public class DashboardService {
         return imageRepo.count();
     }
 
-    public long getTotalUsers() {
-        return userRepository.countByRole("user");
-    }
+//    public long getTotalUsers() {
+//        return userRepository.countByRole("user");
+//    }
 }
