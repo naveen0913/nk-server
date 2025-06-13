@@ -13,17 +13,7 @@ import java.util.List;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     // cart repo
     @Query("SELECT w FROM CartItem w WHERE w.user.id = :userId")
-
     List<CartItem> getAllItemsByUser(String userId);
-
-
-
-
-
-
-
-
-
 
 
 }

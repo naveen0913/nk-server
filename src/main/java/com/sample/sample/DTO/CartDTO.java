@@ -22,6 +22,8 @@ public class CartDTO {
 
     private double optiondiscountPrice;
 
+    private Map<String, Boolean> labelDesigns;
+
     public Map<String, Boolean> getLabelDesigns() {
         return labelDesigns;
     }
@@ -29,9 +31,6 @@ public class CartDTO {
     public void setLabelDesigns(Map<String, Boolean> labelDesigns) {
         this.labelDesigns = labelDesigns;
     }
-
-    private Map<String, Boolean> labelDesigns;
-
 
     public String getCartItemName() {
         return cartItemName;

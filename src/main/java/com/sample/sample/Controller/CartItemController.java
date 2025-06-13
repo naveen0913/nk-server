@@ -5,8 +5,10 @@ package com.sample.sample.Controller;
 
 import com.sample.sample.Model.CartItem;
 import com.sample.sample.Model.User;
+import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.CartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,28 +18,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
+@CrossOrigin("*")
 public class CartItemController {
 
     @Autowired
     private CartItemService cartItemService;
 
-
-
     public CartItemService getCartItemService(CartItemService cartItemService) {
         return this.cartItemService =  cartItemService;
     }
 
-
-
     @PostMapping(value = "/add/{userId}/{productId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<CartItem> addCartItem(
+    public AuthResponse addCartItem(
             @PathVariable Long productId,
             @PathVariable String userId,
             @RequestParam("cartPayload") String cartItem,
             @RequestParam(defaultValue = "customImages", required = false) List<MultipartFile> customImages) throws IOException {
 
-        CartItem savedCartItem = cartItemService.addCartItem(productId,userId, cartItem, customImages);
-        return ResponseEntity.ok(savedCartItem);
+        cartItemService.addCartItem(productId,userId, cartItem, customImages);
+        return new AuthResponse(HttpStatus.CREATED.value(),"created",null);
     }
 
     @GetMapping("/user/{userId}")
@@ -46,17 +45,12 @@ public class CartItemController {
         return ResponseEntity.ok(cartItems);
     }
 
+    @GetMapping("/all")
+    public AuthResponse getAllItems() {
+        List<CartItem> cartItems = cartItemService.getAllCartItems();
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",cartItems);
+    }
 
-
-//    @PostMapping(value = "/add/{userId}/{productId}", consumes = {"multipart/form-data"})
-//    public ResponseEntity<CartItem> addCartItem(
-//            @PathVariable Long productId,
-//            @PathVariable String userId,
-//            @RequestParam("cartPayload") String cartItem,
-//            @RequestParam(defaultValue = "customImages", required = false) List<MultipartFile> customImages) throws IOException {
-//        CartItem savedCartItem = cartItemService.addCartItem(productId, userId, cartItem, customImages);
-//        return ResponseEntity.ok(savedCartItem);
-//    }
 
 
     @GetMapping("/users")
@@ -69,16 +63,16 @@ public class CartItemController {
 
     // Delete one cart item by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCartItem(@PathVariable Long id) {
+    public AuthResponse deleteCartItem(@PathVariable Long id) {
         cartItemService.deleteCartItem(id);
-        return ResponseEntity.ok("Cart item with ID " + id + " deleted.");
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 
 
     @DeleteMapping("/all")
-    public ResponseEntity<String> deleteAllCartItems() {
+    public AuthResponse deleteAllCartItems() {
         cartItemService.deleteAllCartItems();
-        return ResponseEntity.ok("All cart items  deleted.");
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 
 

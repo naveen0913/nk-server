@@ -1,6 +1,7 @@
 package com.sample.sample.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -10,12 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
-@Table(name = "cart_items")
 public class CartItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cart_item_id")
     private Long cartItemId;
 
     private String cartItemName;
@@ -36,26 +35,6 @@ public class CartItem {
 
     private double optiondiscountPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Images product;
-
-
-
-
-
-    public Images getProduct() {
-        return product;
-    }
-
-    public void setProduct(Images product) {
-        this.product = product;
-    }
-
     @ElementCollection
     private List<String> customImages = new ArrayList<>();
 
@@ -63,6 +42,22 @@ public class CartItem {
     @MapKeyColumn(name = "label_name")
     @Column(name = "label_value")
     private Map<String, Boolean> labelDesigns = new HashMap<>();
+
+    @ManyToOne(optional = false) // Mandatory
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(optional = false) // Mandatory
+    @JoinColumn(name = "product_id", nullable = false)
+    private Products product;
+
+    public Products getProduct() {
+        return product;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
+    }
 
 
     public Long getCartItemId() {

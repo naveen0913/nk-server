@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.CartDTO;
 import com.sample.sample.Model.CartItem;
 import com.sample.sample.Model.Images;
+import com.sample.sample.Model.Products;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.CartItemRepository;
 import com.sample.sample.Repository.ImageRepo;
+import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Repository.UserRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +36,12 @@ public class CartItemService {
     private UserRepo userRepo;
 
     @Autowired
-    private ImageRepo imageRepo;
+    private ProductsRepository productsRepository;
 
-    @Value("${upload.path:C:/uploads/}")
+    @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Transactional
     public CartItem addCartItem(Long productId, String userId, String cartPayload, List<MultipartFile> customImages) throws IOException {
         // Convert JSON string to DTO
         ObjectMapper objectMapper = new ObjectMapper();
@@ -54,15 +58,13 @@ public class CartItemService {
         cartItem.setOptionPrice(cartDTO.getOptionPrice());
         cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
         cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
-        cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
 
         // Fetch User
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Fetch Product (Images)
-        Images product = imageRepo.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        Products product = productsRepository.findById(productId).orElseThrow(()-> new RuntimeException("Product not found"));
 
         cartItem.setUser(user);
         cartItem.setProduct(product);
@@ -81,16 +83,20 @@ public class CartItemService {
             }
         }
         cartItem.setCustomImages(imageUrls);
+        cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
+
 
         // Save Cart Item
         return cartItemRepository.save(cartItem);
     }
 
 
-
-
     public List<CartItem> getUserCartList(String userId) {
         return cartItemRepository.getAllItemsByUser(userId);
+    }
+
+    public List<CartItem> getAllCartItems(){
+        return cartItemRepository.findAll();
     }
 
     public List<User> getAllUsers() {

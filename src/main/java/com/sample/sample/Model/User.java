@@ -28,9 +28,6 @@ public class User {
 
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // 👉 Parent side
-    private List<CartItem> cartItems;
 
 
 
@@ -84,11 +81,4 @@ public class User {
         this.role = role;
     }
 
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
-    }
 }
