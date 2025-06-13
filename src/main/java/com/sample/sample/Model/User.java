@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -28,10 +29,31 @@ public class User {
 
     private String role;
 
+    private boolean passwordUpdated;
+
+    public boolean isPasswordUpdated() {
+        return passwordUpdated;
+    }
+
+    public void setPasswordUpdated(boolean passwordUpdated) {
+        this.passwordUpdated = passwordUpdated;
+    }
+
+    // For password reset
+    private String resetOtp;
+    private LocalDateTime otpGeneratedTime;
+    private LocalDateTime passwordUpdatedTime;
+
+    public LocalDateTime getPasswordUpdatedTime() {
+        return passwordUpdatedTime;
+    }
+
+    public void setPasswordUpdatedTime(LocalDateTime passwordUpdatedTime) {
+        this.passwordUpdatedTime = passwordUpdatedTime;
+    }
 
 
-
-    // Getters and Setters
+// Getters and Setters
 
     public String getId() {
         return id;
@@ -81,4 +103,19 @@ public class User {
         this.role = role;
     }
 
+    public String getResetOtp() {
+        return resetOtp;
+    }
+
+    public void setResetOtp(String resetOtp) {
+        this.resetOtp = resetOtp;
+    }
+
+    public LocalDateTime getOtpGeneratedTime() {
+        return otpGeneratedTime;
+    }
+
+    public void setOtpGeneratedTime(LocalDateTime otpGeneratedTime) {
+        this.otpGeneratedTime = otpGeneratedTime;
+    }
 }

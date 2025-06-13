@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -19,6 +20,9 @@ public class UserService{
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private MailService mailService;
 
     public AuthResponse registerUser(SignupDTO signUpDTO, boolean isAdmin) {
         Optional<User> existedUser = userRepository.findByEmail(signUpDTO.getEmail());
@@ -32,6 +36,7 @@ public class UserService{
         newUser.setCreated(new Date());
         String userRole = "user";
         newUser.setRole(userRole);
+        newUser.setPasswordUpdated(false);
         userRepository.save(newUser);
         return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
     }
@@ -46,6 +51,7 @@ public class UserService{
         newUser.setEmail(signUpDTO.getEmail());
         newUser.setPassword(signUpDTO.getPassword());
         newUser.setCreated(new Date());
+        newUser.setPasswordUpdated(false);
         String userRole = "admin";
         newUser.setRole(userRole);
         userRepository.save(newUser);
@@ -110,4 +116,40 @@ public class UserService{
     public long getUserCount() {
         return userRepository.count();
     }
+
+    public void sendOtp(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+        user.setResetOtp(otp);
+        user.setOtpGeneratedTime(LocalDateTime.now());
+
+        userRepository.save(user);
+        mailService.sendOtpEmail(user.getEmail(), otp);
+    }
+
+
+    public void resetPasswordWithOtp(String otp, String newPassword, String confirmPassword) {
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("Passwords do not match");
+        }
+
+        User user = userRepository.findByResetOtp(otp)
+                .orElseThrow(() -> new RuntimeException("Invalid OTP"));
+
+        if (user.getOtpGeneratedTime() == null || user.getOtpGeneratedTime().isBefore(LocalDateTime.now().minusMinutes(10))) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        user.setPassword(newPassword);
+        user.setPasswordUpdated(true);
+        user.setPasswordUpdatedTime(LocalDateTime.now());
+        userRepository.save(user);
+
+        mailService.sendResetSuccessMail(user.getEmail());
+
+
+    }
+
 }
