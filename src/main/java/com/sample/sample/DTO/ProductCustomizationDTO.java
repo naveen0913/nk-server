@@ -8,11 +8,11 @@ public class ProductCustomizationDTO {
     private boolean input;
     private boolean quantity;
     private boolean cart;
+    private boolean multiUpload;
     private boolean upload;
     private boolean design;
     private boolean giftWrap;
     private List<CustomizationOptionDTO> options;
-    private boolean multiUpload;
 
     // Getters and Setters
 
@@ -71,14 +71,6 @@ public class ProductCustomizationDTO {
         this.giftWrap = giftWrap;
     }
 
-    public List<CustomizationOptionDTO> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<CustomizationOptionDTO> options) {
-        this.options = options;
-    }
-
     public boolean isMultiUpload() {
         return multiUpload;
     }
@@ -86,4 +78,12 @@ public class ProductCustomizationDTO {
     public void setMultiUpload(boolean multiUpload) {
         this.multiUpload = multiUpload;
     }
+
+    public List<CustomizationOptionDTO> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<CustomizationOptionDTO> options) {
+        this.options = options;
+}
 }
