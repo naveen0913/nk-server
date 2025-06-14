@@ -1,38 +1,33 @@
 package com.sample.sample.Service;
 
+
 import com.sample.sample.Model.AccountDetails;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AccountDetailsService {
 
     @Autowired
-    private AccountDetailsRepository repository;
+    private AccountDetailsRepository accountDetailsRepository;
 
-    public AccountDetails saveAccount(AccountDetails accountDetails) {
-        return repository.save(accountDetails);
+    public AccountDetails saveAccountDetails(AccountDetails accountDetails) {
+        return accountDetailsRepository.save(accountDetails);
     }
 
-    public AccountDetails updateAccount(Long id, AccountDetails updatedDetails) {
-        Optional<AccountDetails> optional = repository.findById(id);
-        if (optional.isPresent()) {
-            AccountDetails existing = optional.get();
-            existing.setFirstName(updatedDetails.getFirstName());
-            existing.setLastName(updatedDetails.getLastName());
-            existing.setEmail(updatedDetails.getEmail());
-            existing.setPhone(updatedDetails.getPhone());
-            existing.setAddress(updatedDetails.getAddress());
-            return repository.save(existing);
-        } else {
-            throw new RuntimeException("Account not found with ID: " + id);
-        }
+    public List<AccountDetails> getAllAccountDetails() {
+        return accountDetailsRepository.findAll();
     }
 
-    public AccountDetails getAccount(Long id) {
-        return repository.findById(id).orElse(null);
+    public Optional<AccountDetails> getAccountDetailsById(Long id) {
+        return accountDetailsRepository.findById(id);
+    }
+
+    public void deleteAccountDetails(Long id) {
+        accountDetailsRepository.deleteById(id);
     }
 }
