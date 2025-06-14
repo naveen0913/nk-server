@@ -32,7 +32,7 @@ public class MailService {
         message.setText("Hello,\n\n"
                 + "We wanted to let you know that your password has been successfully reset.\n\n"
                 + "If you did not perform this action, please secure your account immediately by contacting support.\n\n"
-                + "Thank you for using Prapujya.\n\n"
+                + "Thank you for using WeLoveYou.\n\n"
                 + "Regards,\nWeLoveYou Team");
         mailSender.send(message);
     }
