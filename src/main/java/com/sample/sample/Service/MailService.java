@@ -15,7 +15,7 @@ public class MailService {
     public void sendOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Reset Your Password - Prapujya");
+        message.setSubject("Reset Your Password - WeLoveTou");
         message.setText("Hello,\n\n"
                 + "You requested to reset your password. Please use the following OTP to proceed:\n\n"
                 + "🔐 OTP: " + otp + "\n\n"
