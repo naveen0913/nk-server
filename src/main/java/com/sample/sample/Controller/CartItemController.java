@@ -48,7 +48,7 @@ public class CartItemController {
     @GetMapping("/all")
     public AuthResponse getAllItems() {
         List<CartItem> cartItems = cartItemService.getAllCartItems();
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",cartItems);
+        return new AuthResponse(HttpStatus.OK.value(), "success",cartItems);
     }
 
 

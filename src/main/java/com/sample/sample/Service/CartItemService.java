@@ -81,6 +81,8 @@ public class CartItemService {
                     imageUrls.add(fileName);
                 }
             }
+        }else{
+            cartItem.setCustomImages(imageUrls.isEmpty() ? null : imageUrls);
         }
         cartItem.setCustomImages(imageUrls);
         cartItem.setLabelDesigns(cartDTO.getLabelDesigns());

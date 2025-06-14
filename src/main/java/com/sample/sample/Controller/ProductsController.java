@@ -34,25 +34,30 @@ public class ProductsController {
     }
 
     @GetMapping
-    public List<ImageResponse> getAllProducts() throws IOException {
+    public List<ImageResponse> getAllProducts() {
         List<Products> productsList = productsService.getAllProducts();
         List<ImageResponse> responseList = new ArrayList<>();
 
-        String folderPath = new ClassPathResource("static/uploads").getFile().getAbsolutePath();
-        File folder = new File(folderPath);
-        File[] files = folder.listFiles();
+        String baseUrl = "http://localhost:8081";
+        String uploadPath = "uploads";
 
+        for (Products product : productsList) {
+            String imageUrl = product.getProductUrl();
 
-        for (Products image : productsList) {
-            String baseUrl = "http://localhost:8081";
-            String uploadPath = "uploads";
-            String finalUrl = buildImageUrl(baseUrl,uploadPath,image.getProductUrl());
-//            String url = "http://localhost:8080/uploads/" + image.getImageUrl(); // Assuming `getFilename()` exists
-            responseList.add(new ImageResponse(image.getProductId(),image.getProductName(), image.getProductDescription(), finalUrl,image.getProductCustomization()));
+            String finalUrl = imageUrl != null && !imageUrl.isEmpty()
+                    ? baseUrl + imageUrl
+                    : null;
+
+            responseList.add(new ImageResponse(
+                    product.getProductId(),
+                    product.getProductName(),
+                    product.getProductDescription(),
+                    finalUrl,
+                    product.getProductCustomization()
+            ));
         }
 
         return responseList;
-
     }
 
     @GetMapping("/{productId}")
@@ -66,13 +71,14 @@ public class ProductsController {
     }
 
     @PutMapping("/{productId}")
-    public AuthResponse updateProduct(@PathVariable Long productId,
-            @RequestParam("name") String name,
-                                      @RequestParam("description") String description,
-                                      @RequestParam("file") MultipartFile file) throws IOException {
-        productsService.updateProductById(productId,name,description,file);
-        return new AuthResponse(HttpStatus.OK.value(), "updated",null);
+    public AuthResponse updateProduct(
+            @PathVariable Long productId,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 
+        productsService.updateProductById(productId, name, description, file);
+        return new AuthResponse(HttpStatus.OK.value(), "updated", null);
     }
 
     public String buildImageUrl(String baseUrl, String uploadPath, String filename) {

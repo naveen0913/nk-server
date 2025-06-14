@@ -54,7 +54,7 @@ public class ProductsService {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found",null);
         }
         ImageResponse imageResponse = new ImageResponse(existedProduct.get().getProductId(), existedProduct.get().getProductName(),existedProduct.get().getProductDescription(),existedProduct.get().getProductUrl(),existedProduct.get().getProductCustomization());
-        return new AuthResponse(HttpStatus.OK.value(), "succes",imageResponse);
+        return new AuthResponse(HttpStatus.OK.value(), "success",imageResponse);
 
     }
 
@@ -74,16 +74,16 @@ public class ProductsService {
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
         // 2. Update name if provided
-        if (name != null && !name.isEmpty()) {
+        if (name != null && !name.isBlank()) {
             existingProduct.setProductName(name);
         }
 
         // 3. Update description if provided
-        if (description != null && !description.isEmpty()) {
+        if (description != null && !description.isBlank()) {
             existingProduct.setProductDescription(description);
         }
 
-        // 4. Update image if file is not empty
+        // 4. Update image if file is present
         if (file != null && !file.isEmpty()) {
             String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
@@ -95,7 +95,7 @@ public class ProductsService {
             existingProduct.setProductUrl("/uploads/" + filename);
         }
 
-        // 5. Save updated entity
+        // 5. Save and return updated product
         return productsRepository.save(existingProduct);
     }
 

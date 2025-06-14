@@ -28,7 +28,7 @@ public class ProductCustomizationService {
     private final ProductsRepository productsRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Value("${upload.path:uploads}")
+    @Value("${file.upload-dir}")
     private String uploadPath;
 
     public ProductCustomizationService(ProductCustomizationRepo repo, ProductsRepository productsRepository) {
