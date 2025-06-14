@@ -1,16 +1,18 @@
 package com.sample.sample.Controller;
 
 
-import com.sample.sample.DTO.ForgotPasswordDTO;
-import com.sample.sample.DTO.LoginDTO;
-import com.sample.sample.DTO.ResetDTO;
-import com.sample.sample.DTO.SignupDTO;
+import com.sample.sample.DTO.*;
+import com.sample.sample.Model.User;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/user/")
@@ -70,4 +72,20 @@ public class UserController {
         userService.resetPasswordWithOtp(request.otp, request.newPassword, request.confirmPassword);
         return new AuthResponse(HttpStatus.OK.value(), "password reset successful",null);
     }
+
+
+//    // GET USER DATA
+//    @GetMapping("/{id}")
+//    public ResponseEntity<User> getUserById(@PathVariable String id) {
+//        User user = userService.getUserById(id);
+//        return ResponseEntity.ok(user);
+//    }
+
+    // UPDATE USER
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserUpdateRequestDTO userDTO) {
+        User updatedUser = userService.updateUser(id, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
 }
+

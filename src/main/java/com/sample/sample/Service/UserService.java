@@ -2,6 +2,7 @@ package com.sample.sample.Service;
 
 import com.sample.sample.DTO.LoginDTO;
 import com.sample.sample.DTO.SignupDTO;
+import com.sample.sample.DTO.UserUpdateRequestDTO;
 import com.sample.sample.JWT.JwtUtil;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.UserRepo;
@@ -17,6 +18,8 @@ import java.util.*;
 public class UserService{
     @Autowired
     private UserRepo userRepository;
+
+
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -152,4 +155,25 @@ public class UserService{
 
     }
 
+
+    public User updateUser(String id, UserUpdateRequestDTO userDTO) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setEmail(userDTO.getEmail());
+            user.setPhone(userDTO.getPhone());
+            user.setAddress(userDTO.getAddress());
+            return userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found with ID: " + id);
+        }
+    }
+
+//    public User getUserById(String id) {
+//        return userRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+//    }
 }
+
