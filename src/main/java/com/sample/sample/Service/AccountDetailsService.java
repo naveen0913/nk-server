@@ -39,9 +39,12 @@ public class AccountDetailsService {
         return AccountResponse.toDtoList(accounts);
     }
 
-//    public List<AccountDetails> getAllAccountDetails() {
-//        return accountDetailsRepository.findAll();
-//    }
+    public Optional<AccountDetails> getUserAccountDetails(String userId){
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+        return accountDetailsRepository.findByUserId(userId);
+    }
 
     public Optional<AccountDetails> getAccountDetailsById(Long id) {
         return accountDetailsRepository.findById(id);

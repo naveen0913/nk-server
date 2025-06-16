@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/account")
@@ -25,10 +26,11 @@ public class AccountDetailsController {
         return new AuthResponse(HttpStatus.CREATED.value(), "ok",null);
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<AccountDetails>> getAllAccounts() {
-//        return ResponseEntity.ok(accountDetailsService.getAllAccountDetails());
-//    }
+    @GetMapping("/user/{userId}")
+    public AuthResponse getAccountDetailsByUserId(@PathVariable String userId){
+        Optional<AccountDetails> accountDetailsList = accountDetailsService.getUserAccountDetails(userId);
+        return new AuthResponse(HttpStatus.OK.value(), "success", accountDetailsList);
+    }
 
     @GetMapping
     public ResponseEntity<List<AccountDetailsDTO>> getAllAccounts() {
