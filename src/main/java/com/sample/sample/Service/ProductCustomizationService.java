@@ -7,6 +7,7 @@ import com.sample.sample.Model.ProductCustomization;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductCustomizationRepo;
 import com.sample.sample.Repository.ProductsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,6 +116,71 @@ public class ProductCustomizationService {
         return repo.findById(id);
     }
 
+    @Transactional
+    public ProductCustomization updateCustomization(Long customizationId, String dtoJson,
+                                                    MultipartFile bannerImage,
+                                                    List<MultipartFile> thumbnails) throws Exception {
+        ProductCustomizationDTO dto = mapper.readValue(dtoJson, ProductCustomizationDTO.class);
+
+        ProductCustomization entity = repo.findById(customizationId)
+                .orElseThrow(() -> new RuntimeException("Customization not found"));
+
+        // Optional field updates
+        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
+        entity.setInput(dto.isInput());
+        entity.setQuantity(dto.isQuantity());
+        entity.setUpload(dto.isUpload());
+        entity.setDesign(dto.isDesign());
+        entity.setGiftWrap(dto.isGiftWrap());
+        entity.setMultiUpload(dto.isMultiUpload());
+
+        // Optional banner image update
+        if (bannerImage != null && !bannerImage.isEmpty()) {
+            String bannerUrl = saveFile(bannerImage);
+            entity.setBannerImageUrl(bannerUrl);
+        }
+
+        // Optional thumbnails update
+        if (thumbnails != null && !thumbnails.isEmpty()) {
+            List<String> thumbUrls = new ArrayList<>();
+            for (MultipartFile thumb : thumbnails) {
+                if (thumb != null && !thumb.isEmpty()) {
+                    thumbUrls.add(saveFile(thumb));
+                }
+            }
+            entity.setThumbnailImageUrls(thumbUrls); // Replace old thumbnails
+        }
+
+        // Replace customization options if provided
+        if (dto.getOptions() != null) {
+            // Clear and replace options
+            List<CustomizationOption> optionEntities = dto.getOptions().stream().map(opt -> {
+                CustomizationOption co = new CustomizationOption();
+                co.setOptionLabel(opt.getOptionLabel());
+                co.setOriginalPrice(opt.getOriginalPrice());
+                co.setOldPrice(opt.getOldPrice());
+                co.setDiscount(opt.getDiscount());
+                co.setMostPopular(opt.isMostPopular());
+                co.setProductCustomization(entity);
+                return co;
+            }).collect(Collectors.toList());
+
+            entity.setCustomizationOptions(optionEntities);
+        }
+
+        return repo.save(entity);
+    }
+
+    @Transactional
+    public void deleteCustomization(Long customizationId) {
+        ProductCustomization customization = repo.findById(customizationId)
+                .orElseThrow(() -> new EntityNotFoundException("Customization not found"));
+
+        if (customization.getCustomizationOptions() != null) {
+            customization.getCustomizationOptions().clear();
+        }
+        repo.delete(customization);
+    }
 
 
 }

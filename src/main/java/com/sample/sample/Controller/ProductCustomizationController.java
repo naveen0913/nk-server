@@ -1,7 +1,9 @@
 package com.sample.sample.Controller;
 
 import com.sample.sample.Model.ProductCustomization;
+import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.ProductCustomizationService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -53,4 +55,28 @@ public class ProductCustomizationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customization not found with ID: " + id);
         }
     }
+
+    @PutMapping("/{customizationId}")
+    public ResponseEntity<ProductCustomization> updateCustomization(
+            @PathVariable Long customizationId,
+            @RequestParam(value = "jsonData", required = false) String dtoJson,
+            @RequestParam(value = "bannerImage", required = false) MultipartFile bannerImage,
+            @RequestParam(value = "thumbnails", required = false) List<MultipartFile> thumbnails) {
+
+        try {
+            ProductCustomization updated = service.updateCustomization(customizationId, dtoJson, bannerImage, thumbnails);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping("/{customizationId}")
+    public AuthResponse deleteCustomization(@PathVariable Long customizationId) {
+        service.deleteCustomization(customizationId);
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+    }
+
+
+
 }
