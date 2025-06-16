@@ -1,5 +1,6 @@
 package com.sample.sample.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -7,37 +8,47 @@ public class UserAddress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private Long addressId;
+    private String firstName;
+    private String lastName;
+    private String phone;
+    private String alterPhone;
     private String addressType;
     private String addressLine1;
+
+    public String getAlterPhone() {
+        return alterPhone;
+    }
+
+    public void setAlterPhone(String alterPhone) {
+        this.alterPhone = alterPhone;
+    }
+
     private String addressLine2;
     private String city;
     private String state;
     private String country;
     private String pincode;
 
-    public UserAddress() {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_details_id")
+    @JsonBackReference
+    private AccountDetails accountDetails;
+
+    public AccountDetails getAccountDetails() {
+        return accountDetails;
     }
 
-    public UserAddress(Long id, String addressType, String addressLine1, String addressLine2,
-                       String city, String state, String country, String pincode) {
-        this.id = id;
-        this.addressType = addressType;
-        this.addressLine1 = addressLine1;
-        this.addressLine2 = addressLine2;
-        this.city = city;
-        this.state = state;
-        this.country = country;
-        this.pincode = pincode;
+    public void setAccountDetails(AccountDetails accountDetails) {
+        this.accountDetails = accountDetails;
     }
 
-    public Long getId() {
-        return id;
+    public Long getAddressId() {
+        return addressId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
     }
 
     public String getAddressType() {
@@ -94,5 +105,29 @@ public class UserAddress {
 
     public void setPincode(String pincode) {
         this.pincode = pincode;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

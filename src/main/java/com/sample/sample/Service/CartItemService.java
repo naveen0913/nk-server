@@ -118,5 +118,9 @@ public class CartItemService {
         cartItemRepository.deleteAll();
     }
 
+    public void getCartItemsCount(){
+        cartItemRepository.count();
+    }
+
 
 }

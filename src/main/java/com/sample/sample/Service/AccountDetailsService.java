@@ -1,10 +1,16 @@
 package com.sample.sample.Service;
 
 
+import com.sample.sample.DTO.AccountDetailsDTO;
 import com.sample.sample.Model.AccountDetails;
+import com.sample.sample.Model.User;
 import com.sample.sample.Repository.AccountDetailsRepository;
+import com.sample.sample.Repository.UserRepo;
+import com.sample.sample.Responses.AccountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,13 +21,27 @@ public class AccountDetailsService {
     @Autowired
     private AccountDetailsRepository accountDetailsRepository;
 
-    public AccountDetails saveAccountDetails(AccountDetails accountDetails) {
+    @Autowired
+    private UserRepo userRepo;
+
+    public AccountDetails saveAccountDetails(String userId, AccountDetails accountDetails) {
+
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+        accountDetails.setUser(user);
+        user.setAccountDetails(accountDetails);
         return accountDetailsRepository.save(accountDetails);
     }
 
-    public List<AccountDetails> getAllAccountDetails() {
-        return accountDetailsRepository.findAll();
+    public List<AccountDetailsDTO> getAllAccountDetails() {
+        List<AccountDetails> accounts = accountDetailsRepository.findAll();
+        return AccountResponse.toDtoList(accounts);
     }
+
+//    public List<AccountDetails> getAllAccountDetails() {
+//        return accountDetailsRepository.findAll();
+//    }
 
     public Optional<AccountDetails> getAccountDetailsById(Long id) {
         return accountDetailsRepository.findById(id);

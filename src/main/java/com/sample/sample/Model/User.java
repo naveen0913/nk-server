@@ -1,8 +1,9 @@
 package com.sample.sample.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -10,8 +11,6 @@ import java.util.Date;
 
 @Entity
 @Table(name = "users")
-
-
 
 public class User {
 
@@ -29,10 +28,18 @@ public class User {
 
     private String role;
 
-    private String firstName;
-    private String lastName;
-    private String phone;
-    private String address;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @JsonIgnore
+    private AccountDetails accountDetails;
+
+    public AccountDetails getAccountDetails() {
+        return accountDetails;
+    }
+
+    public void setAccountDetails(AccountDetails accountDetails) {
+        this.accountDetails = accountDetails;
+    }
 
     private boolean passwordUpdated;
 
@@ -123,40 +130,6 @@ public class User {
     public void setOtpGeneratedTime(LocalDateTime otpGeneratedTime) {
         this.otpGeneratedTime = otpGeneratedTime;
     }// Getter and Setter for firstName
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    // Getter and Setter for lastName
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    // Getter and Setter for phone
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    // Getter and Setter for address
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
 
 
 }

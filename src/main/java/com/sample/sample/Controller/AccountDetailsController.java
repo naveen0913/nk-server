@@ -1,9 +1,12 @@
 package com.sample.sample.Controller;
 
 
+import com.sample.sample.DTO.AccountDetailsDTO;
 import com.sample.sample.Model.AccountDetails;
+import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.AccountDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,14 +19,19 @@ public class AccountDetailsController {
     @Autowired
     private AccountDetailsService accountDetailsService;
 
-    @PostMapping
-    public ResponseEntity<AccountDetails> createAccount(@RequestBody AccountDetails accountDetails) {
-        AccountDetails savedAccount = accountDetailsService.saveAccountDetails(accountDetails);
-        return ResponseEntity.ok(savedAccount);
+    @PostMapping("/{userId}")
+    public AuthResponse createAccount(@PathVariable String userId, @RequestBody AccountDetails accountDetails) {
+        accountDetailsService.saveAccountDetails(userId,accountDetails);
+        return new AuthResponse(HttpStatus.CREATED.value(), "ok",null);
     }
 
+//    @GetMapping
+//    public ResponseEntity<List<AccountDetails>> getAllAccounts() {
+//        return ResponseEntity.ok(accountDetailsService.getAllAccountDetails());
+//    }
+
     @GetMapping
-    public ResponseEntity<List<AccountDetails>> getAllAccounts() {
+    public ResponseEntity<List<AccountDetailsDTO>> getAllAccounts() {
         return ResponseEntity.ok(accountDetailsService.getAllAccountDetails());
     }
 

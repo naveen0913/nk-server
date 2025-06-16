@@ -75,6 +75,11 @@ public class CartItemController {
         return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 
+    @GetMapping("/count")
+    public AuthResponse getItemsCount(){
+
+        return new AuthResponse(HttpStatus.OK.value(),"success",);
+    }
 
 
 

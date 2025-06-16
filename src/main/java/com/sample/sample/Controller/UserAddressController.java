@@ -2,9 +2,12 @@ package com.sample.sample.Controller;
 
 
 
+import com.sample.sample.Model.CartItem;
 import com.sample.sample.Model.UserAddress;
+import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.UserAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +21,16 @@ public class UserAddressController {
     @Autowired
     private UserAddressService userAddressService;
 
-    @PostMapping
-    public ResponseEntity<UserAddress> createAddress(@RequestBody UserAddress userAddress) {
-        UserAddress savedAddress = userAddressService.saveAddress(userAddress);
-        return ResponseEntity.ok(savedAddress);
+    @PostMapping("/{accountId}")
+    public AuthResponse createAddress(@PathVariable Long accountId, @RequestBody UserAddress userAddress) {
+        userAddressService.saveAddress(accountId,userAddress);
+        return new AuthResponse(HttpStatus.CREATED.value(), "success",null);
+    }
+
+    @GetMapping("/{accountId}/all")
+    public ResponseEntity<List<UserAddress>> getAllUserAddresses(@PathVariable Long accountId) {
+        List<UserAddress> userAddressList =  userAddressService.getAllUserAddress(accountId);
+        return ResponseEntity.ok(userAddressList);
     }
 
     @GetMapping

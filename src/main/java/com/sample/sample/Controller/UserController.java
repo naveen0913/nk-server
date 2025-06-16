@@ -80,12 +80,5 @@ public class UserController {
 //        User user = userService.getUserById(id);
 //        return ResponseEntity.ok(user);
 //    }
-
-    // UPDATE USER
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable String id, @RequestBody UserUpdateRequestDTO userDTO) {
-        User updatedUser = userService.updateUser(id, userDTO);
-        return ResponseEntity.ok(updatedUser);
-    }
 }
 
