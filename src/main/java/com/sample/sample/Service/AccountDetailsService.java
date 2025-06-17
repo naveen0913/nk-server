@@ -46,6 +46,22 @@ public class AccountDetailsService {
         return accountDetailsRepository.findByUserId(userId);
     }
 
+    public AccountDetails updateAccountDetails(Long id, AccountDetails updatedDetails) {
+        AccountDetails existingDetails = accountDetailsRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "AccountDetails not found with ID: " + id));
+
+        // Update the fields you want to allow changes for
+        existingDetails.setFirstName(updatedDetails.getFirstName());
+        existingDetails.setLastName(updatedDetails.getLastName());
+        existingDetails.setPhone(updatedDetails.getPhone());
+        existingDetails.setAlternatePhone(updatedDetails.getAlternatePhone());
+
+        return accountDetailsRepository.save(existingDetails);
+    }
+
+
+
     public Optional<AccountDetails> getAccountDetailsById(Long id) {
         return accountDetailsRepository.findById(id);
     }

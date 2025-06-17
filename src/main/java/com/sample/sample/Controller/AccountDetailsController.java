@@ -44,6 +44,14 @@ public class AccountDetailsController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/account/{id}")
+    public AuthResponse updateAccountDetails(
+            @PathVariable Long id,
+            @RequestBody AccountDetails updatedDetails) {
+        AccountDetails updated = accountDetailsService.updateAccountDetails(id, updatedDetails);
+        return new AuthResponse(HttpStatus.OK.value(), "success",null);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
         accountDetailsService.deleteAccountDetails(id);
