@@ -21,7 +21,7 @@ public class CustomizationOption {
     private boolean mostPopular;
 
     @ManyToOne
-    @JoinColumn(name = "product_customization_id")
+    @JoinColumn(name = "product_customization_id",nullable = false)
     @JsonBackReference
     private ProductCustomization productCustomization;
 

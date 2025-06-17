@@ -27,13 +27,13 @@ public class ProductCustomization {
 
     @OneToOne(optional = false) // Product must exist
     @JoinColumn(name = "product_id", referencedColumnName = "productId")
-    @JsonIgnore //it will hides product response
+    @JsonIgnore
     private Products product;
 
     @ElementCollection
     private List<String> thumbnailImageUrls = new ArrayList<>();
 
-    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL)
     private List<CustomizationOption> customizationOptions = new ArrayList<>();
 
     public List<CustomizationOption> getCustomizationOptions() {
