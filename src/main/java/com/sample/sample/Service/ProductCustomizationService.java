@@ -193,21 +193,11 @@ public class ProductCustomizationService {
         ProductCustomization customization = repo.findById(customizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Customization not found"));
 
-        // Detach from Product if needed
-//        customization.setProduct(null);  // ⚠ required if DB constraint blocks delete
-
-        // Clear customization options to allow cascading delete
-        if (customization.getCustomizationOptions() != null) {
-            customization.getCustomizationOptions().forEach(opt -> opt.setProductCustomization(null));
-            customization.getCustomizationOptions().clear();
-        }
-
+        // Delete child tables first
+        repo.deleteOptionsByCustomizationId(customizationId);
         repo.deleteCustomizationThumbnailsById(customizationId);
         repo.deleteCustomizationById(customizationId);
-
-//        repo.delete(customization);
     }
-
 
 
 
