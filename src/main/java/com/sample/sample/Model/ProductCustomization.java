@@ -25,7 +25,7 @@ public class ProductCustomization {
 
     private String bannerImageUrl;
 
-    @OneToOne(optional = false) // Product must exist
+    @OneToOne(optional = true) // Product must exist
     @JoinColumn(name = "product_id", referencedColumnName = "productId")
     @JsonIgnore
     private Products product;
