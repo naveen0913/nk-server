@@ -28,9 +28,9 @@ public class UserAddressController {
     }
 
     @GetMapping("/{accountId}/all")
-    public ResponseEntity<List<UserAddress>> getAllUserAddresses(@PathVariable Long accountId) {
+    public AuthResponse getAllUserAddresses(@PathVariable Long accountId) {
         List<UserAddress> userAddressList =  userAddressService.getAllUserAddress(accountId);
-        return ResponseEntity.ok(userAddressList);
+        return new AuthResponse(HttpStatus.OK.value(), "success",userAddressList);
     }
 
     @GetMapping
@@ -39,9 +39,9 @@ public class UserAddressController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserAddress> getAddressById(@PathVariable Long id) {
+    public AuthResponse getAddressById(@PathVariable Long id) {
         Optional<UserAddress> address = userAddressService.getAddressById(id);
-        return address.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return  new AuthResponse(HttpStatus.OK.value(), "success",address);
     }
 
     @PutMapping("/{id}")
@@ -55,9 +55,9 @@ public class UserAddressController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Long id) {
+    public AuthResponse deleteAddress(@PathVariable Long id) {
         userAddressService.deleteAddress(id);
-        return ResponseEntity.noContent().build();
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 }
 

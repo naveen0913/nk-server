@@ -87,7 +87,6 @@ public class CartItemService {
         cartItem.setCustomImages(imageUrls);
         cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
 
-
         // Save Cart Item
         return cartItemRepository.save(cartItem);
     }

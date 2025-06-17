@@ -4,45 +4,39 @@ import com.razorpay.RazorpayException;
 import com.sample.sample.DTO.PaymentRequestDTO;
 import com.sample.sample.Model.Payment;
 import com.sample.sample.Service.PaymentService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payment")
-@RequiredArgsConstructor
+@CrossOrigin("*")
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-    /**
-     * Create Razorpay Order
-     */
-    @PostMapping("/create-order")
-    public ResponseEntity<?> createOrder(@RequestBody PaymentRequestDTO requestDTO) {
-        try {
-            Payment payment = paymentService.createOrder(requestDTO.getAmount(), requestDTO.getCurrency(), requestDTO.getReceipt());
-            return ResponseEntity.ok(payment);
-        } catch (RazorpayException e) {
-            return ResponseEntity.badRequest().body("Failed to create order: " + e.getMessage());
-        }
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
     }
 
-    /**
-     * Verify Razorpay Payment
-     */
+    @PostMapping("/create/{orderId}")
+    public ResponseEntity<Payment> createOrder(
+            @PathVariable Long orderId) throws RazorpayException {
+
+        return ResponseEntity.ok(paymentService.createOrder(orderId));
+    }
+
+
     @PostMapping("/verify-payment")
-    public ResponseEntity<?> verifyPayment(@RequestBody PaymentRequestDTO requestDTO) {
-        boolean isVerified = paymentService.verifyPayment(requestDTO.getOrderId(), requestDTO.getPaymentId(), requestDTO.getSignature());
-
-        if (isVerified) {
-            return ResponseEntity.ok("Payment Verified Successfully");
+    public ResponseEntity<String> verifyPayment(@RequestBody PaymentRequestDTO dto) {
+        boolean isValid = paymentService.verifyPayment(dto);
+        if (isValid) {
+            return ResponseEntity.ok("Payment verified successfully.");
         } else {
-            return ResponseEntity.badRequest().body("Payment Verification Failed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payment signature.");
         }
     }
+
+
 }
 

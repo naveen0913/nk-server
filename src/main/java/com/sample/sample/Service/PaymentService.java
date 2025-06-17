@@ -3,22 +3,28 @@ package com.sample.sample.Service;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.sample.sample.DTO.PaymentRequestDTO;
+import com.sample.sample.Model.Orders;
 import com.sample.sample.Model.Payment;
 import com.sample.sample.Model.PaymentStatus;
+import com.sample.sample.Repository.OrderRepository;
 import com.sample.sample.Repository.PaymentRepository;
-import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.UUID;
 
-;
 
 @Service
-@RequiredArgsConstructor
 public class PaymentService {
 
     @Value("${razorpay.api.key}")
@@ -27,69 +33,80 @@ public class PaymentService {
     @Value("${razorpay.api.secret}")
     private String secret;
 
-    private final PaymentRepository paymentRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
-    /**
-     * Create Razorpay Order and save it in the database
-     */
-    public Payment createOrder(int amount, String currency, String receipt) throws RazorpayException {
-        RazorpayClient razorpay = new RazorpayClient(key, secret);
+    @Autowired
+    private PaymentRepository paymentRepository;
 
-        JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", amount * 100); // Amount in paise
-        orderRequest.put("currency", currency);
-        orderRequest.put("receipt", receipt);
+    public Payment createOrder(Long orderId) throws RazorpayException {
 
-        Order order = razorpay.orders.create(orderRequest);
+        Orders orders = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 
-        Payment payment = new Payment();
-        payment.setOrderId(order.get("id"));
-        payment.setAmount(amount);
-        payment.setCurrency(currency);
-        payment.setReceipt(receipt);
-        payment.setStatus(PaymentStatus.FAILED); // Default status, will update after verification
+        Payment payment = orders.getPayment();
+        String generatedPaymentId = "pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
-        return paymentRepository.save(payment);
+        if (payment == null) {
+            payment = new Payment();
+            payment.setAmount(orders.getOrderTotal());
+            payment.setCurrency("INR");
+            payment.setPaymentId(generatedPaymentId);
+            payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setOrder(orders);
+            orders.setPayment(payment);
+        }
+
+
+            RazorpayClient razorpay = new RazorpayClient(key, secret);
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", payment.getAmount()*100);
+            orderRequest.put("currency", payment.getCurrency());
+            orderRequest.put("receipt", payment.getReceipt());
+
+            Order razorpayOrder = razorpay.orders.create(orderRequest);
+
+            payment.setRazorpayOrderId(razorpayOrder.get("id"));
+            payment.setAmount(payment.getAmount());
+            payment.setCurrency(payment.getCurrency());
+            payment.setReceipt(payment.getReceipt());
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setOrder(orders);
+            payment.setSignature("");
+            payment.setPaymentId(payment.getPaymentId());
+            return paymentRepository.save(payment);
+
     }
 
-    /**
-     * Verify Razorpay Payment and update the status
-     */
-    public boolean verifyPayment(String orderId, String paymentId, String signature) {
-        String generatedSignature = HmacSHA256(orderId + "|" + paymentId, secret);
+    public boolean verifyPayment(PaymentRequestDTO dto) {
+        try {
+            String payload = dto.getOrderId() + "|" + dto.getPaymentId();
+            String generatedSignature = hmacSHA256(payload, secret);
 
-        Optional<Payment> optionalPayment = paymentRepository.findByOrderId(orderId);
-        if (optionalPayment.isPresent()) {
-            Payment payment = optionalPayment.get();
+            if (generatedSignature.equals(dto.getSignature())) {
+                Payment payment = paymentRepository.findByRazorpayOrderId(dto.getOrderId())
+                        .orElseThrow(() -> new RuntimeException("Payment not found for order ID: " + dto.getOrderId()));
 
-            if (generatedSignature.equals(signature)) {
-                payment.setPaymentId(paymentId);
-                payment.setSignature(signature);
+                payment.setPaymentId(dto.getPaymentId());
+                payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
                 paymentRepository.save(payment);
                 return true;
-            } else {
-                payment.setPaymentId(paymentId);
-                payment.setSignature(signature);
-                payment.setStatus(PaymentStatus.FAILED);
-                paymentRepository.save(payment);
-                return false;
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
 
-    /**
-     * HMAC SHA256 signature generation
-     */
-    private String HmacSHA256(String data, String secret) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret.getBytes(), "HmacSHA256"));
-            byte[] hmacData = mac.doFinal(data.getBytes());
-            return javax.xml.bind.DatatypeConverter.printHexBinary(hmacData).toLowerCase();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to calculate HMAC SHA256", e);
-        }
+    private String hmacSHA256(String data, String secret) throws Exception {
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        sha256_HMAC.init(secretKey);
+        byte[] hash = sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        return Hex.encodeHexString(hash);
     }
+
 }
