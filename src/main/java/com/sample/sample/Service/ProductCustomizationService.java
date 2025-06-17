@@ -120,12 +120,17 @@ public class ProductCustomizationService {
     public ProductCustomization updateCustomization(Long customizationId, String dtoJson,
                                                     MultipartFile bannerImage,
                                                     List<MultipartFile> thumbnails) throws Exception {
+
+        if (dtoJson == null || dtoJson.isBlank()) {
+            throw new IllegalArgumentException("jsonData is required for update.");
+        }
+
         ProductCustomizationDTO dto = mapper.readValue(dtoJson, ProductCustomizationDTO.class);
 
         ProductCustomization entity = repo.findById(customizationId)
                 .orElseThrow(() -> new RuntimeException("Customization not found"));
 
-        // Optional field updates
+        // Update basic fields
         if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
@@ -134,34 +139,37 @@ public class ProductCustomizationService {
         entity.setGiftWrap(dto.isGiftWrap());
         entity.setMultiUpload(dto.isMultiUpload());
 
-        // Optional banner image update
+        // Update banner image only if a new file is sent
         if (bannerImage != null && !bannerImage.isEmpty()) {
             String bannerUrl = saveFile(bannerImage);
             entity.setBannerImageUrl(bannerUrl);
-        }  else {
-            // If an empty file is explicitly sent, you may choose to clear it
-            entity.setBannerImageUrl(null);
         }
 
-        // Optional thumbnails update
+        // Update thumbnails only if list is present and has at least one valid file
         if (thumbnails != null) {
             List<String> thumbUrls = new ArrayList<>();
+
             for (MultipartFile thumb : thumbnails) {
                 if (thumb != null && !thumb.isEmpty()) {
-                    thumbUrls.add(saveFile(thumb));
+                    try {
+                        String url = saveFile(thumb);
+                        thumbUrls.add(url);
+                    } catch (IOException e) {
+                        // Optionally log and skip the failed thumbnail
+                        System.err.println("Failed to save thumbnail: " + e.getMessage());
+                        // Optionally: throw new RuntimeException("Thumbnail upload failed", e);
+                    }
                 }
             }
-            // Even if empty, we overwrite thumbnails to reflect user intention
-            entity.setThumbnailImageUrls(thumbUrls);
-        } else {
-            // Thumbnails were not provided in the request
-            List<String> existingThumbs = entity.getThumbnailImageUrls();
-            entity.setThumbnailImageUrls(existingThumbs != null ? existingThumbs : new ArrayList<>());
+
+            if (!thumbUrls.isEmpty()) {
+                entity.setThumbnailImageUrls(thumbUrls); // Replace old thumbnails
+            }
         }
 
-        // Replace customization options if provided
+
+        // Replace customization options if present
         if (dto.getOptions() != null) {
-            // Clear and replace options
             List<CustomizationOption> optionEntities = dto.getOptions().stream().map(opt -> {
                 CustomizationOption co = new CustomizationOption();
                 co.setOptionLabel(opt.getOptionLabel());
@@ -179,16 +187,28 @@ public class ProductCustomizationService {
         return repo.save(entity);
     }
 
+
     @Transactional
     public void deleteCustomization(Long customizationId) {
         ProductCustomization customization = repo.findById(customizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Customization not found"));
 
+        // Detach from Product if needed
+//        customization.setProduct(null);  // ⚠ required if DB constraint blocks delete
+
+        // Clear customization options to allow cascading delete
         if (customization.getCustomizationOptions() != null) {
+            customization.getCustomizationOptions().forEach(opt -> opt.setProductCustomization(null));
             customization.getCustomizationOptions().clear();
         }
-        repo.delete(customization);
+
+        repo.deleteCustomizationThumbnailsById(customizationId);
+        repo.deleteCustomizationById(customizationId);
+
+//        repo.delete(customization);
     }
+
+
 
 
 }

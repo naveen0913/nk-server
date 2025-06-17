@@ -57,9 +57,9 @@ public class ProductCustomizationController {
     }
 
     @PutMapping("/{customizationId}")
-    public ResponseEntity<ProductCustomization> updateCustomization(
+    public ResponseEntity<?> updateCustomization(
             @PathVariable Long customizationId,
-            @RequestParam(value = "jsonData", required = false) String dtoJson,
+            @RequestParam("jsonData") String dtoJson,
             @RequestParam(value = "bannerImage", required = false) MultipartFile bannerImage,
             @RequestParam(value = "thumbnails", required = false) List<MultipartFile> thumbnails) {
 
@@ -67,15 +67,22 @@ public class ProductCustomizationController {
             ProductCustomization updated = service.updateCustomization(customizationId, dtoJson, bannerImage, thumbnails);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating customization: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/{customizationId}")
-    public AuthResponse deleteCustomization(@PathVariable Long customizationId) {
-        service.deleteCustomization(customizationId);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+    public ResponseEntity<AuthResponse> deleteCustomization(@PathVariable Long customizationId) {
+        try {
+            service.deleteCustomization(customizationId);
+            return ResponseEntity.ok(new AuthResponse(HttpStatus.OK.value(), "Deleted successfully", null));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new AuthResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), null));
+        }
     }
+
 
 
 
