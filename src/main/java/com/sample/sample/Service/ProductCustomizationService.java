@@ -138,17 +138,25 @@ public class ProductCustomizationService {
         if (bannerImage != null && !bannerImage.isEmpty()) {
             String bannerUrl = saveFile(bannerImage);
             entity.setBannerImageUrl(bannerUrl);
+        }  else {
+            // If an empty file is explicitly sent, you may choose to clear it
+            entity.setBannerImageUrl(null);
         }
 
         // Optional thumbnails update
-        if (thumbnails != null && !thumbnails.isEmpty()) {
+        if (thumbnails != null) {
             List<String> thumbUrls = new ArrayList<>();
             for (MultipartFile thumb : thumbnails) {
                 if (thumb != null && !thumb.isEmpty()) {
                     thumbUrls.add(saveFile(thumb));
                 }
             }
-            entity.setThumbnailImageUrls(thumbUrls); // Replace old thumbnails
+            // Even if empty, we overwrite thumbnails to reflect user intention
+            entity.setThumbnailImageUrls(thumbUrls);
+        } else {
+            // Thumbnails were not provided in the request
+            List<String> existingThumbs = entity.getThumbnailImageUrls();
+            entity.setThumbnailImageUrls(existingThumbs != null ? existingThumbs : new ArrayList<>());
         }
 
         // Replace customization options if provided
