@@ -6,6 +6,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class MailService {
 
@@ -42,6 +44,29 @@ public class MailService {
                 + "Regards,\nWeLoveYou Team");
         mailSender.send(message);
     }
+
+    public void sendOrderPlacedMail(String toEmail, String orderNumber) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("🎉 Order Confirmation - WeLoveYou");
+
+        message.setText("Hello,\n\n"
+                + "Thank you for shopping with us at WeLoveYou!\n\n"
+                + "We're excited to let you know that your order has been successfully placed.\n\n"
+                + "🛒 Order Details:\n"
+                + "- Order Number: #" + orderNumber + "\n"
+                + "- Order Date: " + LocalDate.now() + "\n\n"
+                + "- Order Status: Placed \n\n"
+                + "We'll send you another update once your items are shipped.\n\n"
+                + "If you have any questions, feel free to reach out to our support team.\n\n"
+                + "Thank you for choosing WeLoveYou. We truly appreciate your business!\n\n"
+                + "Warm regards,\n"
+                + "WeLoveYou Team");
+
+        mailSender.send(message);
+    }
+
 
 
 }

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/payment")
 @CrossOrigin("*")
@@ -19,11 +21,11 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/create/{orderId}")
+    @PostMapping("/create/{accountId}/{addressId}")
     public ResponseEntity<Payment> createOrder(
-            @PathVariable Long orderId) throws RazorpayException {
+            @PathVariable Long accountId,@PathVariable Long addressId,@RequestBody PaymentRequestDTO request) throws RazorpayException {
 
-        return ResponseEntity.ok(paymentService.createOrder(orderId));
+        return ResponseEntity.ok(paymentService.createOrderPayment(accountId,addressId,request));
     }
 
 
@@ -35,6 +37,11 @@ public class PaymentController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payment signature.");
         }
+    }
+
+    @GetMapping("/all")
+    public List<?> getAllPayments(){
+        return paymentService.getAllPayments();
     }
 
 

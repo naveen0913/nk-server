@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.HandlerTypePredicate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -20,11 +21,11 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping("/{accountId}/{addressId}")
-    public AuthResponse placeOrder(@PathVariable Long accountId, @PathVariable Long addressId, @RequestBody OrderDTO request) {
-        orderService.placeOrder(accountId,addressId,request);
-        return new AuthResponse(HttpStatus.CREATED.value(), "success",null);
-    }
+//    @PostMapping("/{accountId}/{addressId}")
+//    public AuthResponse placeOrder(@PathVariable Long accountId, @PathVariable Long addressId, @RequestBody OrderDTO request) {
+//        orderService.placeOrder(accountId,addressId,request);
+//        return new AuthResponse(HttpStatus.CREATED.value(), "success",null);
+//    }
 
     // GET all orders
     @GetMapping("/all")
@@ -36,6 +37,12 @@ public class OrderController {
     @GetMapping("/{accountId}")
     public ResponseEntity<List<Orders>> getOrdersByAccountId(@PathVariable Long accountId) {
         return ResponseEntity.ok(orderService.getOrdersByAccount(accountId));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Orders> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found")));
     }
 
 

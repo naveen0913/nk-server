@@ -5,6 +5,8 @@ package com.sample.sample.Model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Payment {
 
@@ -17,6 +19,8 @@ public class Payment {
     private String signature;
 
     private Integer amount;
+    private Integer gstAmount;
+    private Integer shippingPrice;
     private String currency;
     private String receipt;
 
@@ -29,6 +33,18 @@ public class Payment {
     @JsonBackReference
     private Orders order;
 
+    @OneToOne
+    @JoinColumn(name = "account_id")
+    private AccountDetails accountDetails;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private UserAddress userAddress;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "ordered_items_list")
+    private List<CartItem> cartItemList;
+
 
     public Long getId() {
         return id;
@@ -40,14 +56,6 @@ public class Payment {
 
     public String getRazorpayOrderId() {
         return razorpayOrderId;
-    }
-
-    public Orders getOrder() {
-        return order;
-    }
-
-    public void setOrder(Orders order) {
-        this.order = order;
     }
 
     public void setRazorpayOrderId(String razorpayOrderId) {
@@ -78,6 +86,22 @@ public class Payment {
         this.amount = amount;
     }
 
+    public Integer getGstAmount() {
+        return gstAmount;
+    }
+
+    public void setGstAmount(Integer gstAmount) {
+        this.gstAmount = gstAmount;
+    }
+
+    public Integer getShippingPrice() {
+        return shippingPrice;
+    }
+
+    public void setShippingPrice(Integer shippingPrice) {
+        this.shippingPrice = shippingPrice;
+    }
+
     public String getCurrency() {
         return currency;
     }
@@ -100,6 +124,38 @@ public class Payment {
 
     public void setStatus(PaymentStatus status) {
         this.status = status;
+    }
+
+    public Orders getOrder() {
+        return order;
+    }
+
+    public void setOrder(Orders order) {
+        this.order = order;
+    }
+
+    public AccountDetails getAccountDetails() {
+        return accountDetails;
+    }
+
+    public void setAccountDetails(AccountDetails accountDetails) {
+        this.accountDetails = accountDetails;
+    }
+
+    public UserAddress getUserAddress() {
+        return userAddress;
+    }
+
+    public void setUserAddress(UserAddress userAddress) {
+        this.userAddress = userAddress;
+    }
+
+    public List<CartItem> getCartItemList(List<Long> cartItemIds) {
+        return cartItemList;
+    }
+
+    public void setCartItemList(List<CartItem> cartItemList) {
+        this.cartItemList = cartItemList;
     }
 }
 

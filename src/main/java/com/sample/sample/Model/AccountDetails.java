@@ -20,6 +20,7 @@ public class AccountDetails {
     private String firstName;
     private String lastName;
     private String phone;
+    private String accountEmail;
     private String alternatePhone;
 
     @OneToOne
@@ -29,6 +30,14 @@ public class AccountDetails {
 
     @OneToMany(mappedBy = "accountDetails", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddress> addresses;
+
+    public String getAccountEmail() {
+        return accountEmail;
+    }
+
+    public void setAccountEmail(String accountEmail) {
+        this.accountEmail = accountEmail;
+    }
 
     public List<UserAddress> getAddresses() {
         return addresses;

@@ -25,22 +25,19 @@ public class Orders {
 
     private String orderShippingCharges;
 
-    @OneToOne
-    @JoinColumn(name = "account_id")
-    private AccountDetails accountDetails;
-
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    private UserAddress userAddress;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "ordered_items_list")
-    private List<CartItem> cartItemList;
+//    @OneToOne
+//    @JoinColumn(name = "account_id")
+//    private AccountDetails accountDetails;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonManagedReference
     @JoinColumn(name = "payment_id")
     private Payment payment;
+
+    @Transient
+    public AccountDetails getAccountDetails() {
+        return this.payment != null ? this.payment.getAccountDetails() : null;
+    }
 
     public Payment getPayment() {
         return payment;
@@ -99,29 +96,29 @@ public class Orders {
         this.orderShippingCharges = orderShippingCharges;
     }
 
-    public AccountDetails getAccountDetails() {
-        return accountDetails;
-    }
+//    public AccountDetails getAccountDetails() {
+//        return accountDetails;
+//    }
+//
+//    public void setAccountDetails(AccountDetails accountDetails) {
+//        this.accountDetails = accountDetails;
+//    }
 
-    public void setAccountDetails(AccountDetails accountDetails) {
-        this.accountDetails = accountDetails;
-    }
+//    public UserAddress getUserAddress() {
+//        return userAddress;
+//    }
+//
+//    public void setUserAddress(UserAddress userAddress) {
+//        this.userAddress = userAddress;
+//    }
 
-    public UserAddress getUserAddress() {
-        return userAddress;
-    }
-
-    public void setUserAddress(UserAddress userAddress) {
-        this.userAddress = userAddress;
-    }
-
-    public List<CartItem> getCartItemList() {
-        return cartItemList;
-    }
-
-    public void setCartItemList(List<CartItem> cartItemList) {
-        this.cartItemList = cartItemList;
-    }
+//    public List<CartItem> getCartItemList() {
+//        return cartItemList;
+//    }
+//
+//    public void setCartItemList(List<CartItem> cartItemList) {
+//        this.cartItemList = cartItemList;
+//    }
 
     public String getOrderGstPercent() {
         return orderGstPercent;
@@ -131,11 +128,4 @@ public class Orders {
         this.orderGstPercent = orderGstPercent;
     }
 
-//    public String getPaymentId() {
-//        return paymentId;
-//    }
-//
-//    public void setPaymentId(String paymentId) {
-//        this.paymentId = paymentId;
-//    }
 }

@@ -3,12 +3,10 @@ package com.sample.sample.Service;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import com.sample.sample.DTO.OrderDTO;
 import com.sample.sample.DTO.PaymentRequestDTO;
-import com.sample.sample.Model.Orders;
-import com.sample.sample.Model.Payment;
-import com.sample.sample.Model.PaymentStatus;
-import com.sample.sample.Repository.OrderRepository;
-import com.sample.sample.Repository.PaymentRepository;
+import com.sample.sample.Model.*;
+import com.sample.sample.Repository.*;
 import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,54 +39,120 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    public Payment createOrder(Long orderId) throws RazorpayException {
+    @Autowired
+    private AccountDetailsRepository accountDetailsRepository;
 
-        Orders orders = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+    @Autowired
+    private UserAddressRepository userAddressRepository;
 
-        Payment payment = orders.getPayment();
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    public Payment createOrderPayment(Long accountId, Long addressId, PaymentRequestDTO request)throws RazorpayException{
+
+        AccountDetails account = accountDetailsRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Account not found with ID: " + accountId));
+
+        UserAddress address = userAddressRepository.findById(addressId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found with ID: " + addressId));
+
+        List<CartItem> cartItems = cartItemRepository.findAllById(request.getCartItemIds());
         String generatedPaymentId = "pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
-        if (payment == null) {
-            payment = new Payment();
-            payment.setAmount(orders.getOrderTotal());
-            payment.setCurrency("INR");
-            payment.setPaymentId(generatedPaymentId);
-            payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
-            payment.setStatus(PaymentStatus.PENDING);
-            payment.setOrder(orders);
-            orders.setPayment(payment);
-        }
+        RazorpayClient razorpay = new RazorpayClient(key, secret);
+        Payment payment = new Payment();
+        JSONObject orderRequest = new JSONObject();
+        orderRequest.put("amount", request.getAmount()*100);
+        orderRequest.put("currency", request.getCurrency());
+        orderRequest.put("receipt", request.getReceipt());
 
+        Order razorpayOrder = razorpay.orders.create(orderRequest);
 
-            RazorpayClient razorpay = new RazorpayClient(key, secret);
-            JSONObject orderRequest = new JSONObject();
-            orderRequest.put("amount", payment.getAmount()*100);
-            orderRequest.put("currency", payment.getCurrency());
-            orderRequest.put("receipt", payment.getReceipt());
+        payment.setRazorpayOrderId(razorpayOrder.get("id"));
+        payment.setAmount(request.getAmount());
+        payment.setCurrency(request.getCurrency());
+        payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setSignature("");
+        payment.setPaymentId(generatedPaymentId);
+        payment.setCartItemList(cartItems);
+        payment.setAccountDetails(account);
+        payment.setUserAddress(address);
+//        payment.setOrder();
 
-            Order razorpayOrder = razorpay.orders.create(orderRequest);
-
-            payment.setRazorpayOrderId(razorpayOrder.get("id"));
-            payment.setAmount(payment.getAmount());
-            payment.setCurrency(payment.getCurrency());
-            payment.setReceipt(payment.getReceipt());
-            payment.setStatus(PaymentStatus.PENDING);
-            payment.setOrder(orders);
-            payment.setSignature("");
-            payment.setPaymentId(payment.getPaymentId());
-            return paymentRepository.save(payment);
+        return paymentRepository.save(payment);
 
     }
 
+    private void createOrderAfterPayment(Payment payment) {
+        Orders order = new Orders();
+        order.setCreatedAt(new Date());
+        order.setOrderStatus("PLACED");
+        order.setOrderTotal(payment.getAmount());
+        order.setOrderDiscount("0");
+        order.setOrderGstPercent(String.valueOf(payment.getGstAmount()));
+        order.setOrderShippingCharges(String.valueOf(payment.getShippingPrice()));
+
+        // Save the order first
+        Orders savedOrder = orderRepository.save(order);
+
+        // Now attach order to payment
+        payment.setOrder(savedOrder);
+        paymentRepository.save(payment);
+    }
+
+
+//    public Payment createOrder(Long orderId) throws RazorpayException {
+//
+//        Orders orders = orderRepository.findById(orderId)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+//
+//        Payment payment = orders.getPayment();
+//        String generatedPaymentId = "pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+//
+//        if (payment == null) {
+//            payment = new Payment();
+//            payment.setAmount(orders.getOrderTotal());
+//            payment.setCurrency("INR");
+//            payment.setPaymentId(generatedPaymentId);
+//            payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
+//            payment.setStatus(PaymentStatus.PENDING);
+//            payment.setOrder(orders);
+//            orders.setPayment(payment);
+//        }
+//
+//
+//            RazorpayClient razorpay = new RazorpayClient(key, secret);
+//            JSONObject orderRequest = new JSONObject();
+//            orderRequest.put("amount", payment.getAmount()*100);
+//            orderRequest.put("currency", payment.getCurrency());
+//            orderRequest.put("receipt", payment.getReceipt());
+//
+//            Order razorpayOrder = razorpay.orders.create(orderRequest);
+//
+//            payment.setRazorpayOrderId(razorpayOrder.get("id"));
+//            payment.setAmount(payment.getAmount());
+//            payment.setCurrency(payment.getCurrency());
+//            payment.setReceipt(payment.getReceipt());
+//            payment.setStatus(PaymentStatus.PENDING);
+//            payment.setOrder(orders);
+//            payment.setSignature("");
+//            payment.setPaymentId(payment.getPaymentId());
+//            return paymentRepository.save(payment);
+//    }
+
+
+
     public boolean verifyPayment(PaymentRequestDTO dto) {
         try {
-            String payload = dto.getOrderId() + "|" + dto.getPaymentId();
+            String payload = dto.getRazorpayOrderId() + "|" + dto.getPaymentId();
             String generatedSignature = hmacSHA256(payload, secret);
 
             if (generatedSignature.equals(dto.getSignature())) {
-                Payment payment = paymentRepository.findByRazorpayOrderId(dto.getOrderId())
-                        .orElseThrow(() -> new RuntimeException("Payment not found for order ID: " + dto.getOrderId()));
+                Payment payment = paymentRepository.findByRazorpayOrderId(dto.getRazorpayOrderId())
+                        .orElseThrow(() -> new RuntimeException("Payment not found for order ID: " + dto.getRazorpayOrderId()));
 
                 payment.setPaymentId(dto.getPaymentId());
                 payment.setSignature(dto.getSignature());
@@ -108,5 +174,10 @@ public class PaymentService {
         byte[] hash = sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
         return Hex.encodeHexString(hash);
     }
+
+    public List<Payment> getAllPayments(){
+      return paymentRepository.findAll();
+    }
+
 
 }

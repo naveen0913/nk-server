@@ -30,6 +30,7 @@ public class AccountDetailsService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
         accountDetails.setUser(user);
+        accountDetails.setAccountEmail(user.getEmail());
         user.setAccountDetails(accountDetails);
         return accountDetailsRepository.save(accountDetails);
     }
