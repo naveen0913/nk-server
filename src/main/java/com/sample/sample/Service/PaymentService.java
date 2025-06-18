@@ -86,22 +86,7 @@ public class PaymentService {
 
     }
 
-    private void createOrderAfterPayment(Payment payment) {
-        Orders order = new Orders();
-        order.setCreatedAt(new Date());
-        order.setOrderStatus("PLACED");
-        order.setOrderTotal(payment.getAmount());
-        order.setOrderDiscount("0");
-        order.setOrderGstPercent(String.valueOf(payment.getGstAmount()));
-        order.setOrderShippingCharges(String.valueOf(payment.getShippingPrice()));
 
-        // Save the order first
-        Orders savedOrder = orderRepository.save(order);
-
-        // Now attach order to payment
-        payment.setOrder(savedOrder);
-        paymentRepository.save(payment);
-    }
 
 
 //    public Payment createOrder(Long orderId) throws RazorpayException {
@@ -158,6 +143,7 @@ public class PaymentService {
                 payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
                 paymentRepository.save(payment);
+                createOrderAfterPayment(payment);
                 return true;
             }
 
@@ -177,6 +163,23 @@ public class PaymentService {
 
     public List<Payment> getAllPayments(){
       return paymentRepository.findAll();
+    }
+
+    private void createOrderAfterPayment(Payment payment) {
+        Orders order = new Orders();
+        order.setCreatedAt(new Date());
+        order.setOrderStatus("PLACED");
+        order.setOrderTotal(payment.getAmount());
+        order.setOrderDiscount("0");
+        order.setOrderGstPercent(String.valueOf(payment.getGstAmount()));
+        order.setOrderShippingCharges(String.valueOf(payment.getShippingPrice()));
+
+        // Save the order first
+        Orders savedOrder = orderRepository.save(order);
+
+        // Now attach order to payment
+        payment.setOrder(savedOrder);
+        paymentRepository.save(payment);
     }
 
 
