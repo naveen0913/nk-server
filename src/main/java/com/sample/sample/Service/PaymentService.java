@@ -48,6 +48,9 @@ public class PaymentService {
     @Autowired
     private CartItemRepository cartItemRepository;
 
+    @Autowired
+    MailService mailService;
+
     public Payment createOrderPayment(Long accountId, Long addressId, PaymentRequestDTO request)throws RazorpayException{
 
         AccountDetails account = accountDetailsRepository.findById(accountId)
@@ -80,7 +83,6 @@ public class PaymentService {
         payment.setCartItemList(cartItems);
         payment.setAccountDetails(account);
         payment.setUserAddress(address);
-//        payment.setOrder();
 
         return paymentRepository.save(payment);
 
@@ -144,6 +146,7 @@ public class PaymentService {
                 payment.setStatus(PaymentStatus.SUCCESS);
                 paymentRepository.save(payment);
                 createOrderAfterPayment(payment);
+
                 return true;
             }
 
@@ -180,6 +183,12 @@ public class PaymentService {
         // Now attach order to payment
         payment.setOrder(savedOrder);
         paymentRepository.save(payment);
+
+        // Send order confirmation email
+        String email = payment.getAccountDetails().getAccountEmail();
+        String orderNumber = String.valueOf(order.getOrderId());
+
+        mailService.sendOrderPlacedMail(email, orderNumber);
     }
 
 
