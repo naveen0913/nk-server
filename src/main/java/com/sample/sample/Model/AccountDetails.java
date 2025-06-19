@@ -31,6 +31,17 @@ public class AccountDetails {
     @OneToMany(mappedBy = "accountDetails", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddress> addresses;
 
+    @OneToMany(mappedBy = "accountDetails")
+    private List<Payment> payments;
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
     public String getAccountEmail() {
         return accountEmail;
     }

@@ -51,6 +51,18 @@ public class CartItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
 
+    @ManyToOne
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
+
     public Products getProduct() {
         return product;
     }

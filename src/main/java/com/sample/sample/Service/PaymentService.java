@@ -79,7 +79,12 @@ public class PaymentService {
         payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
         payment.setStatus(PaymentStatus.PENDING);
         payment.setSignature("");
+        payment.setShippingPrice(request.getShippingPrice());
+        payment.setGstAmount(request.getGstAmount());
         payment.setPaymentId(generatedPaymentId);
+        for (CartItem item : cartItems) {
+            item.setPayment(payment);
+        }
         payment.setCartItemList(cartItems);
         payment.setAccountDetails(account);
         payment.setUserAddress(address);
@@ -87,49 +92,6 @@ public class PaymentService {
         return paymentRepository.save(payment);
 
     }
-
-
-
-
-//    public Payment createOrder(Long orderId) throws RazorpayException {
-//
-//        Orders orders = orderRepository.findById(orderId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
-//
-//        Payment payment = orders.getPayment();
-//        String generatedPaymentId = "pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-//
-//        if (payment == null) {
-//            payment = new Payment();
-//            payment.setAmount(orders.getOrderTotal());
-//            payment.setCurrency("INR");
-//            payment.setPaymentId(generatedPaymentId);
-//            payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
-//            payment.setStatus(PaymentStatus.PENDING);
-//            payment.setOrder(orders);
-//            orders.setPayment(payment);
-//        }
-//
-//
-//            RazorpayClient razorpay = new RazorpayClient(key, secret);
-//            JSONObject orderRequest = new JSONObject();
-//            orderRequest.put("amount", payment.getAmount()*100);
-//            orderRequest.put("currency", payment.getCurrency());
-//            orderRequest.put("receipt", payment.getReceipt());
-//
-//            Order razorpayOrder = razorpay.orders.create(orderRequest);
-//
-//            payment.setRazorpayOrderId(razorpayOrder.get("id"));
-//            payment.setAmount(payment.getAmount());
-//            payment.setCurrency(payment.getCurrency());
-//            payment.setReceipt(payment.getReceipt());
-//            payment.setStatus(PaymentStatus.PENDING);
-//            payment.setOrder(orders);
-//            payment.setSignature("");
-//            payment.setPaymentId(payment.getPaymentId());
-//            return paymentRepository.save(payment);
-//    }
-
 
 
     public boolean verifyPayment(PaymentRequestDTO dto) {

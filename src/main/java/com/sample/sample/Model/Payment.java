@@ -22,6 +22,11 @@ public class Payment {
     private Integer gstAmount;
     private Integer shippingPrice;
     private String currency;
+
+    public List<CartItem> getCartItemList() {
+        return cartItemList;
+    }
+
     private String receipt;
 
     @Column(length = 10)
@@ -41,8 +46,7 @@ public class Payment {
     @JoinColumn(name = "address_id")
     private UserAddress userAddress;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "ordered_items_list")
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItemList;
 
 
