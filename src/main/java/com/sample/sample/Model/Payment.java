@@ -33,7 +33,7 @@ public class Payment {
     @JsonBackReference
     private Orders order;
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "account_id")
     private AccountDetails accountDetails;
 
