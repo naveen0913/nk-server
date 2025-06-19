@@ -32,6 +32,7 @@ public class AccountDetails {
     private List<UserAddress> addresses;
 
     @OneToMany(mappedBy = "accountDetails")
+    @JsonBackReference
     private List<Payment> payments;
 
     public List<Payment> getPayments() {
