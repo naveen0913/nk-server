@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Orders,Long> {
-//    List<Orders> findByAccountDetails(AccountDetails accountDetails);
 @Query("SELECT o FROM Orders o WHERE o.payment.accountDetails.id = :accountId")
 List<Orders> findAllByAccountId(@Param("accountId") Long accountId);
 }

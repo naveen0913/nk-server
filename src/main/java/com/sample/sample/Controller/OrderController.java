@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     // GET orders by account ID
-    @GetMapping("/{accountId}")
+    @GetMapping("/account/{accountId}")
     public ResponseEntity<List<Orders>> getOrdersByAccountId(@PathVariable Long accountId) {
         return ResponseEntity.ok(orderService.getOrdersByAccount(accountId));
     }
