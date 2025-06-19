@@ -53,6 +53,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "payment_id")
+    @JsonBackReference
     private Payment payment;
 
     public Payment getPayment() {
