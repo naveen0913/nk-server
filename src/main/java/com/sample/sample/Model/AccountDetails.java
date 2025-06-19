@@ -25,14 +25,14 @@ public class AccountDetails {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    @JsonBackReference
+    @JsonBackReference("user-account")
     private User user;
 
     @OneToMany(mappedBy = "accountDetails", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddress> addresses;
 
     @OneToMany(mappedBy = "accountDetails")
-    @JsonBackReference
+    @JsonBackReference("user-payments")
     private List<Payment> payments;
 
     public List<Payment> getPayments() {

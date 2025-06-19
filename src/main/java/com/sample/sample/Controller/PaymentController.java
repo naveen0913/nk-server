@@ -3,6 +3,7 @@ package com.sample.sample.Controller;
 import com.razorpay.RazorpayException;
 import com.sample.sample.DTO.PaymentRequestDTO;
 import com.sample.sample.Model.Payment;
+import com.sample.sample.Repository.PaymentRepository;
 import com.sample.sample.Service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,11 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    public PaymentController(PaymentService paymentService) {
+    private final PaymentRepository paymentRepository;
+
+    public PaymentController(PaymentService paymentService, PaymentRepository paymentRepository) {
         this.paymentService = paymentService;
+        this.paymentRepository = paymentRepository;
     }
 
     @PostMapping("/create/{accountId}/{addressId}")
@@ -43,6 +47,13 @@ public class PaymentController {
     public List<?> getAllPayments(){
         return paymentService.getAllPayments();
     }
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<Payment>> getPaymentsByAccountId(@PathVariable Long accountId) {
+        List<Payment> payments = paymentRepository.findByAccountDetails_Id(accountId);
+        return ResponseEntity.ok(payments);
+    }
+
 
 
 }
