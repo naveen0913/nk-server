@@ -3,7 +3,6 @@ package com.sample.sample.Model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -25,14 +24,13 @@ public class Orders {
 
     private String orderShippingCharges;
 
-//    @OneToOne
-//    @JoinColumn(name = "account_id")
-//    private AccountDetails accountDetails;
-
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonManagedReference
     @JoinColumn(name = "payment_id")
     private Payment payment;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private OrdersTracking orderTracking;
 
     @Transient
     public AccountDetails getAccountDetails() {
