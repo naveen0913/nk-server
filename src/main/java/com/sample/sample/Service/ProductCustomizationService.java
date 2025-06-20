@@ -50,7 +50,7 @@ public class ProductCustomizationService {
         entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
-        // Removed: entity.setCart(dto.isCart());
+        entity.setCart(dto.isCart());
         entity.setUpload(dto.isUpload());
         entity.setDesign(dto.isDesign());
         entity.setGiftWrap(dto.isGiftWrap());

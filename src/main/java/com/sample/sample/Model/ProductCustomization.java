@@ -15,7 +15,7 @@ public class ProductCustomization {
     private Long id;
 
     private String description;
-
+    private boolean cart;
     private boolean input;
     private boolean quantity;
     private boolean upload;
@@ -101,6 +101,14 @@ public class ProductCustomization {
 
     public void setDesign(boolean design) {
         this.design = design;
+    }
+
+    public boolean isCart() {
+        return cart;
+    }
+
+    public void setCart(boolean cart) {
+        this.cart = cart;
     }
 
     public boolean isGiftWrap() {
