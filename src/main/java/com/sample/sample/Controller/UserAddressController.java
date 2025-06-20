@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user-address")
+@CrossOrigin("*")
 public class UserAddressController {
 
     @Autowired
