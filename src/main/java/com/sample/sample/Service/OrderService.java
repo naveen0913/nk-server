@@ -30,44 +30,6 @@ public class OrderService {
     private MailService mailService;
 
 
-//    public Orders placeOrder(Long accountId, Long addressId, OrderDTO request) {
-//        AccountDetails account = accountDetailsRepository.findById(accountId)
-//                .orElseThrow(() -> new ResponseStatusException(
-//                        HttpStatus.NOT_FOUND, "Account not found with ID: " + accountId));
-//
-//        UserAddress address = userAddressRepository.findById(addressId)
-//                .orElseThrow(() -> new ResponseStatusException(
-//                        HttpStatus.NOT_FOUND, "User not found with ID: " + addressId));
-//
-//        List<CartItem> cartItems = cartItemRepository.findAllById(request.getCartItemIds());
-//
-//        String generatedPaymentId = "pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-//
-//        Orders order = new Orders();
-////        order.setAccountDetails(account);
-////        order.setUserAddress(address);
-//        order.setOrderDiscount(request.getOrderDiscount());
-//        order.setOrderTotal(request.getOrderTotal());
-////        order.setCartItemList(cartItems);
-//        order.setOrderGstPercent(request.getOrderGstPercent());
-//        order.setOrderShippingCharges(request.getShippingCharges());
-//        order.setOrderStatus("PLACED");
-//        order.setCreatedAt(new Date());
-//
-//        Payment payment = new Payment();
-//        payment.setPaymentId(generatedPaymentId);
-//        payment.setStatus(PaymentStatus.PENDING);
-//        payment.setCurrency("INR");
-//        payment.setAmount(request.getOrderTotal());
-//        payment.setReceipt("rcpt_" + UUID.randomUUID().toString().substring(0, 8));
-//        payment.setOrder(order);
-//
-//        order.setPayment(payment);
-////        mailService.sendOrderPlacedMail(account.setAccountEmail(),order.getOrderId());
-//
-//        return orderRepository.save(order);
-//    }
-
     public List<Orders> getAllOrders() {
         return orderRepository.findAll();
     }

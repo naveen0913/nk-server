@@ -128,7 +128,7 @@ public class UserService{
         user.setOtpGeneratedTime(LocalDateTime.now());
 
         userRepository.save(user);
-        mailService.sendOtpEmail(user.getEmail(), otp);
+        mailService.sendOtpEmail(user.getEmail(), otp, user.getUsername());
     }
 
 
@@ -149,7 +149,7 @@ public class UserService{
         user.setPasswordUpdatedTime(LocalDateTime.now());
         userRepository.save(user);
 
-        mailService.sendResetSuccessMail(user.getEmail());
+        mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
 
 
     }

@@ -9,7 +9,11 @@ import java.util.Date;
 public class Orders {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    @Column(name = "order_id")
+    private Long id;
+
+    @Column(name = "order_number")
+    private String orderId;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -61,13 +65,28 @@ public class Orders {
         this.orderDiscount = orderDiscount;
     }
 
+    public Long getId() {
+        return id;
+    }
 
-    public Long getOrderId() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Long orderId) {
+    public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+
+    public OrdersTracking getOrderTracking() {
+        return orderTracking;
+    }
+
+    public void setOrderTracking(OrdersTracking orderTracking) {
+        this.orderTracking = orderTracking;
     }
 
     public Date getCreatedAt() {

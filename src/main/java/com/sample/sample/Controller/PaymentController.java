@@ -34,12 +34,12 @@ public class PaymentController {
 
 
     @PostMapping("/verify-payment")
-    public ResponseEntity<String> verifyPayment(@RequestBody PaymentRequestDTO dto) {
+    public ResponseEntity<?> verifyPayment(@RequestBody PaymentRequestDTO dto) {
         boolean isValid = paymentService.verifyPayment(dto);
         if (isValid) {
-            return ResponseEntity.ok("Payment verified successfully.");
+            return ResponseEntity.status(HttpStatus.OK.value()).body("Payment Verified Successful");
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid payment signature.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body("Invalid payment signature.");
         }
     }
 

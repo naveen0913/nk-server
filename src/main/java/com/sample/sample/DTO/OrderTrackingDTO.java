@@ -1,34 +1,51 @@
 package com.sample.sample.DTO;
 
+import com.sample.sample.Model.TrackingStatus;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
+import java.util.Date;
+
 public class OrderTrackingDTO {
-    private String trackingStatus;
-    private Boolean isShipped;
-    private Boolean isPacked;
+    private TrackingStatus trackingStatus;
+    private Boolean shipped;
+    private Boolean packed;
     private Boolean outOfDelivery;
     private Boolean delivered;
 
-    public String getTrackingStatus() {
+    @Temporal(TemporalType.DATE)
+    private Date estimatedDelivery;
+
+    public Date getEstimatedDelivery() {
+        return estimatedDelivery;
+    }
+
+    public void setEstimatedDelivery(Date estimatedDelivery) {
+        this.estimatedDelivery = estimatedDelivery;
+    }
+
+    public TrackingStatus getTrackingStatus() {
         return trackingStatus;
     }
 
-    public void setTrackingStatus(String trackingStatus) {
+    public void setTrackingStatus(TrackingStatus trackingStatus) {
         this.trackingStatus = trackingStatus;
     }
 
+    public Boolean getPacked() {
+        return packed;
+    }
+
     public Boolean getShipped() {
-        return isShipped;
+        return shipped;
     }
 
     public void setShipped(Boolean shipped) {
-        isShipped = shipped;
-    }
-
-    public Boolean getPacked() {
-        return isPacked;
+        this.shipped = shipped;
     }
 
     public void setPacked(Boolean packed) {
-        isPacked = packed;
+        this.packed = packed;
     }
 
     public Boolean getOutOfDelivery() {

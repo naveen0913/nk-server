@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+//import static com.sample.sample.Model.TrackingStatus.ORDER_PLACED;
+
 
 @Service
 public class PaymentService {
@@ -131,7 +133,9 @@ public class PaymentService {
     }
 
     private void createOrderAfterPayment(Payment payment) {
+        String generateOrderId = "ORDER" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 13).toUpperCase();
         Orders order = new Orders();
+        order.setOrderId(generateOrderId);
         order.setCreatedAt(new Date());
         order.setOrderStatus("PLACED");
         order.setOrderTotal(payment.getAmount());
@@ -150,7 +154,7 @@ public class PaymentService {
         String email = payment.getAccountDetails().getAccountEmail();
         String orderNumber = String.valueOf(order.getOrderId());
 
-        mailService.sendOrderPlacedMail(email, orderNumber);
+        mailService.sendOrderStatusMail(email,payment.getAccountDetails().getFirstName(),payment.getAccountDetails().getLastName(), orderNumber, TrackingStatus.ORDER_PLACED);
     }
 
 

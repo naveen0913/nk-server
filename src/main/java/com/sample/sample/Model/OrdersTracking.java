@@ -1,29 +1,56 @@
 package com.sample.sample.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
 
 @Entity
 @Table(name = "orders_tracking")
+@EntityListeners(AuditingEntityListener.class)
 public class OrdersTracking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     private Date trackingCreated;
 
     private String trackingId;
-    private String trackingStatus;
-    private Boolean isShipped;
-    private Boolean isPacked;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private TrackingStatus trackingStatus;
+    private Boolean shipped;
+    private Boolean packed;
     private Boolean outOfDelivery;
     private Boolean delivered;
 
+
+    @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date trackingUpdated;
+
+    @Temporal(TemporalType.DATE)
+    private Date estimatedDelivery;
+
     @OneToOne
     @JoinColumn(name = "order_id", unique = true)
+    @JsonBackReference
     private Orders order;
+
+
+    public Date getTrackingUpdated() {
+        return trackingUpdated;
+    }
+
+    public void setTrackingUpdated(Date trackingUpdated) {
+        this.trackingUpdated = trackingUpdated;
+    }
 
     public Long getId() {
         return id;
@@ -49,28 +76,37 @@ public class OrdersTracking {
         this.trackingId = trackingId;
     }
 
-    public String getTrackingStatus() {
+    public TrackingStatus getTrackingStatus() {
         return trackingStatus;
     }
 
-    public void setTrackingStatus(String trackingStatus) {
+    public void setTrackingStatus(TrackingStatus trackingStatus) {
         this.trackingStatus = trackingStatus;
     }
 
+    public Date getEstimatedDelivery() {
+        return estimatedDelivery;
+    }
+
+    public void setEstimatedDelivery(Date estimatedDelivery) {
+        this.estimatedDelivery = estimatedDelivery;
+    }
+
     public Boolean getShipped() {
-        return isShipped;
+        return shipped;
+    }
+
+
+    public Boolean getPacked() {
+        return packed;
     }
 
     public void setShipped(Boolean shipped) {
-        isShipped = shipped;
-    }
-
-    public Boolean getPacked() {
-        return isPacked;
+        this.shipped = shipped;
     }
 
     public void setPacked(Boolean packed) {
-        isPacked = packed;
+        this.packed = packed;
     }
 
     public Boolean getOutOfDelivery() {

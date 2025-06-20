@@ -3,6 +3,7 @@ package com.sample.sample.Model;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -45,6 +46,7 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "address_id")
+    @JsonIgnore
     private UserAddress userAddress;
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)

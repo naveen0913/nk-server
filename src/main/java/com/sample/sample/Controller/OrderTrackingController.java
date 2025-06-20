@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tracking/orders")
+@RequestMapping("/api/tracking")
 @CrossOrigin("*")
 public class OrderTrackingController {
 
@@ -27,22 +27,29 @@ public class OrderTrackingController {
     }
 
 
-//    @GetMapping
-//    public ResponseEntity<List<OrderTracking>> getAllTrackings() {
-//        return ResponseEntity.ok(orderTrackingService.getAllTrackings());
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<OrderTracking> getTrackingById(@PathVariable Long id) {
-//        return orderTrackingService.getTrackingById(id)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
+    @GetMapping("/all")
+    public ResponseEntity<List<OrdersTracking>> getAllOrderTrackings() {
+        return ResponseEntity.ok(orderTrackingService.getAllOrdersTracking());
+    }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<OrderTracking> updateTracking(@PathVariable Long id, @RequestBody OrderTracking tracking) {
-//        return ResponseEntity.ok(orderTrackingService.updateTracking(id, tracking));
-//    }
+    @GetMapping("/order/{orderId}")
+    public ResponseEntity<OrdersTracking> getTrackingByOrderId(@PathVariable Long orderId) {
+        return orderTrackingService.getOrderTrackingById(orderId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{trackingId}")
+    public ResponseEntity<OrdersTracking> getTrackingById(@PathVariable Long trackingId) {
+        return orderTrackingService.getTrackingById(trackingId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/order/{id}")
+    public ResponseEntity<OrdersTracking> updateTracking(@PathVariable Long id, @RequestBody OrderTrackingDTO tracking) {
+        return ResponseEntity.ok(orderTrackingService.updateTracking(id, tracking));
+    }
 
 
 }

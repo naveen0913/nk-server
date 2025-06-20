@@ -48,6 +48,10 @@ public class UserAddressService {
 
     public UserAddress updateAddress(Long id, UserAddress updatedAddress) {
         return userAddressRepository.findById(id).map(existingAddress -> {
+            existingAddress.setFirstName(updatedAddress.getFirstName());
+            existingAddress.setLastName(updatedAddress.getLastName());
+            existingAddress.setPhone(updatedAddress.getPhone());
+            existingAddress.setAlterPhone(updatedAddress.getAlterPhone());
             existingAddress.setAddressType(updatedAddress.getAddressType());
             existingAddress.setAddressLine1(updatedAddress.getAddressLine1());
             existingAddress.setAddressLine2(updatedAddress.getAddressLine2());
