@@ -1,18 +1,12 @@
 package com.sample.sample.Controller;
 
-
 import com.sample.sample.DTO.*;
-import com.sample.sample.Model.User;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/user/")
@@ -22,35 +16,33 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-
     @PostMapping("/signup")
-    public AuthResponse createUser(@RequestBody SignupDTO signUpDTO){
-        return userService.registerUser(signUpDTO,false);
+    public AuthResponse createUser(@RequestBody SignupDTO signUpDTO) {
+        return userService.registerUser(signUpDTO, false);
     }
 
-
     @PostMapping("/admin")
-    public AuthResponse createAdmin(@RequestBody SignupDTO signUpDTO){
-        return userService.adminRegister(signUpDTO,true);
+    public AuthResponse createAdmin(@RequestBody SignupDTO signUpDTO) {
+        return userService.adminRegister(signUpDTO, true);
     }
 
     @PostMapping("/login")
-    public AuthResponse userLogin(@RequestBody LoginDTO loginDTO){
+    public AuthResponse userLogin(@RequestBody LoginDTO loginDTO) {
         return userService.userLogin(loginDTO);
     }
 
     @GetMapping("/{userId}")
-    public AuthResponse getUserById(@PathVariable String userId){
+    public AuthResponse getUserById(@PathVariable String userId) {
         return userService.getUserById(userId);
     }
 
     @PutMapping("update/{userId}")
-    public AuthResponse updateUser(@PathVariable String userId,@RequestBody SignupDTO signUpDTO){
-        return userService.updateUserDetails(userId,signUpDTO);
+    public AuthResponse updateUser(@PathVariable String userId, @RequestBody SignupDTO signUpDTO) {
+        return userService.updateUserDetails(userId, signUpDTO);
     }
 
     @GetMapping("/all")
-    public AuthResponse getAllUsers(){
+    public AuthResponse getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -63,22 +55,34 @@ public class UserController {
     @PostMapping("/forgot-password")
     public AuthResponse sendOtp(@RequestBody ForgotPasswordDTO request) {
         userService.sendOtp(request.email);
-        return new AuthResponse(HttpStatus.OK.value(), "OTP sent Succesful",null);
+        return new AuthResponse(HttpStatus.OK.value(), "OTP sent Succesful", null);
     }
 
     @PostMapping("/reset-password")
     public AuthResponse resetPassword(@RequestBody ResetDTO request) {
-
         userService.resetPasswordWithOtp(request.otp, request.newPassword, request.confirmPassword);
-        return new AuthResponse(HttpStatus.OK.value(), "password reset successful",null);
+        return new AuthResponse(HttpStatus.OK.value(), "password reset successful", null);
     }
 
+    @PostMapping("/{userId}/change-password")
+    public ResponseEntity<?> changePassword(@PathVariable String userId, @RequestBody ChangePasswordRequest request) {
+        try {
+            userService.changePassword(userId, request);
+            return ResponseEntity.ok(new AuthResponse(
+                    HttpStatus.OK.value(),
+                    "Password changed successfully",
+                    null
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new AuthResponse(
+                            HttpStatus.BAD_REQUEST.value(),
+                            "Password change failed " + e.getMessage(),
+                            null
+                    ));
+        }
+    }
 
-//    // GET USER DATA
-//    @GetMapping("/{id}")
-//    public ResponseEntity<User> getUserById(@PathVariable String id) {
-//        User user = userService.getUserById(id);
-//        return ResponseEntity.ok(user);
-//    }
 }
 
