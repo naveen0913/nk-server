@@ -1,7 +1,6 @@
 package com.sample.sample.Model;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -30,8 +29,8 @@ public class ProductCustomization {
     @JsonIgnore
     private Products product;
 
-    @ElementCollection
-    private List<String> thumbnailImageUrls = new ArrayList<>();
+    @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL)
+    private List<CustomizationThumbnailUrls> thumbnailImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "productCustomization", cascade = CascadeType.ALL)
     private List<CustomizationOption> customizationOptions = new ArrayList<>();
@@ -135,13 +134,21 @@ public class ProductCustomization {
         this.bannerImageUrl = bannerImageUrl;
     }
 
-    public List<String> getThumbnailImageUrls() {
-        return thumbnailImageUrls;
+    public List<CustomizationThumbnailUrls> getThumbnailImages() {
+        return thumbnailImages;
     }
 
-    public void setThumbnailImageUrls(List<String> thumbnailImageUrls) {
-        this.thumbnailImageUrls = thumbnailImageUrls;
+    public void setThumbnailImages(List<CustomizationThumbnailUrls> thumbnailImages) {
+        this.thumbnailImages = thumbnailImages;
     }
+
+    //    public List<String> getThumbnailImageUrls() {
+//        return thumbnailImageUrls;
+//    }
+//
+//    public void setThumbnailImageUrls(List<String> thumbnailImageUrls) {
+//        this.thumbnailImageUrls = thumbnailImageUrls;
+//    }
 
 
 }

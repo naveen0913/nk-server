@@ -83,7 +83,17 @@ public class ProductCustomizationController {
         }
     }
 
+    @DeleteMapping("/option/{optionId}")
+    public AuthResponse deleteCustomizationOptionById(@PathVariable Long optionId){
+        service.deleteCustomizationOptionById(optionId);
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+    }
 
+    @DeleteMapping("/thumbnail/{thumbnailId}")
+    public AuthResponse deleteCustomizationThumbnailById(@PathVariable Long thumbnailId){
+        service.deleteCustomizationThumbnailUrl(thumbnailId);
+        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+    }
 
 
 }

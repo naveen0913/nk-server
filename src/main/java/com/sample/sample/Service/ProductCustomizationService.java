@@ -3,8 +3,11 @@ package com.sample.sample.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.ProductCustomizationDTO;
 import com.sample.sample.Model.CustomizationOption;
+import com.sample.sample.Model.CustomizationThumbnailUrls;
 import com.sample.sample.Model.ProductCustomization;
 import com.sample.sample.Model.Products;
+import com.sample.sample.Repository.CustomOptionRepository;
+import com.sample.sample.Repository.CustomizationThumbnailsRepo;
 import com.sample.sample.Repository.ProductCustomizationRepo;
 import com.sample.sample.Repository.ProductsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,14 +30,18 @@ public class ProductCustomizationService {
 
     private final ProductCustomizationRepo repo;
     private final ProductsRepository productsRepository;
+    private final CustomOptionRepository customOptionRepository;
+    private final CustomizationThumbnailsRepo customizationThumbnailsRepo;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Value("${file.upload-dir}")
     private String uploadPath;
 
-    public ProductCustomizationService(ProductCustomizationRepo repo, ProductsRepository productsRepository) {
+    public ProductCustomizationService(ProductCustomizationRepo repo, ProductsRepository productsRepository, CustomOptionRepository customOptionRepository, CustomizationThumbnailsRepo customizationThumbnailsRepo) {
         this.repo = repo;
         this.productsRepository = productsRepository;
+        this.customOptionRepository = customOptionRepository;
+        this.customizationThumbnailsRepo = customizationThumbnailsRepo;
     }
 
     @Transactional
@@ -64,15 +71,22 @@ public class ProductCustomizationService {
         }
 
         // Save thumbnails
-        List<String> thumbUrls = new ArrayList<>();
+        List<CustomizationThumbnailUrls> thumbEntities = new ArrayList<>();
         if (thumbnails != null) {
             for (MultipartFile thumb : thumbnails) {
                 if (thumb != null && !thumb.isEmpty()) {
-                    thumbUrls.add(saveFile(thumb));
+                    String imageUrl = saveFile(thumb);
+
+                    CustomizationThumbnailUrls thumbEntity = new CustomizationThumbnailUrls();
+                    thumbEntity.setThumbnailUrl(imageUrl);
+                    thumbEntity.setProductCustomization(entity);
+
+                    thumbEntities.add(thumbEntity);
                 }
             }
         }
-        entity.setThumbnailImageUrls(thumbUrls);
+        entity.setThumbnailImages(thumbEntities); // set list in parent
+
 
         // Save customization options
         List<CustomizationOption> optionEntities = new ArrayList<>();
@@ -162,9 +176,9 @@ public class ProductCustomizationService {
                 }
             }
 
-            if (!thumbUrls.isEmpty()) {
-                entity.setThumbnailImageUrls(thumbUrls); // Replace old thumbnails
-            }
+//            if (!thumbUrls.isEmpty()) {
+//                entity.setThumbnailImages(thumbUrls); // Replace old thumbnails
+//            }
         }
 
 
@@ -185,6 +199,22 @@ public class ProductCustomizationService {
         }
 
         return repo.save(entity);
+    }
+
+    @Transactional
+    public void deleteCustomizationOptionById(Long customizationOptionId){
+        CustomizationOption customizationOption = customOptionRepository.findById(customizationOptionId)
+                .orElseThrow(() -> new EntityNotFoundException("Customization Option not found"));
+
+        customOptionRepository.deleteCustomizationOptionId(customizationOptionId);
+    }
+
+    @Transactional
+    public void deleteCustomizationThumbnailUrl(Long customizationThumbnaiId){
+        CustomizationThumbnailUrls thumbnailUrls = customizationThumbnailsRepo.findById(customizationThumbnaiId)
+                .orElseThrow(() -> new EntityNotFoundException("Customization Thumbnail Url Option not found"));
+
+        customizationThumbnailsRepo.deleteCustomizationThumbnailUrl(customizationThumbnaiId);
     }
 
 
