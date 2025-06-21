@@ -15,6 +15,7 @@ public interface UserRepo extends JpaRepository<User,String> {
     long countByRole(String role);
 
     Optional<User> findByResetOtp(String otp);
+    Optional<User> findByUsername(String username);
 
 
 

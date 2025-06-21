@@ -1,5 +1,7 @@
 package com.sample.sample.Service;
 
+
+import com.sample.sample.DTO.ChangePasswordRequest;
 import com.sample.sample.DTO.LoginDTO;
 import com.sample.sample.DTO.SignupDTO;
 import com.sample.sample.JWT.JwtUtil;
@@ -14,11 +16,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-public class UserService{
+public class UserService {
+
     @Autowired
     private UserRepo userRepository;
-
-
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -28,36 +29,38 @@ public class UserService{
 
     public AuthResponse registerUser(SignupDTO signUpDTO, boolean isAdmin) {
         Optional<User> existedUser = userRepository.findByEmail(signUpDTO.getEmail());
-        if (existedUser.isPresent()){
-            new AuthResponse(HttpStatus.CONFLICT.value(), "User already exists", null);
+        if (existedUser.isPresent()) {
+            return new AuthResponse(HttpStatus.CONFLICT.value(), "User already exists", null);
         }
+
         User newUser = new User();
         newUser.setUsername(signUpDTO.getUsername());
         newUser.setEmail(signUpDTO.getEmail());
         newUser.setPassword(signUpDTO.getPassword());
         newUser.setCreated(new Date());
-        String userRole = "user";
-        newUser.setRole(userRole);
+        newUser.setRole("user");
         newUser.setPasswordUpdated(false);
         userRepository.save(newUser);
-        return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
-    public AuthResponse adminRegister(SignupDTO signUpDTO,boolean isAdmin) {
+    public AuthResponse adminRegister(SignupDTO signUpDTO, boolean isAdmin) {
         Optional<User> existedUser = userRepository.findByEmail(signUpDTO.getEmail());
-        if (existedUser.isPresent()){
-            new AuthResponse(HttpStatus.CONFLICT.value(), "User already exists", null);
+        if (existedUser.isPresent()) {
+            return new AuthResponse(HttpStatus.CONFLICT.value(), "User already exists", null);
         }
+
         User newUser = new User();
         newUser.setUsername(signUpDTO.getUsername());
         newUser.setEmail(signUpDTO.getEmail());
         newUser.setPassword(signUpDTO.getPassword());
         newUser.setCreated(new Date());
+        newUser.setRole("admin");
         newUser.setPasswordUpdated(false);
-        String userRole = "admin";
-        newUser.setRole(userRole);
         userRepository.save(newUser);
-        return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
     public AuthResponse userLogin(LoginDTO loginDTO) {
@@ -74,6 +77,7 @@ public class UserService{
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
+
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("user", user);
         responseBody.put("token", token);
@@ -81,20 +85,23 @@ public class UserService{
         return new AuthResponse(HttpStatus.OK.value(), "Login success", responseBody);
     }
 
-    public AuthResponse getUserById(String userId){
+    public AuthResponse getUserById(String userId) {
         Optional<User> existedUser = userRepository.findById(userId);
-        if (existedUser.isEmpty()){
-            new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
+        if (existedUser.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
         }
-        return new AuthResponse(HttpStatus.OK.value(), "login success",existedUser);
+
+        return new AuthResponse(HttpStatus.OK.value(), "login success", existedUser);
     }
 
-    public AuthResponse updateUserDetails(String userId,SignupDTO signUpDTO){
+    public AuthResponse updateUserDetails(String userId, SignupDTO signUpDTO) {
         Optional<User> existedUser = userRepository.findById(userId);
-        if (existedUser.isEmpty()){
-            new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
+        if (existedUser.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
         }
+
         User user = existedUser.get();
+
         if (signUpDTO.getUsername() != null) {
             user.setUsername(signUpDTO.getUsername());
         }
@@ -102,18 +109,17 @@ public class UserService{
             user.setEmail(signUpDTO.getEmail());
         }
         if (signUpDTO.getPassword() != null) {
-            user.setPassword(signUpDTO.getPassword()); // Consider hashing passwords before saving!
+            user.setPassword(signUpDTO.getPassword()); // Consider hashing!
         }
+
         userRepository.save(user);
         return new AuthResponse(HttpStatus.OK.value(), "User updated successfully", user);
-
     }
 
     public AuthResponse getAllUsers() {
         List<User> users = userRepository.findAll();
         return new AuthResponse(HttpStatus.OK.value(), "users list", users);
     }
-
 
     public long getUserCount() {
         return userRepository.count();
@@ -130,7 +136,6 @@ public class UserService{
         userRepository.save(user);
         mailService.sendOtpEmail(user.getEmail(), otp, user.getUsername());
     }
-
 
     public void resetPasswordWithOtp(String otp, String newPassword, String confirmPassword) {
         if (!newPassword.equals(confirmPassword)) {
@@ -150,10 +155,27 @@ public class UserService{
         userRepository.save(user);
 
         mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
-
-
     }
 
+    // ✅ NEW: Change Password
+    public void changePassword(String userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!request.getCurrentPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
+            throw new RuntimeException("New passwords do not match");
+        }
+
+        user.setPassword(request.getNewPassword());
+        user.setPasswordUpdated(true);
+        user.setPasswordUpdatedTime(LocalDateTime.now());
+
+        userRepository.save(user);
+//        mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
+    }
 
 }
-
