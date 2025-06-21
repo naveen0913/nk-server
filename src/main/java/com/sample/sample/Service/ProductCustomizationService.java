@@ -1,6 +1,8 @@
 package com.sample.sample.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sample.sample.DTO.CustomizationOptionDTO;
+import com.sample.sample.DTO.CustomizationThumbnailDTO;
 import com.sample.sample.DTO.ProductCustomizationDTO;
 import com.sample.sample.Model.CustomizationOption;
 import com.sample.sample.Model.CustomizationThumbnailUrls;
@@ -12,6 +14,7 @@ import com.sample.sample.Repository.ProductCustomizationRepo;
 import com.sample.sample.Repository.ProductsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -160,31 +163,26 @@ public class ProductCustomizationService {
         }
 
         // Update thumbnails only if list is present and has at least one valid file
+        List<CustomizationThumbnailUrls> thumbEntities = new ArrayList<>();
         if (thumbnails != null) {
-            List<String> thumbUrls = new ArrayList<>();
-
             for (MultipartFile thumb : thumbnails) {
                 if (thumb != null && !thumb.isEmpty()) {
-                    try {
-                        String url = saveFile(thumb);
-                        thumbUrls.add(url);
-                    } catch (IOException e) {
-                        // Optionally log and skip the failed thumbnail
-                        System.err.println("Failed to save thumbnail: " + e.getMessage());
-                        // Optionally: throw new RuntimeException("Thumbnail upload failed", e);
-                    }
+                    String imageUrl = saveFile(thumb);
+
+                    CustomizationThumbnailUrls thumbEntity = new CustomizationThumbnailUrls();
+                    thumbEntity.setThumbnailUrl(imageUrl);
+                    thumbEntity.setProductCustomization(entity);
+
+                    thumbEntities.add(thumbEntity);
                 }
             }
-
-//            if (!thumbUrls.isEmpty()) {
-//                entity.setThumbnailImages(thumbUrls); // Replace old thumbnails
-//            }
         }
-
+        entity.setThumbnailImages(thumbEntities);
 
         // Replace customization options if present
+        List<CustomizationOption> optionEntities = new ArrayList<>();
         if (dto.getOptions() != null) {
-            List<CustomizationOption> optionEntities = dto.getOptions().stream().map(opt -> {
+            optionEntities = dto.getOptions().stream().map(opt -> {
                 CustomizationOption co = new CustomizationOption();
                 co.setOptionLabel(opt.getOptionLabel());
                 co.setOriginalPrice(opt.getOriginalPrice());
@@ -194,12 +192,41 @@ public class ProductCustomizationService {
                 co.setProductCustomization(entity);
                 return co;
             }).collect(Collectors.toList());
-
-            entity.setCustomizationOptions(optionEntities);
         }
+
+        entity.setCustomizationOptions(optionEntities);
 
         return repo.save(entity);
     }
+
+
+    @Transactional
+    public void updateCustomizationOptions(Long id, CustomizationOptionDTO optionDTO) {
+        CustomizationOption customizationOption = customOptionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Customization Option not found with ID: " + id));
+
+        if (optionDTO.getOptionLabel() != null) {
+            customizationOption.setOptionLabel(optionDTO.getOptionLabel());
+        }
+
+        if (optionDTO.getOriginalPrice() != null) {
+            customizationOption.setOriginalPrice(optionDTO.getOriginalPrice());
+        }
+
+        if (optionDTO.getOldPrice() != null) {
+            customizationOption.setOldPrice(optionDTO.getOldPrice());
+        }
+
+        if (optionDTO.getDiscount() != null) {
+            customizationOption.setDiscount(optionDTO.getDiscount());
+        }
+
+        if (!optionDTO.isMostPopular()) {
+            customizationOption.setMostPopular(optionDTO.isMostPopular());
+        }
+        customOptionRepository.save(customizationOption);
+    }
+
 
     @Transactional
     public void deleteCustomizationOptionById(Long customizationOptionId){

@@ -1,5 +1,6 @@
 package com.sample.sample.Controller;
 
+import com.sample.sample.DTO.CustomizationOptionDTO;
 import com.sample.sample.Model.ProductCustomization;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.ProductCustomizationService;
@@ -71,6 +72,18 @@ public class ProductCustomizationController {
                     .body("Error updating customization: " + e.getMessage());
         }
     }
+
+    @PutMapping("/customizationOption/{optionId}")
+    public ResponseEntity<?> deleteCustomization(@PathVariable Long optionId, @RequestBody CustomizationOptionDTO optionDTO) {
+        try {
+            service.updateCustomizationOptions(optionId, optionDTO);
+            return ResponseEntity.ok(new AuthResponse(HttpStatus.OK.value(), "Updated successfully", null));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new AuthResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), null));
+        }
+    }
+
 
     @DeleteMapping("/{customizationId}")
     public ResponseEntity<AuthResponse> deleteCustomization(@PathVariable Long customizationId) {

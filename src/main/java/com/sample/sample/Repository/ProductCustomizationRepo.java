@@ -23,6 +23,6 @@ public interface ProductCustomizationRepo extends JpaRepository<ProductCustomiza
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM product_customization_thumbnail_image_urls WHERE product_customization_id = :customizationId", nativeQuery = true)
+    @Query(value = "DELETE FROM product_customization_thumbnail_urls WHERE product_customization_id = :customizationId", nativeQuery = true)
     void deleteCustomizationThumbnailsById(@Param("customizationId") Long customizationId);
 }

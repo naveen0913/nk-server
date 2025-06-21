@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface CustomOptionRepository extends JpaRepository<CustomizationOption,Long> {
 
 
-//    @Transactional
     @Modifying
     @Query("DELETE FROM CustomizationOption c WHERE c.id = :customizationId")
     void deleteCustomizationOptionId(@Param("customizationId") Long customizationId);
