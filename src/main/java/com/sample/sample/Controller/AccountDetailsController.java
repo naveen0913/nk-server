@@ -34,7 +34,7 @@ public class AccountDetailsController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AccountDetailsDTO>> getAllAccounts() {
+    public ResponseEntity<List<AccountDetails>> getAllAccounts() {
         return ResponseEntity.ok(accountDetailsService.getAllAccountDetails());
     }
 

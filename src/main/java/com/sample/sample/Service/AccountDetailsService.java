@@ -6,7 +6,6 @@ import com.sample.sample.Model.AccountDetails;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.UserRepo;
-import com.sample.sample.Responses.AccountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,9 +34,9 @@ public class AccountDetailsService {
         return accountDetailsRepository.save(accountDetails);
     }
 
-    public List<AccountDetailsDTO> getAllAccountDetails() {
+    public List<AccountDetails> getAllAccountDetails() {
         List<AccountDetails> accounts = accountDetailsRepository.findAll();
-        return AccountResponse.toDtoList(accounts);
+        return accounts;
     }
 
     public Optional<AccountDetails> getUserAccountDetails(String userId){
