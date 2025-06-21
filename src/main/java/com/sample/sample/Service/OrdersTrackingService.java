@@ -1,5 +1,6 @@
 package com.sample.sample.Service;
 
+import com.sample.sample.DTO.NotificationDTO;
 import com.sample.sample.DTO.OrderTrackingDTO;
 import com.sample.sample.Model.*;
 import com.sample.sample.Repository.OrderRepository;
@@ -27,6 +28,9 @@ public class OrdersTrackingService {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Transactional
     public OrdersTracking saveTracking(Long orderId, OrdersTracking dto) {
@@ -115,6 +119,15 @@ public class OrdersTrackingService {
                         account.getLastName(),
                         TrackingStatus.valueOf(dto.getTrackingStatus().toString().toUpperCase()) // converts string to enum
                 );
+
+                NotificationDTO notificationDTO = new NotificationDTO();
+                notificationDTO.setTitle("Order Status Updated");
+                notificationDTO.setMessage("Your order " + order.getId() + " is now " + TrackingStatus.valueOf(dto.getTrackingStatus().toString().toUpperCase()));
+                notificationDTO.setRecipientType("user");
+                notificationDTO.setOrderId(order.getOrderId());
+
+                notificationService.notifyUser(account.getUser().getId(), notificationDTO);
+
             } catch (Exception e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send order status email: " + e.getMessage());
             }

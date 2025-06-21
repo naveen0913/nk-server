@@ -2,7 +2,10 @@ package com.sample.sample.Model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -36,9 +39,32 @@ public class Orders {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private OrdersTracking orderTracking;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserOrderedItems> orderItems = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "address_id")
+    private UserAddress userAddress;
+
     @Transient
     public AccountDetails getAccountDetails() {
         return this.payment != null ? this.payment.getAccountDetails() : null;
+    }
+
+    public List<UserOrderedItems> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<UserOrderedItems> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public UserAddress getUserAddress() {
+        return userAddress;
+    }
+
+    public void setUserAddress(UserAddress userAddress) {
+        this.userAddress = userAddress;
     }
 
     public Payment getPayment() {

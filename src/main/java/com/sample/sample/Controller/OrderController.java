@@ -2,8 +2,12 @@ package com.sample.sample.Controller;
 
 import com.sample.sample.DTO.OrderDTO;
 import com.sample.sample.Model.Orders;
+import com.sample.sample.Model.UserOrderedItems;
+import com.sample.sample.Repository.UserOrderedItemRepository;
 import com.sample.sample.Responses.AuthResponse;
+import com.sample.sample.Responses.OrdersResponse;
 import com.sample.sample.Service.OrderService;
+import com.sample.sample.Service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,30 +25,31 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-//    @PostMapping("/{accountId}/{addressId}")
-//    public AuthResponse placeOrder(@PathVariable Long accountId, @PathVariable Long addressId, @RequestBody OrderDTO request) {
-//        orderService.placeOrder(accountId,addressId,request);
-//        return new AuthResponse(HttpStatus.CREATED.value(), "success",null);
-//    }
+    @Autowired
+    private UserOrderedItemRepository userOrderedItemRepository;
 
     // GET all orders
     @GetMapping("/all")
-    public ResponseEntity<List<Orders>> getAllOrders() {
+    public ResponseEntity<List<OrdersResponse>> getAllOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     // GET orders by account ID
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<Orders>> getOrdersByAccountId(@PathVariable Long accountId) {
-        return ResponseEntity.ok(orderService.getOrdersByAccount(accountId));
+    public ResponseEntity<List<OrdersResponse>> getOrdersByAccount(@PathVariable Long accountId) {
+        return ResponseEntity.ok(orderService.getOrdersByAccountId(accountId));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Orders> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found")));
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrdersResponse> getOrderByOrderId(@PathVariable String orderId) {
+        return ResponseEntity.ok(orderService.getOrderByOrderId(orderId));
     }
 
 
+    //    User ordered Items
+    @GetMapping("/account/{orderId}/items")
+    public ResponseEntity<List<UserOrderedItems>> getOrderItems(@PathVariable Long orderId) {
+        return ResponseEntity.ok(userOrderedItemRepository.findByOrderId(orderId));
+    }
 
 }

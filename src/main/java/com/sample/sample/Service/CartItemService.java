@@ -3,23 +3,16 @@ package com.sample.sample.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.CartDTO;
 import com.sample.sample.Model.CartItem;
-import com.sample.sample.Model.Images;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.CartItemRepository;
-import com.sample.sample.Repository.ImageRepo;
 import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Repository.UserRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -106,23 +99,15 @@ public class CartItemService {
         return userRepo.findAll();
     }
 
-//    // Delete a cart item by its ID
-//    public void deleteCartItem(Long cartItemId) {
-//        if (!cartItemRepository.existsById(cartItemId)) {
-//            throw new RuntimeException("Cart Item not found with id: " + cartItemId);
-//        }
-//        cartItemRepository.deleteById(cartItemId);
-//    }
-
-    public void softDeleteCartItem(Long cartItemId) {
-        CartItem item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Cart item not found"));
-
-        item.setDeleted(true);
-        item.setLastUpdate(); // if you're using timestamps
-        cartItemRepository.save(item);
+    // Delete a cart item by its ID
+    public void deleteCartItem(Long cartItemId) {
+        if (!cartItemRepository.existsById(cartItemId)) {
+            throw new RuntimeException("Cart Item not found with id: " + cartItemId);
+        }
+        cartItemRepository.deleteById(cartItemId);
     }
+
+
 
     // Delete all cart items
     public void deleteAllCartItems() {

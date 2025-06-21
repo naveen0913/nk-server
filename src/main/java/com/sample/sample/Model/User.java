@@ -34,8 +34,7 @@ public class User {
      * One-to-One mapping with account details.
      */
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonManagedReference
-    @JsonIgnore
+    @JsonManagedReference("user-account")
     private AccountDetails accountDetails;
 
     /**

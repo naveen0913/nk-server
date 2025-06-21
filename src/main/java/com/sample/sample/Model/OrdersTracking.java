@@ -1,6 +1,7 @@
 package com.sample.sample.Model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -41,6 +42,7 @@ public class OrdersTracking {
     @OneToOne
     @JoinColumn(name = "order_id", unique = true)
     @JsonBackReference
+    @JsonIgnore
     private Orders order;
 
 

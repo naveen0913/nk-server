@@ -1,6 +1,5 @@
 package com.sample.sample.Service;
 
-import com.sample.sample.Model.Images;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Responses.AuthResponse;

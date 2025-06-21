@@ -15,7 +15,5 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Query("SELECT w FROM CartItem w WHERE w.user.id = :userId")
     List<CartItem> getAllItemsByUser(String userId);
 
-    @Query("SELECT c FROM CartItem c WHERE c.deleted = false")
-    List<CartItem> findAllActive();
 
 }

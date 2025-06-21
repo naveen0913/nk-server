@@ -25,14 +25,14 @@ public class AccountDetails {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    @JsonBackReference("user-account")
+    @JsonIgnore // 🔁 Prevent circular reference
     private User user;
 
     @OneToMany(mappedBy = "accountDetails", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAddress> addresses;
 
     @OneToMany(mappedBy = "accountDetails")
-    @JsonBackReference("user-payments")
+    @JsonIgnore
     private List<Payment> payments;
 
     public List<Payment> getPayments() {

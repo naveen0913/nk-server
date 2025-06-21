@@ -1,18 +1,14 @@
 package com.sample.sample.Controller;
 
-import com.sample.sample.Model.Images;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Responses.ImageResponse;
 import com.sample.sample.Service.ProductsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

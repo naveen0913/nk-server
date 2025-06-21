@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Orders,Long> {
 @Query("SELECT o FROM Orders o WHERE o.payment.accountDetails.id = :accountId")
 List<Orders> findAllByAccountId(@Param("accountId") Long accountId);
+
+    Optional<Orders> findByOrderId(String orderId);
 }

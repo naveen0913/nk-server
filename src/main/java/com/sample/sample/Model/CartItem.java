@@ -4,6 +4,7 @@ package com.sample.sample.Model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,17 +53,6 @@ public class CartItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
 
-    @ManyToOne
-    @JoinColumn(name = "payment_id")
-    @JsonBackReference
-    private Payment payment;
-
-    public Payment getPayment() {
-        return payment;
-    }
-
-    @Column(name = "is_deleted")
-    private Boolean deleted = false; // default not deleted
 
     // add timestamps optionally
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -72,14 +62,6 @@ public class CartItem {
     @PreUpdate
     public void setLastUpdate() {
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        deleted = deleted;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -98,9 +80,6 @@ public class CartItem {
         this.updatedAt = updatedAt;
     }
 
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
 
     public Products getProduct() {
         return product;
