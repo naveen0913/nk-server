@@ -64,7 +64,7 @@ public class CartItemController {
     // Delete one cart item by ID
     @DeleteMapping("/{id}")
     public AuthResponse deleteCartItem(@PathVariable Long id) {
-        cartItemService.deleteCartItem(id);
+        cartItemService.softDeleteCartItem(id);
         return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 
