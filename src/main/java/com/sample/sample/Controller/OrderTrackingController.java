@@ -18,15 +18,6 @@ public class OrderTrackingController {
     @Autowired
     private OrdersTrackingService orderTrackingService;
 
-    @PostMapping("/{orderId}")
-    public ResponseEntity<OrdersTracking> saveTracking(
-            @PathVariable Long orderId,
-            @RequestBody OrdersTracking trackingDto) {
-        OrdersTracking saved = orderTrackingService.saveTracking(orderId, trackingDto);
-        return new ResponseEntity(saved, HttpStatus.CREATED);
-    }
-
-
     @GetMapping("/all")
     public ResponseEntity<List<OrdersTracking>> getAllOrderTrackings() {
         return ResponseEntity.ok(orderTrackingService.getAllOrdersTracking());

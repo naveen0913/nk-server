@@ -11,6 +11,7 @@ import com.sample.sample.Repository.*;
 import com.sample.sample.Responses.AccountDetailsResponse;
 import com.sample.sample.Responses.PaymentResponse;
 import com.sample.sample.Responses.UserAddressResponse;
+import jakarta.transaction.Transactional;
 import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,9 @@ public class PaymentService {
     @Autowired
     private UserOrderedItemRepository userOrderedItemRepository;
 
+    @Autowired
+    private OrdersTrackingRepository ordersTrackingRepository;
+
     public Payment createOrderPayment(Long accountId, Long addressId, PaymentRequestDTO request)throws RazorpayException{
 
         AccountDetails account = accountDetailsRepository.findById(accountId)
@@ -97,7 +101,7 @@ public class PaymentService {
 //        }
 //        payment.setCartItemList(cartItems);
         payment.setAccountDetails(account);
-//        payment.setUserAddress(address);
+        payment.setUserAddress(address);
 
         return paymentRepository.save(payment);
 
@@ -194,7 +198,7 @@ public class PaymentService {
     }
 
 
-
+    @Transactional
     private void createOrderAfterPayment(Payment payment) {
         String generateOrderId = "ORDER" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 13).toUpperCase();
         Orders order = new Orders();
@@ -205,10 +209,12 @@ public class PaymentService {
         order.setOrderDiscount("0");
         order.setOrderGstPercent(String.valueOf(payment.getGstAmount()));
         order.setOrderShippingCharges(String.valueOf(payment.getShippingPrice()));
+        order.setUserAddress(payment.getUserAddress());
+//        order.setOrderTracking(payment.getOrder().getOrderTracking());
 
         Orders savedOrder = orderRepository.save(order);
-        payment.setOrder(savedOrder);
-        paymentRepository.save(payment);
+//        payment.setOrder(savedOrder);
+//        paymentRepository.save(payment);
 
         List<CartItem> cartItems = cartItemRepository.getAllItemsByUser(payment.getAccountDetails().getUser().getId());
 
@@ -232,24 +238,50 @@ public class PaymentService {
 
             orderItems.add(orderItem);
         }
+        order.setOrderItems(orderItems);
+
+        payment.setOrder(savedOrder);
+        paymentRepository.save(payment);
 
         userOrderedItemRepository.saveAll(orderItems);
-        savedOrder.setOrderItems(orderItems);
-        orderRepository.save(savedOrder);
-
-        // Notify admin
-        NotificationDTO dto = new NotificationDTO();
-        dto.setTitle("New Order");
-        dto.setMessage("Order " + order.getOrderId() + " has been placed.");
-        dto.setRecipientType("ADMIN");
-        dto.setOrderId(order.getOrderId());
-        notificationService.notifyAdmin(dto);
 
         // Send order email
         String email = payment.getAccountDetails().getAccountEmail();
         String orderNumber = order.getOrderId();
-        mailService.sendOrderStatusMail(email, payment.getAccountDetails().getFirstName(), payment.getAccountDetails().getLastName(), orderNumber, TrackingStatus.ORDER_PLACED);
-    }
+        mailService.sendOrderStatusMail(email, orderNumber,payment.getAccountDetails().getFirstName(), payment.getAccountDetails().getLastName(), TrackingStatus.ORDER_PLACED);
 
+//       creating tracking after order placement
+
+        OrdersTracking tracking = new OrdersTracking();
+        tracking.setTrackingId("track_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12));
+        tracking.setTrackingStatus(TrackingStatus.ORDER_PLACED);
+        tracking.setShipped(false);
+        tracking.setPacked(false);
+        tracking.setOutOfDelivery(false);
+        tracking.setDelivered(false);
+        tracking.setTrackingCreated(new Date());
+
+        // Estimated delivery = today + 10 days
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 10);
+        tracking.setEstimatedDelivery(calendar.getTime());
+
+        tracking.setOrder(savedOrder);
+        savedOrder.setOrderTracking(tracking); // Bidirectional mapping
+
+        ordersTrackingRepository.save(tracking);
+        savedOrder.setOrderTracking(tracking);
+        orderRepository.save(savedOrder);
+
+        // Notify admin
+//        NotificationDTO dto = new NotificationDTO();
+//        dto.setTitle("New Order");
+//        dto.setMessage("Order " + order.getOrderId() + " has been placed.");
+//        dto.setRecipientType("ADMIN");
+//        dto.setOrderId(order.getOrderId());
+//        notificationService.notifyAdmin(dto);
+
+
+    }
 
 }

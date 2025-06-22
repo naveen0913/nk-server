@@ -40,7 +40,7 @@ public class Orders {
     private OrdersTracking orderTracking;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserOrderedItems> orderItems = new ArrayList<>();
+    private List<UserOrderedItems> orderItems;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id")

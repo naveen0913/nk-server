@@ -1,10 +1,15 @@
 package com.sample.sample.DTO;
 
 public class NotificationDTO {
+//    private String title;
+//    private String message;
+//    private String recipientType;
+//    private String orderId;
+
     private String title;
     private String message;
-    private String recipientType;
-    private String orderId;
+    private String type; // e.g., "TRACKING_UPDATE"
+    private String userId;
 
     public String getTitle() {
         return title;
@@ -22,19 +27,19 @@ public class NotificationDTO {
         this.message = message;
     }
 
-    public String getRecipientType() {
-        return recipientType;
+    public String getType() {
+        return type;
     }
 
-    public void setRecipientType(String recipientType) {
-        this.recipientType = recipientType;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getOrderId() {
-        return orderId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

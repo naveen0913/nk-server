@@ -9,13 +9,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrdersTrackingService {
@@ -32,28 +30,9 @@ public class OrdersTrackingService {
     @Autowired
     private NotificationService notificationService;
 
-    @Transactional
-    public OrdersTracking saveTracking(Long orderId, OrdersTracking dto) {
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
-        Orders existedOrder = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Order not found with ID: " + orderId));
-
-        // Create tracking ID
-        String generatedTrackingId = "track_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-
-        OrdersTracking tracking = new OrdersTracking();
-        tracking.setTrackingId(generatedTrackingId);
-        tracking.setTrackingStatus(dto.getTrackingStatus());
-        tracking.setShipped(dto.getShipped());
-        tracking.setPacked(dto.getPacked());
-        tracking.setOutOfDelivery(dto.getOutOfDelivery());
-        tracking.setDelivered(dto.getDelivered());
-        tracking.setTrackingCreated(new Date());
-
-        tracking.setOrder(existedOrder);
-        return ordersTrackingRepository.save(tracking);
-    }
 
     public Optional<OrdersTracking> getOrderTrackingById(Long orderId){
         Orders existedOrder = orderRepository.findById(orderId)
@@ -123,10 +102,11 @@ public class OrdersTrackingService {
                 NotificationDTO notificationDTO = new NotificationDTO();
                 notificationDTO.setTitle("Order Status Updated");
                 notificationDTO.setMessage("Your order " + order.getId() + " is now " + TrackingStatus.valueOf(dto.getTrackingStatus().toString().toUpperCase()));
-                notificationDTO.setRecipientType("user");
-                notificationDTO.setOrderId(order.getOrderId());
+                notificationDTO.setType("TRACKING_UPDATE");
+                notificationDTO.setUserId(account.getUser().getId());
+                messagingTemplate.convertAndSend("/queue/user/" + account.getUser().getId(), notificationDTO);
 
-                notificationService.notifyUser(account.getUser().getId(), notificationDTO);
+//                notificationService.notifyUser(account.getUser().getId(), notificationDTO);
 
             } catch (Exception e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send order status email: " + e.getMessage());
