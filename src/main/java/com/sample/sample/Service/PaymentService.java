@@ -168,6 +168,8 @@ public class PaymentService {
             dto.setCurrency(payment.getCurrency());
             dto.setReceipt(payment.getReceipt());
             dto.setStatus(payment.getStatus().name());
+            dto.setPaymentMode(payment.getPaymentMode());
+            dto.setPaymentDate(payment.getPaymentPaidDate());
             AccountDetails acc = payment.getAccountDetails();
             UserAddress usedAddress = payment.getUserAddress();
 

@@ -1,5 +1,6 @@
 package com.sample.sample.Responses;
 
+import java.util.Date;
 import java.util.List;
 
 public class PaymentResponse {
@@ -13,8 +14,26 @@ public class PaymentResponse {
     private String currency;
     private String receipt;
     private String status;
+    private String paymentMode;
+    private Date paymentDate;
     private AccountDetailsResponse accountDetails;
     private OrdersResponse ordersResponse;
+
+    public String getPaymentMode() {
+        return paymentMode;
+    }
+
+    public void setPaymentMode(String paymentMode) {
+        this.paymentMode = paymentMode;
+    }
+
+    public Date getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(Date paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 
     public OrdersResponse getOrdersResponse() {
         return ordersResponse;
