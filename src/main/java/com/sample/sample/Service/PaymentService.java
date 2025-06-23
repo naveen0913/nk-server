@@ -97,17 +97,12 @@ public class PaymentService {
         payment.setShippingPrice(request.getShippingPrice());
         payment.setGstAmount(request.getGstAmount());
         payment.setPaymentId(generatedPaymentId);
-//        for (CartItem item : cartItems) {
-//            item.setPayment(payment);
-//        }
-//        payment.setCartItemList(cartItems);
+
         payment.setAccountDetails(account);
         payment.setUserAddress(address);
 
         return paymentRepository.save(payment);
-
     }
-
 
     public boolean verifyPayment(PaymentRequestDTO dto) {
         try {
@@ -118,9 +113,22 @@ public class PaymentService {
                 Payment payment = paymentRepository.findByRazorpayOrderId(dto.getRazorpayOrderId())
                         .orElseThrow(() -> new RuntimeException("Payment not found for order ID: " + dto.getRazorpayOrderId()));
 
+                RazorpayClient razorpayClient = new RazorpayClient(key, secret);
+                com.razorpay.Payment razorpayPayment = razorpayClient.payments.fetch(dto.getPaymentId());
+
+                // Extract payment method (mode) like card, upi, netbanking, etc.
+                String method = razorpayPayment.get("method");
+                String bank = razorpayPayment.has("bank") ? razorpayPayment.get("bank") : null;
+                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
+                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
+
+                // Store data
                 payment.setPaymentId(dto.getPaymentId());
                 payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
+                payment.setPaymentPaidDate(new Date());
+                payment.setPaymentMode(method);
+
                 paymentRepository.save(payment);
                 createOrderAfterPayment(payment);
 

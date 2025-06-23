@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,9 +23,28 @@ public class Payment {
 
     private Integer amount;
     private Integer gstAmount;
+
+    public String getPaymentMode() {
+        return paymentMode;
+    }
+
+    public void setPaymentMode(String paymentMode) {
+        this.paymentMode = paymentMode;
+    }
+
+    public Date getPaymentPaidDate() {
+        return paymentPaidDate;
+    }
+
+    public void setPaymentPaidDate(Date paymentPaidDate) {
+        this.paymentPaidDate = paymentPaidDate;
+    }
+
     private Integer shippingPrice;
     private String currency;
 
+    private String paymentMode;
+    private Date paymentPaidDate;
 
     private String receipt;
 
