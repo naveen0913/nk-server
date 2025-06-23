@@ -74,7 +74,7 @@ public class ProductCustomizationController {
     }
 
     @PutMapping("/customizationOption/{optionId}")
-    public ResponseEntity<?> deleteCustomization(@PathVariable Long optionId, @RequestBody CustomizationOptionDTO optionDTO) {
+    public ResponseEntity<?> updateCustomizationOptionByID(@PathVariable Long optionId, @RequestBody CustomizationOptionDTO optionDTO) {
         try {
             service.updateCustomizationOptions(optionId, optionDTO);
             return ResponseEntity.ok(new AuthResponse(HttpStatus.OK.value(), "Updated successfully", null));
