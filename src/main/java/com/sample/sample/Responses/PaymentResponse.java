@@ -14,6 +14,15 @@ public class PaymentResponse {
     private String receipt;
     private String status;
     private AccountDetailsResponse accountDetails;
+    private OrdersResponse ordersResponse;
+
+    public OrdersResponse getOrdersResponse() {
+        return ordersResponse;
+    }
+
+    public void setOrdersResponse(OrdersResponse ordersResponse) {
+        this.ordersResponse = ordersResponse;
+    }
 
     public Long getId() {
         return id;

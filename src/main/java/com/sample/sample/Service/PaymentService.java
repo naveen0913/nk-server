@@ -9,6 +9,7 @@ import com.sample.sample.DTO.PaymentRequestDTO;
 import com.sample.sample.Model.*;
 import com.sample.sample.Repository.*;
 import com.sample.sample.Responses.AccountDetailsResponse;
+import com.sample.sample.Responses.OrdersResponse;
 import com.sample.sample.Responses.PaymentResponse;
 import com.sample.sample.Responses.UserAddressResponse;
 import jakarta.transaction.Transactional;
@@ -159,7 +160,6 @@ public class PaymentService {
             dto.setCurrency(payment.getCurrency());
             dto.setReceipt(payment.getReceipt());
             dto.setStatus(payment.getStatus().name());
-
             AccountDetails acc = payment.getAccountDetails();
             UserAddress usedAddress = payment.getUserAddress();
 
@@ -171,7 +171,6 @@ public class PaymentService {
             accDto.setAccountEmail(acc.getAccountEmail());
             accDto.setAlternatePhone(acc.getAlternatePhone());
 
-            // Include only the address used for payment
             if (usedAddress != null) {
                 UserAddressResponse addressDTO = new UserAddressResponse();
                 addressDTO.setAddressId(usedAddress.getAddressId());
@@ -193,6 +192,24 @@ public class PaymentService {
             }
 
             dto.setAccountDetails(accDto);
+
+            // Map associated order
+            Orders order = payment.getOrder();
+            if (order != null) {
+                OrdersResponse orderDto = new OrdersResponse();
+                orderDto.setId(order.getId());
+                orderDto.setOrderId(order.getOrderId());
+                orderDto.setCreatedAt(order.getCreatedAt());
+                orderDto.setOrderStatus(order.getOrderStatus());
+                orderDto.setOrderTotal(order.getOrderTotal());
+                orderDto.setOrderDiscount(order.getOrderDiscount());
+                orderDto.setOrderGstPercent(orderDto.getOrderGstPercent());
+                orderDto.setOrderShippingCharges(orderDto.getOrderShippingCharges());
+                orderDto.setOrderItems(order.getOrderItems());
+                orderDto.setOrderTracking(order.getOrderTracking());
+                dto.setOrdersResponse(orderDto);
+            }
+
             return dto;
         }).collect(Collectors.toList());
     }
