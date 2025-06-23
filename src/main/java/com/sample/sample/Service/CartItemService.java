@@ -86,46 +86,44 @@ public class CartItemService {
         return cartItemRepository.save(cartItem);
     }
 
-    // ✅ Update Cart Item by cartItemId
+
     @Transactional
     public CartItem updateCartItemById(Long cartItemId, String cartPayload, List<MultipartFile> customImages) throws IOException {
-        // Convert JSON string to DTO
         ObjectMapper objectMapper = new ObjectMapper();
         CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
 
-        // Fetch existing Cart Item
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("Cart Item not found with id: " + cartItemId));
 
         // Update fields
-        cartItem.setCartItemName(cartDTO.getCartItemName());
+        if (cartDTO.getCustomName()!=null){
+            cartItem.setCustomName(cartDTO.getCustomName());
+        }
+        if (!cartDTO.isCartGiftWrap()){
+            cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
+        }
         cartItem.setCartQuantity(cartDTO.getCartQuantity());
-        cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
-        cartItem.setTotalPrice(cartDTO.getTotalPrice());
-        cartItem.setCustomName(cartDTO.getCustomName());
-        cartItem.setOptionCount(cartDTO.getOptionCount());
-        cartItem.setOptionPrice(cartDTO.getOptionPrice());
-        cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
-        cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
-        cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
+
+        if (cartDTO.getLabelDesigns()!=null){
+            cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
+        }
 
         // Process Images
         List<String> imageUrls = cartItem.getCustomImages() != null ? cartItem.getCustomImages() : new ArrayList<>();
 
         if (customImages != null && !customImages.isEmpty()) {
+            List<String> existing = cartItem.getCustomImages() != null ? cartItem.getCustomImages() : new ArrayList<>();
             for (MultipartFile file : customImages) {
                 if (!file.isEmpty()) {
                     String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
                     Path filePath = Paths.get(uploadDir + fileName);
                     Files.createDirectories(filePath.getParent());
                     Files.write(filePath, file.getBytes());
-                    imageUrls.add(fileName);
+                    existing.add(fileName);
                 }
             }
+            cartItem.setCustomImages(existing);
         }
-
-        cartItem.setCustomImages(imageUrls);
-
         // Save updated Cart Item
         return cartItemRepository.save(cartItem);
     }
