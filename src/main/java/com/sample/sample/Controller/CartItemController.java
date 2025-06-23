@@ -1,8 +1,5 @@
 package com.sample.sample.Controller;
 
-
-
-
 import com.sample.sample.Model.CartItem;
 import com.sample.sample.Model.User;
 import com.sample.sample.Responses.AuthResponse;
@@ -17,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cart")
+    @RequestMapping("/api/cart")
 @CrossOrigin("*")
 public class CartItemController {
 
@@ -37,6 +34,17 @@ public class CartItemController {
 
         cartItemService.addCartItem(productId,userId, cartItem, customImages);
         return new AuthResponse(HttpStatus.CREATED.value(),"created",null);
+    }
+
+
+    @PutMapping(value = "/update/{cartItemId}", consumes = {"multipart/form-data"})
+    public AuthResponse updateCartItem(
+            @PathVariable Long cartItemId,
+            @RequestParam("cartPayload") String cartPayload,
+            @RequestParam(value = "customImages", required = false) List<MultipartFile> customImages) throws IOException {
+
+        cartItemService.updateCartItemById(cartItemId, cartPayload, customImages);
+        return new AuthResponse(HttpStatus.OK.value(), "Cart Item Updated", null);
     }
 
     @GetMapping("/user/{userId}")
@@ -74,14 +82,4 @@ public class CartItemController {
         cartItemService.deleteAllCartItems();
         return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
-
-
-
-
-
 }
-
-
-
-
-

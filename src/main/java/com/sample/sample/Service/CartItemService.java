@@ -86,12 +86,55 @@ public class CartItemService {
         return cartItemRepository.save(cartItem);
     }
 
+    // ✅ Update Cart Item by cartItemId
+    @Transactional
+    public CartItem updateCartItemById(Long cartItemId, String cartPayload, List<MultipartFile> customImages) throws IOException {
+        // Convert JSON string to DTO
+        ObjectMapper objectMapper = new ObjectMapper();
+        CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
+
+        // Fetch existing Cart Item
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new RuntimeException("Cart Item not found with id: " + cartItemId));
+
+        // Update fields
+        cartItem.setCartItemName(cartDTO.getCartItemName());
+        cartItem.setCartQuantity(cartDTO.getCartQuantity());
+        cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
+        cartItem.setTotalPrice(cartDTO.getTotalPrice());
+        cartItem.setCustomName(cartDTO.getCustomName());
+        cartItem.setOptionCount(cartDTO.getOptionCount());
+        cartItem.setOptionPrice(cartDTO.getOptionPrice());
+        cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
+        cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
+        cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
+
+        // Process Images
+        List<String> imageUrls = cartItem.getCustomImages() != null ? cartItem.getCustomImages() : new ArrayList<>();
+
+        if (customImages != null && !customImages.isEmpty()) {
+            for (MultipartFile file : customImages) {
+                if (!file.isEmpty()) {
+                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                    Path filePath = Paths.get(uploadDir + fileName);
+                    Files.createDirectories(filePath.getParent());
+                    Files.write(filePath, file.getBytes());
+                    imageUrls.add(fileName);
+                }
+            }
+        }
+
+        cartItem.setCustomImages(imageUrls);
+
+        // Save updated Cart Item
+        return cartItemRepository.save(cartItem);
+    }
 
     public List<CartItem> getUserCartList(String userId) {
         return cartItemRepository.getAllItemsByUser(userId);
     }
 
-    public List<CartItem> getAllCartItems(){
+    public List<CartItem> getAllCartItems() {
         return cartItemRepository.findAll();
     }
 
@@ -99,7 +142,6 @@ public class CartItemService {
         return userRepo.findAll();
     }
 
-    // Delete a cart item by its ID
     public void deleteCartItem(Long cartItemId) {
         if (!cartItemRepository.existsById(cartItemId)) {
             throw new RuntimeException("Cart Item not found with id: " + cartItemId);
@@ -107,16 +149,11 @@ public class CartItemService {
         cartItemRepository.deleteById(cartItemId);
     }
 
-
-
-    // Delete all cart items
     public void deleteAllCartItems() {
         cartItemRepository.deleteAll();
     }
 
-    public void getCartItemsCount(){
-        cartItemRepository.count();
+    public long getCartItemsCount() {
+        return cartItemRepository.count();
     }
-
-
 }

@@ -120,4 +120,34 @@ public class MailService {
     }
 
 
+    private void sendStatusToAdmin(String orderNumber, String customerName, TrackingStatus status, String adminMail) {
+        SimpleMailMessage adminMessage = new SimpleMailMessage();
+        adminMessage.setFrom(fromEmail);
+        adminMessage.setTo(adminMail);
+
+        adminMessage.setSubject("📢 Order Status Update - Admin Notification");
+
+        String adminBody = "Admin Notification\n\n"
+                + "Customer: " + customerName + "\n"
+                + "Order ID: #" + orderNumber + "\n"
+                + "Current Status: " + status + "\n\n"
+                + "Please take necessary action if required.";
+
+        adminMessage.setText(adminBody);
+        mailSender.send(adminMessage);
+    }
+
+
+    public void sendPasswordChangeEmail(String toEmail, String username) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Password Updated Successfully ");
+        message.setText("Hello " + username + ",\n\nYour password has been changed successfully.\n\nIf you did not request this change, please contact support immediately.\n\nThank you.");
+
+        mailSender.send(message);
+    }
+
+
+
 }
