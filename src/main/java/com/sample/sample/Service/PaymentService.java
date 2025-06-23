@@ -117,17 +117,17 @@ public class PaymentService {
                 com.razorpay.Payment razorpayPayment = razorpayClient.payments.fetch(dto.getPaymentId());
 
                 // Extract payment method (mode) like card, upi, netbanking, etc.
-                String method = razorpayPayment.get("method");
-                String bank = razorpayPayment.has("bank") ? razorpayPayment.get("bank") : null;
-                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
-                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
+//                String method = razorpayPayment.get("method");
+//                String bank = razorpayPayment.has("bank") ? razorpayPayment.get("bank") : null;
+//                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
+//                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
 
                 // Store data
                 payment.setPaymentId(dto.getPaymentId());
                 payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
                 payment.setPaymentPaidDate(new Date());
-                payment.setPaymentMode(method);
+//                payment.setPaymentMode(method);
 
                 paymentRepository.save(payment);
                 createOrderAfterPayment(payment);
