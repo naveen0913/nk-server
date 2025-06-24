@@ -32,6 +32,10 @@ public class OrdersTracking {
     private Boolean delivered;
 
 
+    public Boolean getPacked() {
+        return packed;
+    }
+
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     private Date trackingUpdated;
@@ -46,14 +50,11 @@ public class OrdersTracking {
     private Orders order;
 
 
-    public Date getTrackingUpdated() {
-        return trackingUpdated;
-    }
+    private String trackingRefNo;
+    private String trackingLink;
+    private Date deliveryDate;
 
-    public void setTrackingUpdated(Date trackingUpdated) {
-        this.trackingUpdated = trackingUpdated;
-    }
-
+    // --- Getters and Setters ---
     public Long getId() {
         return id;
     }
@@ -86,21 +87,8 @@ public class OrdersTracking {
         this.trackingStatus = trackingStatus;
     }
 
-    public Date getEstimatedDelivery() {
-        return estimatedDelivery;
-    }
-
-    public void setEstimatedDelivery(Date estimatedDelivery) {
-        this.estimatedDelivery = estimatedDelivery;
-    }
-
     public Boolean getShipped() {
         return shipped;
-    }
-
-
-    public Boolean getPacked() {
-        return packed;
     }
 
     public void setShipped(Boolean shipped) {
@@ -127,11 +115,51 @@ public class OrdersTracking {
         this.delivered = delivered;
     }
 
+    public Date getTrackingUpdated() {
+        return trackingUpdated;
+    }
+
+    public void setTrackingUpdated(Date trackingUpdated) {
+        this.trackingUpdated = trackingUpdated;
+    }
+
+    public Date getEstimatedDelivery() {
+        return estimatedDelivery;
+    }
+
+    public void setEstimatedDelivery(Date estimatedDelivery) {
+        this.estimatedDelivery = estimatedDelivery;
+    }
+
     public Orders getOrder() {
         return order;
     }
 
     public void setOrder(Orders order) {
         this.order = order;
+    }
+
+    public String getTrackingRefNo() {
+        return trackingRefNo;
+    }
+
+    public void setTrackingRefNo(String trackingRefNo) {
+        this.trackingRefNo = trackingRefNo;
+    }
+
+    public String getTrackingLink() {
+        return trackingLink;
+    }
+
+    public void setTrackingLink(String trackingLink) {
+        this.trackingLink = trackingLink;
+    }
+
+    public Date getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
     }
 }
