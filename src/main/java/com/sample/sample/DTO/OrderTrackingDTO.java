@@ -12,9 +12,38 @@ public class OrderTrackingDTO {
     private Boolean packed;
     private Boolean outOfDelivery;
     private Boolean delivered;
+    private String trackingLink;
+    private String trackingRefNo;
+
+    @Temporal(TemporalType.DATE)
+    private Date deliveryDate;
 
     @Temporal(TemporalType.DATE)
     private Date estimatedDelivery;
+
+    public String getTrackingLink() {
+        return trackingLink;
+    }
+
+    public void setTrackingLink(String trackingLink) {
+        this.trackingLink = trackingLink;
+    }
+
+    public String getTrackingRefNo() {
+        return trackingRefNo;
+    }
+
+    public void setTrackingRefNo(String trackingRefNo) {
+        this.trackingRefNo = trackingRefNo;
+    }
+
+    public Date getDeliveryDate() {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
 
     public Date getEstimatedDelivery() {
         return estimatedDelivery;

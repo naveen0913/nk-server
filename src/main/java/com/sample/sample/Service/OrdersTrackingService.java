@@ -82,11 +82,13 @@ public class OrdersTrackingService {
         }
 
         existing.setTrackingUpdated(new Date());
+        existing.setTrackingLink(dto.getTrackingLink());
+        existing.setTrackingRefNo(dto.getTrackingRefNo());
+        existing.setDeliveryDate(dto.getDeliveryDate());
 
         // Send mail only if trackingStatus is provided
         if (dto.getTrackingStatus() != null) {
             try {
-                // Assuming `OrdersTracking` has `Orders` -> `Payment` -> `AccountDetails`
                 Orders order = existing.getOrder();
                 Payment payment = order.getPayment();
                 AccountDetails account = payment.getAccountDetails();
