@@ -47,8 +47,9 @@ public class PaymentController {
     }
 
     @GetMapping("/all")
-    public List<?> getAllPayments(){
-        return paymentService.getAllPayments();
+    public ResponseEntity<List<PaymentResponse>> getAllPayments() {
+        List<PaymentResponse> payments = paymentService.getAllPayments();
+        return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/account/{accountId}")

@@ -3,8 +3,6 @@ package com.sample.sample.Service;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
-import com.sample.sample.DTO.NotificationDTO;
-import com.sample.sample.DTO.OrderDTO;
 import com.sample.sample.DTO.PaymentRequestDTO;
 import com.sample.sample.Model.*;
 import com.sample.sample.Repository.*;
@@ -117,17 +115,17 @@ public class PaymentService {
                 com.razorpay.Payment razorpayPayment = razorpayClient.payments.fetch(dto.getPaymentId());
 
                 // Extract payment method (mode) like card, upi, netbanking, etc.
-                String method = razorpayPayment.get("method");
-                String bank = razorpayPayment.has("bank") ? razorpayPayment.get("bank") : null;
-                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
-                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
+//                String method = razorpayPayment.get("method");
+//                String bank = razorpayPayment.has("bank") ? razorpayPayment.get("bank") : null;
+//                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
+//                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
 
                 // Store data
                 payment.setPaymentId(dto.getPaymentId());
                 payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
                 payment.setPaymentPaidDate(new Date());
-                payment.setPaymentMode(method);
+//                payment.setPaymentMode(method);
 
                 paymentRepository.save(payment);
                 createOrderAfterPayment(payment);
@@ -147,10 +145,6 @@ public class PaymentService {
         sha256_HMAC.init(secretKey);
         byte[] hash = sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
         return Hex.encodeHexString(hash);
-    }
-
-    public List<Payment> getAllPayments(){
-        return paymentRepository.findAll();
     }
 
     public List<PaymentResponse> getPaymentsByAccount(Long accountId) {
@@ -310,5 +304,77 @@ public class PaymentService {
 
 
     }
+
+    public List<PaymentResponse> getAllPayments() {
+        List<Payment> payments = paymentRepository.findAll();
+
+        return payments.stream().map(payment -> {
+            PaymentResponse dto = new PaymentResponse();
+            dto.setId(payment.getId());
+            dto.setRazorpayOrderId(payment.getRazorpayOrderId());
+            dto.setPaymentId(payment.getPaymentId());
+            dto.setSignature(payment.getSignature());
+            dto.setAmount(payment.getAmount());
+            dto.setGstAmount(payment.getGstAmount());
+            dto.setShippingPrice(payment.getShippingPrice());
+            dto.setCurrency(payment.getCurrency());
+            dto.setReceipt(payment.getReceipt());
+            dto.setStatus(payment.getStatus().name());
+            dto.setPaymentMode(payment.getPaymentMode());
+            dto.setPaymentDate(payment.getPaymentPaidDate());
+
+            AccountDetails acc = payment.getAccountDetails();
+            UserAddress usedAddress = payment.getUserAddress();
+
+            AccountDetailsResponse accDto = new AccountDetailsResponse();
+            accDto.setId(acc.getId());
+            accDto.setFirstName(acc.getFirstName());
+            accDto.setLastName(acc.getLastName());
+            accDto.setPhone(acc.getPhone());
+            accDto.setAccountEmail(acc.getAccountEmail());
+            accDto.setAlternatePhone(acc.getAlternatePhone());
+
+            if (usedAddress != null) {
+                UserAddressResponse addressDTO = new UserAddressResponse();
+                addressDTO.setAddressId(usedAddress.getAddressId());
+                addressDTO.setFirstName(usedAddress.getFirstName());
+                addressDTO.setLastName(usedAddress.getLastName());
+                addressDTO.setPhone(usedAddress.getPhone());
+                addressDTO.setAlterPhone(usedAddress.getAlterPhone());
+                addressDTO.setAddressType(usedAddress.getAddressType());
+                addressDTO.setAddressLine1(usedAddress.getAddressLine1());
+                addressDTO.setAddressLine2(usedAddress.getAddressLine2());
+                addressDTO.setCity(usedAddress.getCity());
+                addressDTO.setState(usedAddress.getState());
+                addressDTO.setCountry(usedAddress.getCountry());
+                addressDTO.setPincode(usedAddress.getPincode());
+
+                accDto.setAddresses(Collections.singletonList(addressDTO));
+            } else {
+                accDto.setAddresses(Collections.emptyList());
+            }
+
+            dto.setAccountDetails(accDto);
+
+            Orders order = payment.getOrder();
+            if (order != null) {
+                OrdersResponse orderDto = new OrdersResponse();
+                orderDto.setId(order.getId());
+                orderDto.setOrderId(order.getOrderId());
+                orderDto.setCreatedAt(order.getCreatedAt());
+                orderDto.setOrderStatus(order.getOrderStatus());
+                orderDto.setOrderTotal(order.getOrderTotal());
+                orderDto.setOrderDiscount(order.getOrderDiscount());
+                orderDto.setOrderGstPercent(order.getOrderGstPercent());
+                orderDto.setOrderShippingCharges(order.getOrderShippingCharges());
+                orderDto.setOrderItems(order.getOrderItems());
+                orderDto.setOrderTracking(order.getOrderTracking());
+                dto.setOrdersResponse(orderDto);
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 
 }
