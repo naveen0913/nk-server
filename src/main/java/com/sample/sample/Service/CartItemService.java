@@ -98,9 +98,7 @@ public class CartItemService {
         if (cartDTO.getCustomName() != null) {
             cartItem.setCustomName(cartDTO.getCustomName());
         }
-        if (!cartDTO.isCartGiftWrap()) {
-            cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
-        }
+        cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
         cartItem.setCartQuantity(cartDTO.getCartQuantity());
 
         if (cartDTO.getLabelDesigns() != null) {
