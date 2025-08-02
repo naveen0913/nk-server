@@ -50,7 +50,7 @@ public class ProductCustomizationService {
     }
 
     @Transactional
-    public ProductCustomization saveCustomization( Long productId, String dtoJson,
+    public AuthResponse saveCustomization( Long productId, String dtoJson,
                                                   MultipartFile bannerImage,
                                                   List<MultipartFile> thumbnails) throws Exception {
         ProductCustomizationDTO dto = mapper.readValue(dtoJson, ProductCustomizationDTO.class);
@@ -110,7 +110,8 @@ public class ProductCustomizationService {
 
         entity.setCustomizationOptions(optionEntities);
 
-        return repo.save(entity);
+        repo.save(entity);
+        return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
     }
 
     private String saveFile(MultipartFile file) throws IOException {

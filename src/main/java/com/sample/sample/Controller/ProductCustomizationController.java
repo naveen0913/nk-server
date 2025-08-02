@@ -31,15 +31,15 @@ public class ProductCustomizationController {
             @RequestParam("bannerImage") MultipartFile bannerImage,
             @RequestParam("thumbnails") List<MultipartFile> thumbnails) {
         try {
-            ProductCustomization saved = service.saveCustomization(productId,jsonData, bannerImage, thumbnails);
-            return ResponseEntity.ok(saved);
+            AuthResponse saved = service.saveCustomization(productId,jsonData, bannerImage, thumbnails);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(saved);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to save customization: " + e.getMessage());
         }
     }
 
-    // GET: Return all saved customizations
     @GetMapping
     public ResponseEntity<List<ProductCustomization>> getAllCustomizations() {
         List<ProductCustomization> customizations = service.getAllCustomizations();
