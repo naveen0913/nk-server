@@ -6,6 +6,7 @@ import com.sample.sample.Responses.ImageResponse;
 import com.sample.sample.Service.ProductsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,19 +32,21 @@ public class ProductsController {
     }
 
     @GetMapping
-    public List<ImageResponse> getAllProducts() {
-        List<Products> productsList = productsService.getAllProducts();
+    public ResponseEntity<AuthResponse> getAllProducts() {
+        AuthResponse serviceResponse = productsService.getAllProducts();
+
+        if (serviceResponse.getData() == null) {
+            return ResponseEntity.status(serviceResponse.getCode()).body(serviceResponse);
+        }
+
+        List<Products> productsList = (List<Products>) serviceResponse.getData();
         List<ImageResponse> responseList = new ArrayList<>();
 
         String baseUrl = "http://localhost:8081";
-        String uploadPath = "uploads";
 
         for (Products product : productsList) {
             String imageUrl = product.getProductUrl();
-
-            String finalUrl = imageUrl != null && !imageUrl.isEmpty()
-                    ? baseUrl + imageUrl
-                    : null;
+            String finalUrl = (imageUrl != null && !imageUrl.isEmpty()) ? baseUrl + imageUrl : null;
 
             responseList.add(new ImageResponse(
                     product.getProductId(),
@@ -54,8 +57,15 @@ public class ProductsController {
             ));
         }
 
-        return responseList;
+        AuthResponse finalResponse = new AuthResponse(
+                serviceResponse.getCode(),
+                serviceResponse.getMessage(),
+                responseList
+        );
+
+        return ResponseEntity.status(finalResponse.getCode()).body(finalResponse);
     }
+
 
     @GetMapping("/{productId}")
     public AuthResponse getProductById(@PathVariable Long productId){
