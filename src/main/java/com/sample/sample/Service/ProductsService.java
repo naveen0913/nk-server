@@ -27,25 +27,56 @@ public class ProductsService {
     private String uploadDir;
 
 
-    public Products saveProducts(String name, String description, MultipartFile file) throws IOException {
-        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-        Files.createDirectories(uploadPath);
+    public AuthResponse saveProducts(String name, String description, MultipartFile file) {
+        try {
 
-        Path filePath = uploadPath.resolve(filename);
-        Files.write(filePath, file.getBytes());
+            if (file == null || file.isEmpty()) {
+                return new AuthResponse(400, "Product image file is required", null);
+            }
 
-        Products data = new Products();
-        data.setProductName(name);
-        data.setProductDescription(description);
-        data.setProductUrl("/uploads/" + filename); // Accessible from browser
 
-        return productsRepository.save(data);
+            String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+            Files.createDirectories(uploadPath);
+
+            Path filePath = uploadPath.resolve(filename);
+            Files.write(filePath, file.getBytes());
+
+            // 3. Create and populate product
+            Products data = new Products();
+            data.setProductName(name);
+            data.setProductDescription(description);
+            data.setProductUrl("/uploads/" + filename); // Accessible from browser
+
+            // 4. Save to repository
+            Products savedProduct = productsRepository.save(data);
+
+            // 5. Return success response
+            return new AuthResponse(201, "Product created successfully", savedProduct);
+
+        } catch (IOException e) {
+            return new AuthResponse(500, "Failed to save product image", null);
+        } catch (Exception e) {
+            return new AuthResponse(500, "An unexpected error occurred", null);
+        }
     }
 
-    public List<Products> getAllProducts() {
-        return productsRepository.findAll();
+
+    public AuthResponse getAllProducts() {
+        try {
+            List<Products> productList = productsRepository.findAll();
+
+            if (productList.isEmpty()) {
+                return new AuthResponse(204, "No products found", productList);
+            }
+
+            return new AuthResponse(200, "Products retrieved successfully", productList);
+
+        } catch (Exception e) {
+            return new AuthResponse(500, "An unexpected error occurred", null);
+        }
     }
+
 
     public AuthResponse getProductById(Long id){
         Optional<Products> existedProduct = productsRepository.findById(id);
@@ -67,35 +98,45 @@ public class ProductsService {
     }
 
 
-    public Products updateProductById(Long id, String name, String description, MultipartFile file) throws IOException {
-        // 1. Find existing product
-        Products existingProduct = productsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+    public AuthResponse updateProductById(Long id, String name, String description, MultipartFile file) {
+        try {
 
-        // 2. Update name if provided
-        if (name != null && !name.isBlank()) {
-            existingProduct.setProductName(name);
+            Products existingProduct = productsRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+
+
+            if (name != null && !name.isBlank()) {
+                existingProduct.setProductName(name);
+            }
+            if (description != null && !description.isBlank()) {
+                existingProduct.setProductDescription(description);
+            }
+
+
+            if (file != null && !file.isEmpty()) {
+                String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+                Files.createDirectories(uploadPath);
+
+                Path filePath = uploadPath.resolve(filename);
+                Files.write(filePath, file.getBytes());
+
+                existingProduct.setProductUrl("/uploads/" + filename);
+            }
+
+
+            Products updatedProduct = productsRepository.save(existingProduct);
+
+
+            return new AuthResponse(200, "Product updated successfully", updatedProduct);
+
+        } catch (IOException e) {
+            return new AuthResponse(500, "Failed to update product image", null);
+        } catch (RuntimeException e) {
+            return new AuthResponse(404, e.getMessage(), null);
+        } catch (Exception e) {
+            return new AuthResponse(500, "An unexpected error occurred", null);
         }
-
-        // 3. Update description if provided
-        if (description != null && !description.isBlank()) {
-            existingProduct.setProductDescription(description);
-        }
-
-        // 4. Update image if file is present
-        if (file != null && !file.isEmpty()) {
-            String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-            Files.createDirectories(uploadPath);
-
-            Path filePath = uploadPath.resolve(filename);
-            Files.write(filePath, file.getBytes());
-
-            existingProduct.setProductUrl("/uploads/" + filename);
-        }
-
-        // 5. Save and return updated product
-        return productsRepository.save(existingProduct);
     }
 
 
