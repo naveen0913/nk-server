@@ -1,7 +1,5 @@
 package com.sample.sample.Controller;
 
-import com.sample.sample.Model.CartItem;
-import com.sample.sample.Model.User;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.CartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,28 +46,27 @@ public class CartItemController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CartItem>> getUserCartItems(@PathVariable String userId) {
-        List<CartItem> cartItems = cartItemService.getUserCartList(userId);
-        return ResponseEntity.ok(cartItems);
+    public ResponseEntity<AuthResponse> getUserCartItems(@PathVariable String userId) {
+        AuthResponse response = cartItemService.getUserCartList(userId);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
 
     @GetMapping("/all")
-    public AuthResponse getAllItems() {
-        List<CartItem> cartItems = cartItemService.getAllCartItems();
-        return new AuthResponse(HttpStatus.OK.value(), "success",cartItems);
+    public ResponseEntity<AuthResponse> getAllItems() {
+        AuthResponse response = cartItemService.getAllCartItems();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
-
-
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = cartItemService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<AuthResponse> getAllUsers() {
+        AuthResponse response = cartItemService.getAllUsers();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
 
 
 
-    // Delete one cart item by ID
+
+
     @DeleteMapping("/{id}")
     public AuthResponse deleteCartItem(@PathVariable Long id) {
         cartItemService.deleteCartItem(id);
