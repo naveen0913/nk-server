@@ -89,7 +89,7 @@ public class ProductsController {
     }
 
     public String buildImageUrl(String baseUrl, String uploadPath, String filename) {
-        // Ensure no double slashes in the final URL
+
         if (filename.startsWith("/") || filename.startsWith(uploadPath)) {
             filename = filename.replaceFirst("^/+", "").replaceFirst("^" + uploadPath + "/?", "");
         }

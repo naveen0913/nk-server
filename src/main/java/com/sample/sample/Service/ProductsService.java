@@ -42,16 +42,15 @@ public class ProductsService {
             Path filePath = uploadPath.resolve(filename);
             Files.write(filePath, file.getBytes());
 
-            // 3. Create and populate product
             Products data = new Products();
             data.setProductName(name);
             data.setProductDescription(description);
-            data.setProductUrl("/uploads/" + filename); // Accessible from browser
+            data.setProductUrl("/uploads/" + filename);
 
-            // 4. Save to repository
+
             Products savedProduct = productsRepository.save(data);
 
-            // 5. Return success response
+
             return new AuthResponse(201, "Product created successfully", savedProduct);
 
         } catch (IOException e) {
@@ -67,7 +66,7 @@ public class ProductsService {
             List<Products> productList = productsRepository.findAll();
 
             if (productList.isEmpty()) {
-                return new AuthResponse(204, "No products found", productList);
+                return new AuthResponse(404, "No products found", productList);
             }
 
             return new AuthResponse(200, "Products retrieved successfully", productList);
