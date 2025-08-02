@@ -69,13 +69,13 @@ public class ProductCustomizationService {
         entity.setMultiUpload(dto.isMultiUpload());
         entity.setProduct(product);
 
-        // Save banner image
+
         if (bannerImage != null && !bannerImage.isEmpty()) {
             String bannerUrl = saveFile(bannerImage);
             entity.setBannerImageUrl(bannerUrl);
         }
 
-        // Save thumbnails
+
         List<CustomizationThumbnailUrls> thumbEntities = new ArrayList<>();
         if (thumbnails != null) {
             for (MultipartFile thumb : thumbnails) {
@@ -90,10 +90,9 @@ public class ProductCustomizationService {
                 }
             }
         }
-        entity.setThumbnailImages(thumbEntities); // set list in parent
+        entity.setThumbnailImages(thumbEntities);
 
 
-        // Save customization options
         List<CustomizationOption> optionEntities = new ArrayList<>();
         if (dto.getOptions() != null) {
             optionEntities = dto.getOptions().stream().map(opt -> {
@@ -117,29 +116,32 @@ public class ProductCustomizationService {
     private String saveFile(MultipartFile file) throws IOException {
         String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-        // Resolve path relative to project root
+
         Path directory = Paths.get("").toAbsolutePath().resolve(uploadPath);
-        Files.createDirectories(directory); // ensure it exists
+        Files.createDirectories(directory);
 
         Path filePath = directory.resolve(filename);
         file.transferTo(filePath.toFile());
 
-        // Return URL-like path for storing in DB
+
         return "/uploads/" + filename;
     }
 
-    public List<ProductCustomization> getAllCustomizations() {
-        return repo.findAll();
+    public AuthResponse getAllCustomizations() {
+        repo.findAll();
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
-    public Optional<ProductCustomization> getCustomizationById(Long id) {
-        return repo.findById(id);
+    public AuthResponse getCustomizationById(Long id) {
+        repo.findById(id);
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
+
 
     @Transactional
-    public ProductCustomization updateCustomization(Long customizationId, String dtoJson,
-                                                    MultipartFile bannerImage,
-                                                    List<MultipartFile> thumbnails) throws Exception {
+    public AuthResponse updateCustomization(Long customizationId, String dtoJson,
+                                            MultipartFile bannerImage,
+                                            List<MultipartFile> thumbnails) throws Exception {
 
         if (dtoJson == null || dtoJson.isBlank()) {
             throw new IllegalArgumentException("jsonData is required for update.");
@@ -150,7 +152,7 @@ public class ProductCustomizationService {
         ProductCustomization entity = repo.findById(customizationId)
                 .orElseThrow(() -> new RuntimeException("Customization not found"));
 
-        // Update basic fields
+
         if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
@@ -160,13 +162,13 @@ public class ProductCustomizationService {
         entity.setMultiUpload(dto.isMultiUpload());
         entity.setCart(dto.isCart());
 
-        // Update banner image only if a new file is sent
+
         if (bannerImage != null && !bannerImage.isEmpty()) {
             String bannerUrl = saveFile(bannerImage);
             entity.setBannerImageUrl(bannerUrl);
         }
 
-        // Update thumbnails only if list is present and has at least one valid file
+
         List<CustomizationThumbnailUrls> thumbEntities = new ArrayList<>();
         if (thumbnails != null) {
             for (MultipartFile thumb : thumbnails) {
@@ -183,7 +185,7 @@ public class ProductCustomizationService {
         }
         entity.setThumbnailImages(thumbEntities);
 
-        // Replace customization options if present
+
         List<CustomizationOption> optionEntities = new ArrayList<>();
         if (dto.getOptions() != null) {
             optionEntities = dto.getOptions().stream().map(opt -> {
@@ -200,12 +202,15 @@ public class ProductCustomizationService {
 
         entity.setCustomizationOptions(optionEntities);
 
-        return repo.save(entity);
+        repo.save(entity);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
 
+
     @Transactional
-    public void updateCustomizationOptions(Long id, CustomizationOptionDTO optionDTO) {
+    public AuthResponse updateCustomizationOptions(Long id, CustomizationOptionDTO optionDTO) {
         CustomizationOption customizationOption = customOptionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Customization Option not found with ID: " + id));
 
@@ -225,27 +230,35 @@ public class ProductCustomizationService {
             customizationOption.setDiscount(optionDTO.getDiscount());
         }
 
-        if (!optionDTO.isMostPopular()) {
-            customizationOption.setMostPopular(optionDTO.isMostPopular());
-        }
+
+        customizationOption.setMostPopular(optionDTO.isMostPopular());
+
         customOptionRepository.save(customizationOption);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
 
+
     @Transactional
-    public void deleteCustomizationOptionById(Long customizationOptionId){
+    public AuthResponse deleteCustomizationOptionById(Long customizationOptionId) {
         CustomizationOption customizationOption = customOptionRepository.findById(customizationOptionId)
                 .orElseThrow(() -> new EntityNotFoundException("Customization Option not found"));
 
         customOptionRepository.deleteCustomizationOptionId(customizationOptionId);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
+
     @Transactional
-    public void deleteCustomizationThumbnailUrl(Long customizationThumbnaiId){
+    public AuthResponse deleteCustomizationThumbnailUrl(Long customizationThumbnaiId) {
         CustomizationThumbnailUrls thumbnailUrls = customizationThumbnailsRepo.findById(customizationThumbnaiId)
                 .orElseThrow(() -> new EntityNotFoundException("Customization Thumbnail Url Option not found"));
 
         customizationThumbnailsRepo.deleteCustomizationThumbnailUrl(customizationThumbnaiId);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
     @Transactional
@@ -260,14 +273,15 @@ public class ProductCustomizationService {
 
 
     @Transactional
-    public void deleteCustomization(Long customizationId) {
+    public AuthResponse deleteCustomization(Long customizationId) {
         ProductCustomization customization = repo.findById(customizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Customization not found"));
 
-        // Delete child tables first
         repo.deleteOptionsByCustomizationId(customizationId);
         repo.deleteCustomizationThumbnailsById(customizationId);
         repo.deleteCustomizationById(customizationId);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
 
