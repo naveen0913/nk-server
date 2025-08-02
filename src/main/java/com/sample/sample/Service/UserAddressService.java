@@ -5,6 +5,7 @@ import com.sample.sample.Model.AccountDetails;
 import com.sample.sample.Model.UserAddress;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.UserAddressRepository;
+import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,32 +23,55 @@ public class UserAddressService {
     @Autowired
     private AccountDetailsRepository accountDetailsRepository;
 
-    public UserAddress saveAddress(Long accountId,UserAddress userAddress) {
-        AccountDetails accountDetails = accountDetailsRepository.findById(accountId).orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Account not found with ID: " + accountId));
+    public AuthResponse saveAddress(Long accountId, UserAddress userAddress) {
+        AccountDetails accountDetails = accountDetailsRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Account not found with ID: " + accountId));
 
         userAddress.setAccountDetails(accountDetails);
-        return userAddressRepository.save(userAddress);
+        UserAddress savedAddress = userAddressRepository.save(userAddress);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "Address saved successfully", null);
     }
 
-    public List<UserAddress> getAllUserAddress(Long accountId){
-        return userAddressRepository.getAllUserAddress(accountId);
+
+    public AuthResponse getAllUserAddress(Long accountId) {
+        List<UserAddress> addresses = userAddressRepository.getAllUserAddress(accountId);
+        return new AuthResponse(HttpStatus.OK.value(), "User addresses fetched successfully", addresses);
     }
 
-    public List<UserAddress> getAllAddresses() {
-        return userAddressRepository.findAll();
+    public AuthResponse getAllAddresses() {
+        List<UserAddress> allAddresses = userAddressRepository.findAll();
+        return new AuthResponse(HttpStatus.OK.value(), "All addresses fetched successfully", allAddresses);
     }
 
-    public Optional<UserAddress> getAddressById(Long id) {
-        return userAddressRepository.findById(id);
+    public AuthResponse getAddressById(Long id) {
+        Optional<UserAddress> optionalAddress = userAddressRepository.findById(id);
+
+        if (optionalAddress.isPresent()) {
+            return new AuthResponse(HttpStatus.OK.value(), "Address found", optionalAddress.get());
+        } else {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Address not found with ID: " + id, null);
+        }
     }
 
-    public void deleteAddress(Long id) {
+    public AuthResponse deleteAddress(Long id) {
+        boolean exists = userAddressRepository.existsById(id);
+        if (!exists) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Address not found with ID: " + id, null);
+        }
+
         userAddressRepository.deleteById(id);
+        return new AuthResponse(HttpStatus.OK.value(), "Address deleted successfully", null);
     }
 
-    public UserAddress updateAddress(Long id, UserAddress updatedAddress) {
-        return userAddressRepository.findById(id).map(existingAddress -> {
+
+    public AuthResponse updateAddress(Long id, UserAddress updatedAddress) {
+        Optional<UserAddress> optionalAddress = userAddressRepository.findById(id);
+
+        if (optionalAddress.isPresent()) {
+            UserAddress existingAddress = optionalAddress.get();
+
             existingAddress.setFirstName(updatedAddress.getFirstName());
             existingAddress.setLastName(updatedAddress.getLastName());
             existingAddress.setPhone(updatedAddress.getPhone());
@@ -59,8 +83,13 @@ public class UserAddressService {
             existingAddress.setState(updatedAddress.getState());
             existingAddress.setCountry(updatedAddress.getCountry());
             existingAddress.setPincode(updatedAddress.getPincode());
-            return userAddressRepository.save(existingAddress);
-        }).orElse(null);
+
+            UserAddress savedAddress = userAddressRepository.save(existingAddress);
+            return new AuthResponse(HttpStatus.OK.value(), "Address updated successfully", savedAddress);
+        } else {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Address not found with ID: " + id, null);
+        }
     }
+
 }
 
