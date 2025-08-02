@@ -12,8 +12,10 @@ import com.sample.sample.Repository.CustomOptionRepository;
 import com.sample.sample.Repository.CustomizationThumbnailsRepo;
 import com.sample.sample.Repository.ProductCustomizationRepo;
 import com.sample.sample.Repository.ProductsRepository;
+import com.sample.sample.Responses.AuthResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,6 +157,7 @@ public class ProductCustomizationService {
         entity.setDesign(dto.isDesign());
         entity.setGiftWrap(dto.isGiftWrap());
         entity.setMultiUpload(dto.isMultiUpload());
+        entity.setCart(dto.isCart());
 
         // Update banner image only if a new file is sent
         if (bannerImage != null && !bannerImage.isEmpty()) {
@@ -242,6 +245,16 @@ public class ProductCustomizationService {
                 .orElseThrow(() -> new EntityNotFoundException("Customization Thumbnail Url Option not found"));
 
         customizationThumbnailsRepo.deleteCustomizationThumbnailUrl(customizationThumbnaiId);
+    }
+
+    @Transactional
+    public AuthResponse deleteAllCustomizationOptions(Long customizationId){
+        List<CustomizationOption> customizationOption = customOptionRepository.findAllByProductCustomizationId(customizationId);
+        if (customizationOption.isEmpty()){
+          return  new AuthResponse(HttpStatus.NOT_FOUND.value(), "Option not found",null);
+        }
+        customOptionRepository.deleteAllOptionsByProductCustomizationId(customizationId);
+        return  new AuthResponse(HttpStatus.OK.value(), "ok",null);
     }
 
 

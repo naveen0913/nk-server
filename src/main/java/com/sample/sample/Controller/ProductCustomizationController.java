@@ -108,5 +108,11 @@ public class ProductCustomizationController {
         return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 
+    @DeleteMapping("/delete/all-options/{customization}")
+    public ResponseEntity<?> deleteAllOptions(@PathVariable long customization){
+        AuthResponse authResponse = service.deleteAllCustomizationOptions(customization);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
+    }
+
 
 }
