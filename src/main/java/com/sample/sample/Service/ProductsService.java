@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,10 +53,25 @@ public class ProductsService {
 
     public AuthResponse getAllProducts() {
         List<Products> productList = productsRepository.findAll();
+        if (productList.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "products not found", null);
+        }
+        List<ImageResponse> responseList = new ArrayList<>();
+        String baseUrl = "http://localhost:8081";
+        for (Products product : productList) {
+            String imageUrl = product.getProductUrl();
+            String finalUrl = (imageUrl != null && !imageUrl.isEmpty()) ? baseUrl + imageUrl : null;
 
+            responseList.add(new ImageResponse(
+                    product.getProductId(),
+                    product.getProductName(),
+                    product.getProductDescription(),
+                    finalUrl,
+                    product.getProductCustomization()
+            ));
+        }
 
-
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "created", responseList);
     }
 
 
@@ -105,7 +121,7 @@ public class ProductsService {
 
         productsRepository.save(existingProduct);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "created", null);
     }
 
 
