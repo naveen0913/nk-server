@@ -11,6 +11,7 @@ import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -127,7 +128,8 @@ public class UserService {
 
     public void sendOtp(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found with email: " + email));
 
         String otp = String.valueOf(new Random().nextInt(900000) + 100000);
         user.setResetOtp(otp);
