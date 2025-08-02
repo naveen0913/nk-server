@@ -31,6 +31,8 @@ public class ProductsController {
 
     }
 
+
+
     @GetMapping
     public ResponseEntity<AuthResponse> getAllProducts() {
         AuthResponse serviceResponse = productsService.getAllProducts();
