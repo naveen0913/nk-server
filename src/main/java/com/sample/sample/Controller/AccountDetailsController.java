@@ -21,11 +21,11 @@ public class AccountDetailsController {
     @Autowired
     private AccountDetailsService accountDetailsService;
 
-    @PostMapping("/{userId}")
-    public AuthResponse createAccount(@PathVariable String userId, @RequestBody AccountDetails accountDetails) {
-        accountDetailsService.saveAccountDetails(userId,accountDetails);
-        return new AuthResponse(HttpStatus.CREATED.value(), "ok",null);
-    }
+//    @PostMapping("/{userId}")
+//    public AuthResponse createAccount(@PathVariable String userId, @RequestBody AccountDetails accountDetails) {
+//        accountDetailsService.saveAccountDetails(userId,accountDetails);
+//        return new AuthResponse(HttpStatus.CREATED.value(), "ok",null);
+//    }
 
     @GetMapping("/user/{userId}")
     public AuthResponse getAccountDetailsByUserId(@PathVariable String userId){

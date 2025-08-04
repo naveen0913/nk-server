@@ -6,6 +6,7 @@ import com.sample.sample.Model.AccountDetails;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.UserRepo;
+import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,16 +24,17 @@ public class AccountDetailsService {
     @Autowired
     private UserRepo userRepo;
 
-    public AccountDetails saveAccountDetails(String userId, AccountDetails accountDetails) {
-
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
-        accountDetails.setUser(user);
-        accountDetails.setAccountEmail(user.getEmail());
-        user.setAccountDetails(accountDetails);
-        return accountDetailsRepository.save(accountDetails);
-    }
+//    public AuthResponse saveAccountDetails(String userId, AccountDetails accountDetails) {
+//
+//        User user = userRepo.findById(userId)
+//                .orElseThrow(() -> new ResponseStatusException(
+//                        HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+//        accountDetails.setUser(user);
+//        accountDetails.setAccountEmail(user.getEmail());
+//        user.setAccountDetails(accountDetails);
+//        accountDetailsRepository.save(accountDetails);
+//        return new AuthResponse(HttpStatus.CREATED.value(), "ok",null);
+//    }
 
     public List<AccountDetails> getAllAccountDetails() {
         List<AccountDetails> accounts = accountDetailsRepository.findAll();
