@@ -4,6 +4,7 @@ import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Responses.ImageResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,11 +87,11 @@ public class ProductsService {
     }
 
     public AuthResponse deleteProduct(Long id){
-        Optional<Products> existedProduct = productsRepository.findById(id);
-        if (!existedProduct.isPresent()){
+        Products existedProduct = productsRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Product not Found"));
+        if (existedProduct==null){
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found",null);
         }
-        productsRepository.deleteById(id);
+        productsRepository.delete(existedProduct);
         return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
 

@@ -37,6 +37,9 @@ public class UserAddressService {
 
     public AuthResponse getAllUserAddress(Long accountId) {
         List<UserAddress> addresses = userAddressRepository.getAllUserAddress(accountId);
+        if (addresses.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User addresses not found ", null);
+        }
         return new AuthResponse(HttpStatus.OK.value(), "User addresses fetched successfully", addresses);
     }
 
@@ -56,12 +59,10 @@ public class UserAddressService {
     }
 
     public AuthResponse deleteAddress(Long id) {
-        boolean exists = userAddressRepository.existsById(id);
-        if (!exists) {
-            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Address not found with ID: " + id, null);
-        }
+        UserAddress exists = userAddressRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Address not found with ID: " + id));
 
-        userAddressRepository.deleteById(id);
+        userAddressRepository.delete(exists);
         return new AuthResponse(HttpStatus.OK.value(), "Address deleted successfully", null);
     }
 
@@ -71,7 +72,6 @@ public class UserAddressService {
 
         if (optionalAddress.isPresent()) {
             UserAddress existingAddress = optionalAddress.get();
-
             existingAddress.setFirstName(updatedAddress.getFirstName());
             existingAddress.setLastName(updatedAddress.getLastName());
             existingAddress.setPhone(updatedAddress.getPhone());
@@ -85,7 +85,7 @@ public class UserAddressService {
             existingAddress.setPincode(updatedAddress.getPincode());
 
             UserAddress savedAddress = userAddressRepository.save(existingAddress);
-            return new AuthResponse(HttpStatus.OK.value(), "Address updated successfully", savedAddress);
+            return new AuthResponse(HttpStatus.OK.value(), "Address updated successfully", null);
         } else {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Address not found with ID: " + id, null);
         }

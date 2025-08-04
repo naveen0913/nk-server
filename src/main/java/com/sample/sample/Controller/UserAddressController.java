@@ -18,20 +18,16 @@ public class UserAddressController {
     private UserAddressService userAddressService;
 
     @PostMapping("/{accountId}")
-    public AuthResponse createAddress(@PathVariable Long accountId, @RequestBody UserAddress userAddress) {
-        userAddressService.saveAddress(accountId,userAddress);
-        return new AuthResponse(HttpStatus.CREATED.value(), "success",null);
+    public ResponseEntity<?> createAddress(@PathVariable Long accountId, @RequestBody UserAddress userAddress) {
+        AuthResponse authResponse = userAddressService.saveAddress(accountId,userAddress);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
-
-
 
     @DeleteMapping("/{id}")
     public AuthResponse deleteAddress(@PathVariable Long id) {
         userAddressService.deleteAddress(id);
         return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
     }
-
-
 
 
     @GetMapping("/{accountId}/all")
@@ -47,8 +43,9 @@ public class UserAddressController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthResponse> getAddressById(@PathVariable Long id) {
-        return ResponseEntity.ok(userAddressService.getAddressById(id));
+    public ResponseEntity<?> getAddressById(@PathVariable Long id) {
+        AuthResponse authResponse = userAddressService.getAddressById(id);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
 
