@@ -41,7 +41,7 @@ public class ProductCustomizationController {
     @GetMapping
     public ResponseEntity<AuthResponse> getAllCustomizations() {
         AuthResponse response = service.getAllCustomizations();
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
@@ -49,7 +49,7 @@ public class ProductCustomizationController {
     @GetMapping("/{id}")
     public ResponseEntity<AuthResponse> getCustomizationById(@PathVariable Long id) {
         AuthResponse response = service.getCustomizationById(id);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 
@@ -61,7 +61,7 @@ public class ProductCustomizationController {
             @RequestParam(value = "thumbnails", required = false) List<MultipartFile> thumbnails) throws Exception {
 
         AuthResponse response = service.updateCustomization(customizationId, dtoJson, bannerImage, thumbnails);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 

@@ -6,10 +6,7 @@ import com.razorpay.RazorpayException;
 import com.sample.sample.DTO.PaymentRequestDTO;
 import com.sample.sample.Model.*;
 import com.sample.sample.Repository.*;
-import com.sample.sample.Responses.AccountDetailsResponse;
-import com.sample.sample.Responses.OrdersResponse;
-import com.sample.sample.Responses.PaymentResponse;
-import com.sample.sample.Responses.UserAddressResponse;
+import com.sample.sample.Responses.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.apache.commons.codec.binary.Hex;
@@ -68,8 +65,7 @@ public class PaymentService {
     @Autowired
     private ProductsRepository productsRepository;
 
-    public Payment createOrderPayment(Long accountId, Long addressId, PaymentRequestDTO request)throws RazorpayException{
-
+    public AuthResponse createOrderPayment(Long accountId, Long addressId, PaymentRequestDTO request) throws RazorpayException {
         AccountDetails account = accountDetailsRepository.findById(accountId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Account not found with ID: " + accountId));
@@ -79,17 +75,18 @@ public class PaymentService {
                         HttpStatus.NOT_FOUND, "User not found with ID: " + addressId));
 
         List<CartItem> cartItems = cartItemRepository.findAllById(request.getCartItemIds());
+
         String generatedPaymentId = "pay_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
         RazorpayClient razorpay = new RazorpayClient(key, secret);
-        Payment payment = new Payment();
         JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", request.getAmount()*100);
+        orderRequest.put("amount", request.getAmount() * 100);
         orderRequest.put("currency", request.getCurrency());
         orderRequest.put("receipt", request.getReceipt());
 
         Order razorpayOrder = razorpay.orders.create(orderRequest);
 
+        Payment payment = new Payment();
         payment.setRazorpayOrderId(razorpayOrder.get("id"));
         payment.setAmount(request.getAmount());
         payment.setCurrency(request.getCurrency());
@@ -103,8 +100,11 @@ public class PaymentService {
         payment.setAccountDetails(account);
         payment.setUserAddress(address);
 
-        return paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "Payment order created successfully", savedPayment);
     }
+
 
     public boolean verifyPayment(PaymentRequestDTO dto) {
         try {
@@ -124,7 +124,7 @@ public class PaymentService {
 //                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
 //                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
 
-                // Store data
+
                 payment.setPaymentId(dto.getPaymentId());
                 payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
@@ -151,171 +151,10 @@ public class PaymentService {
         return Hex.encodeHexString(hash);
     }
 
-    public List<PaymentResponse> getPaymentsByAccount(Long accountId) {
+    public AuthResponse getPaymentsByAccount(Long accountId) {
         List<Payment> payments = paymentRepository.findByAccountDetails_Id(accountId);
 
-        return payments.stream().map(payment -> {
-            PaymentResponse dto = new PaymentResponse();
-            dto.setId(payment.getId());
-            dto.setRazorpayOrderId(payment.getRazorpayOrderId());
-            dto.setPaymentId(payment.getPaymentId());
-            dto.setSignature(payment.getSignature());
-            dto.setAmount(payment.getAmount());
-            dto.setGstAmount(payment.getGstAmount());
-            dto.setShippingPrice(payment.getShippingPrice());
-            dto.setCurrency(payment.getCurrency());
-            dto.setReceipt(payment.getReceipt());
-            dto.setStatus(payment.getStatus().name());
-            dto.setPaymentMode(payment.getPaymentMode());
-            dto.setPaymentDate(payment.getPaymentPaidDate());
-            AccountDetails acc = payment.getAccountDetails();
-            UserAddress usedAddress = payment.getUserAddress();
-
-            AccountDetailsResponse accDto = new AccountDetailsResponse();
-            accDto.setId(acc.getId());
-            accDto.setFirstName(acc.getFirstName());
-            accDto.setLastName(acc.getLastName());
-            accDto.setPhone(acc.getPhone());
-            accDto.setAccountEmail(acc.getAccountEmail());
-            accDto.setAlternatePhone(acc.getAlternatePhone());
-
-            if (usedAddress != null) {
-                UserAddressResponse addressDTO = new UserAddressResponse();
-                addressDTO.setAddressId(usedAddress.getAddressId());
-                addressDTO.setFirstName(usedAddress.getFirstName());
-                addressDTO.setLastName(usedAddress.getLastName());
-                addressDTO.setPhone(usedAddress.getPhone());
-                addressDTO.setAlterPhone(usedAddress.getAlterPhone());
-                addressDTO.setAddressType(usedAddress.getAddressType());
-                addressDTO.setAddressLine1(usedAddress.getAddressLine1());
-                addressDTO.setAddressLine2(usedAddress.getAddressLine2());
-                addressDTO.setCity(usedAddress.getCity());
-                addressDTO.setState(usedAddress.getState());
-                addressDTO.setCountry(usedAddress.getCountry());
-                addressDTO.setPincode(usedAddress.getPincode());
-
-                accDto.setAddresses(Collections.singletonList(addressDTO));
-            } else {
-                accDto.setAddresses(Collections.emptyList());
-            }
-
-            dto.setAccountDetails(accDto);
-
-            // Map associated order
-            Orders order = payment.getOrder();
-            if (order != null) {
-                OrdersResponse orderDto = new OrdersResponse();
-                orderDto.setId(order.getId());
-                orderDto.setOrderId(order.getOrderId());
-                orderDto.setCreatedAt(order.getCreatedAt());
-                orderDto.setOrderStatus(order.getOrderStatus());
-                orderDto.setOrderTotal(order.getOrderTotal());
-                orderDto.setOrderDiscount(order.getOrderDiscount());
-                orderDto.setOrderGstPercent(orderDto.getOrderGstPercent());
-                orderDto.setOrderShippingCharges(orderDto.getOrderShippingCharges());
-                orderDto.setOrderItems(order.getOrderItems());
-                orderDto.setOrderTracking(order.getOrderTracking());
-                dto.setOrdersResponse(orderDto);
-            }
-
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-
-    @Transactional
-    private void createOrderAfterPayment(Payment payment) {
-        String generateOrderId = "ORDER" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 13).toUpperCase();
-        Orders order = new Orders();
-        order.setOrderId(generateOrderId);
-        order.setCreatedAt(new Date());
-        order.setOrderStatus("PLACED");
-        order.setOrderTotal(payment.getAmount());
-        order.setOrderDiscount("0");
-        order.setOrderGstPercent(String.valueOf(payment.getGstAmount()));
-        order.setOrderShippingCharges(String.valueOf(payment.getShippingPrice()));
-        order.setUserAddress(payment.getUserAddress());
-//        order.setOrderTracking(payment.getOrder().getOrderTracking());
-
-        Orders savedOrder = orderRepository.save(order);
-//        payment.setOrder(savedOrder);
-//        paymentRepository.save(payment);
-
-        List<CartItem> cartItems = cartItemRepository.getAllItemsByUser(payment.getAccountDetails().getUser().getId());
-
-        List<UserOrderedItems> orderItems = new ArrayList<>();
-        for (CartItem cartItem : cartItems) {
-            UserOrderedItems orderItem = new UserOrderedItems();
-            orderItem.setItemName(cartItem.getCartItemName());
-            orderItem.setQuantity(cartItem.getCartQuantity());
-            orderItem.setGiftWrap(cartItem.isCartGiftWrap());
-            orderItem.setTotalPrice(cartItem.getTotalPrice());
-            orderItem.setCustomName(cartItem.getCustomName());
-            orderItem.setOptionCount(cartItem.getOptionCount());
-            orderItem.setOptionPrice(cartItem.getOptionPrice());
-            orderItem.setOptionDiscount(cartItem.getOptiondiscount());
-            orderItem.setOptionDiscountPrice(cartItem.getOptiondiscountPrice());
-            orderItem.setCustomImages(new ArrayList<>(cartItem.getCustomImages()));
-            orderItem.setLabelDesigns(new HashMap<>(cartItem.getLabelDesigns()));
-            orderItem.setProduct(cartItem.getProduct());
-            orderItem.setPayment(payment);
-            orderItem.setOrder(savedOrder);
-
-            Products products = productsRepository.findById(cartItem.getProduct().getProductId()).orElseThrow(()-> new EntityNotFoundException("Product not found"));
-            products.setProductOrdered(true);
-            productsRepository.save(products);
-            orderItems.add(orderItem);
-        }
-        order.setOrderItems(orderItems);
-
-        payment.setOrder(savedOrder);
-        paymentRepository.save(payment);
-
-        userOrderedItemRepository.saveAll(orderItems);
-
-        // Send order email
-        String email = payment.getAccountDetails().getAccountEmail();
-        String orderNumber = order.getOrderId();
-        mailService.sendOrderStatusMail(email, orderNumber,payment.getAccountDetails().getFirstName(), payment.getAccountDetails().getLastName(), TrackingStatus.ORDER_PLACED);
-
-//       creating tracking after order placement
-
-        OrdersTracking tracking = new OrdersTracking();
-        tracking.setTrackingId("track_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12));
-        tracking.setTrackingStatus(TrackingStatus.ORDER_PLACED);
-        tracking.setShipped(false);
-        tracking.setPacked(false);
-        tracking.setOutOfDelivery(false);
-        tracking.setDelivered(false);
-        tracking.setTrackingCreated(new Date());
-
-        // Estimated delivery = today + 10 days
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 10);
-        tracking.setEstimatedDelivery(calendar.getTime());
-
-        tracking.setOrder(savedOrder);
-        savedOrder.setOrderTracking(tracking); // Bidirectional mapping
-
-        ordersTrackingRepository.save(tracking);
-        savedOrder.setOrderTracking(tracking);
-        orderRepository.save(savedOrder);
-
-        // Notify admin
-//        NotificationDTO dto = new NotificationDTO();
-//        dto.setTitle("New Order");
-//        dto.setMessage("Order " + order.getOrderId() + " has been placed.");
-//        dto.setRecipientType("ADMIN");
-//        dto.setOrderId(order.getOrderId());
-//        notificationService.notifyAdmin(dto);
-
-
-    }
-
-    public List<PaymentResponse> getAllPayments() {
-        List<Payment> payments = paymentRepository.findAll();
-
-        return payments.stream().map(payment -> {
+        List<PaymentResponse> responseList = payments.stream().map(payment -> {
             PaymentResponse dto = new PaymentResponse();
             dto.setId(payment.getId());
             dto.setRazorpayOrderId(payment.getRazorpayOrderId());
@@ -381,7 +220,173 @@ public class PaymentService {
 
             return dto;
         }).collect(Collectors.toList());
+
+        return new AuthResponse(HttpStatus.OK.value(), "Payments fetched successfully for accountId: " + accountId, responseList);
     }
+
+
+    @Transactional
+    private void createOrderAfterPayment(Payment payment) {
+        String generateOrderId = "ORDER" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 13).toUpperCase();
+        Orders order = new Orders();
+        order.setOrderId(generateOrderId);
+        order.setCreatedAt(new Date());
+        order.setOrderStatus("PLACED");
+        order.setOrderTotal(payment.getAmount());
+        order.setOrderDiscount("0");
+        order.setOrderGstPercent(String.valueOf(payment.getGstAmount()));
+        order.setOrderShippingCharges(String.valueOf(payment.getShippingPrice()));
+        order.setUserAddress(payment.getUserAddress());
+//        order.setOrderTracking(payment.getOrder().getOrderTracking());
+
+        Orders savedOrder = orderRepository.save(order);
+//        payment.setOrder(savedOrder);
+//        paymentRepository.save(payment);
+
+        List<CartItem> cartItems = cartItemRepository.getAllItemsByUser(payment.getAccountDetails().getUser().getId());
+
+        List<UserOrderedItems> orderItems = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            UserOrderedItems orderItem = new UserOrderedItems();
+            orderItem.setItemName(cartItem.getCartItemName());
+            orderItem.setQuantity(cartItem.getCartQuantity());
+            orderItem.setGiftWrap(cartItem.isCartGiftWrap());
+            orderItem.setTotalPrice(cartItem.getTotalPrice());
+            orderItem.setCustomName(cartItem.getCustomName());
+            orderItem.setOptionCount(cartItem.getOptionCount());
+            orderItem.setOptionPrice(cartItem.getOptionPrice());
+            orderItem.setOptionDiscount(cartItem.getOptiondiscount());
+            orderItem.setOptionDiscountPrice(cartItem.getOptiondiscountPrice());
+            orderItem.setCustomImages(new ArrayList<>(cartItem.getCustomImages()));
+            orderItem.setLabelDesigns(new HashMap<>(cartItem.getLabelDesigns()));
+            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setPayment(payment);
+            orderItem.setOrder(savedOrder);
+
+            Products products = productsRepository.findById(cartItem.getProduct().getProductId()).orElseThrow(()-> new EntityNotFoundException("Product not found"));
+            products.setProductOrdered(true);
+            productsRepository.save(products);
+            orderItems.add(orderItem);
+        }
+        order.setOrderItems(orderItems);
+
+        payment.setOrder(savedOrder);
+        paymentRepository.save(payment);
+
+        userOrderedItemRepository.saveAll(orderItems);
+
+
+        String email = payment.getAccountDetails().getAccountEmail();
+        String orderNumber = order.getOrderId();
+        mailService.sendOrderStatusMail(email, orderNumber,payment.getAccountDetails().getFirstName(), payment.getAccountDetails().getLastName(), TrackingStatus.ORDER_PLACED);
+
+
+
+        OrdersTracking tracking = new OrdersTracking();
+        tracking.setTrackingId("track_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12));
+        tracking.setTrackingStatus(TrackingStatus.ORDER_PLACED);
+        tracking.setShipped(false);
+        tracking.setPacked(false);
+        tracking.setOutOfDelivery(false);
+        tracking.setDelivered(false);
+        tracking.setTrackingCreated(new Date());
+
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 10);
+        tracking.setEstimatedDelivery(calendar.getTime());
+
+        tracking.setOrder(savedOrder);
+        savedOrder.setOrderTracking(tracking);
+
+        ordersTrackingRepository.save(tracking);
+        savedOrder.setOrderTracking(tracking);
+        orderRepository.save(savedOrder);
+
+        // Notify admin
+//        NotificationDTO dto = new NotificationDTO();
+//        dto.setTitle("New Order");
+//        dto.setMessage("Order " + order.getOrderId() + " has been placed.");
+//        dto.setRecipientType("ADMIN");
+//        dto.setOrderId(order.getOrderId());
+//        notificationService.notifyAdmin(dto);
+
+
+    }
+
+    public AuthResponse getAllPayments() {
+        List<Payment> payments = paymentRepository.findAll();
+
+        List<PaymentResponse> responseList = payments.stream().map(payment -> {
+            PaymentResponse dto = new PaymentResponse();
+            dto.setId(payment.getId());
+            dto.setRazorpayOrderId(payment.getRazorpayOrderId());
+            dto.setPaymentId(payment.getPaymentId());
+            dto.setSignature(payment.getSignature());
+            dto.setAmount(payment.getAmount());
+            dto.setGstAmount(payment.getGstAmount());
+            dto.setShippingPrice(payment.getShippingPrice());
+            dto.setCurrency(payment.getCurrency());
+            dto.setReceipt(payment.getReceipt());
+            dto.setStatus(payment.getStatus().name());
+            dto.setPaymentMode(payment.getPaymentMode());
+            dto.setPaymentDate(payment.getPaymentPaidDate());
+
+            AccountDetails acc = payment.getAccountDetails();
+            UserAddress usedAddress = payment.getUserAddress();
+
+            AccountDetailsResponse accDto = new AccountDetailsResponse();
+            accDto.setId(acc.getId());
+            accDto.setFirstName(acc.getFirstName());
+            accDto.setLastName(acc.getLastName());
+            accDto.setPhone(acc.getPhone());
+            accDto.setAccountEmail(acc.getAccountEmail());
+            accDto.setAlternatePhone(acc.getAlternatePhone());
+
+            if (usedAddress != null) {
+                UserAddressResponse addressDTO = new UserAddressResponse();
+                addressDTO.setAddressId(usedAddress.getAddressId());
+                addressDTO.setFirstName(usedAddress.getFirstName());
+                addressDTO.setLastName(usedAddress.getLastName());
+                addressDTO.setPhone(usedAddress.getPhone());
+                addressDTO.setAlterPhone(usedAddress.getAlterPhone());
+                addressDTO.setAddressType(usedAddress.getAddressType());
+                addressDTO.setAddressLine1(usedAddress.getAddressLine1());
+                addressDTO.setAddressLine2(usedAddress.getAddressLine2());
+                addressDTO.setCity(usedAddress.getCity());
+                addressDTO.setState(usedAddress.getState());
+                addressDTO.setCountry(usedAddress.getCountry());
+                addressDTO.setPincode(usedAddress.getPincode());
+
+                accDto.setAddresses(Collections.singletonList(addressDTO));
+            } else {
+                accDto.setAddresses(Collections.emptyList());
+            }
+
+            dto.setAccountDetails(accDto);
+
+            Orders order = payment.getOrder();
+            if (order != null) {
+                OrdersResponse orderDto = new OrdersResponse();
+                orderDto.setId(order.getId());
+                orderDto.setOrderId(order.getOrderId());
+                orderDto.setCreatedAt(order.getCreatedAt());
+                orderDto.setOrderStatus(order.getOrderStatus());
+                orderDto.setOrderTotal(order.getOrderTotal());
+                orderDto.setOrderDiscount(order.getOrderDiscount());
+                orderDto.setOrderGstPercent(order.getOrderGstPercent());
+                orderDto.setOrderShippingCharges(order.getOrderShippingCharges());
+                orderDto.setOrderItems(order.getOrderItems());
+                orderDto.setOrderTracking(order.getOrderTracking());
+                dto.setOrdersResponse(orderDto);
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new AuthResponse(HttpStatus.OK.value(), "All payments fetched successfully", responseList);
+    }
+
 
 
 }

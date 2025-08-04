@@ -128,14 +128,24 @@ public class ProductCustomizationService {
     }
 
     public AuthResponse getAllCustomizations() {
-        repo.findAll();
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+
+        List<Products> productList = productsRepository.findAll();
+        if (productList.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "products not found", null);
+        }
+        return new AuthResponse(HttpStatus.OK.value(), "ok",productList );
     }
 
     public AuthResponse getCustomizationById(Long id) {
-        repo.findById(id);
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        Optional<Products> product = productsRepository.findById(id);
+
+        if (product.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found", null);
+        }
+
+        return new AuthResponse(HttpStatus.OK.value(), "ok", product.get());
     }
+
 
 
     @Transactional
@@ -204,7 +214,7 @@ public class ProductCustomizationService {
 
         repo.save(entity);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
 
@@ -235,7 +245,7 @@ public class ProductCustomizationService {
 
         customOptionRepository.save(customizationOption);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
 
@@ -247,7 +257,7 @@ public class ProductCustomizationService {
 
         customOptionRepository.deleteCustomizationOptionId(customizationOptionId);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
 
@@ -258,7 +268,7 @@ public class ProductCustomizationService {
 
         customizationThumbnailsRepo.deleteCustomizationThumbnailUrl(customizationThumbnaiId);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
     @Transactional
@@ -281,7 +291,7 @@ public class ProductCustomizationService {
         repo.deleteCustomizationThumbnailsById(customizationId);
         repo.deleteCustomizationById(customizationId);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
 

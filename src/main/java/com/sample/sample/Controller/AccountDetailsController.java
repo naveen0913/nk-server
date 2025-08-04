@@ -28,34 +28,42 @@ public class AccountDetailsController {
     }
 
     @GetMapping("/user/{userId}")
-    public AuthResponse getAccountDetailsByUserId(@PathVariable String userId){
-        Optional<AccountDetails> accountDetailsList = accountDetailsService.getUserAccountDetails(userId);
-        return new AuthResponse(HttpStatus.OK.value(), "success", accountDetailsList);
+    public ResponseEntity<AuthResponse> getAccountDetailsByUserId(@PathVariable String userId) {
+        AuthResponse response = accountDetailsService.getUserAccountDetails(userId);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<AuthResponse> getAllAccountDetails() {
+        AuthResponse response = accountDetailsService.getAllAccountDetails();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
+    }
+
+
     @GetMapping
-    public ResponseEntity<List<AccountDetails>> getAllAccounts() {
-        return ResponseEntity.ok(accountDetailsService.getAllAccountDetails());
+    public ResponseEntity<AuthResponse> getAllAccounts() {
+        AuthResponse response = accountDetailsService.getAllAccountDetails();
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDetails> getAccountById(@PathVariable Long id) {
-        return accountDetailsService.getAccountDetailsById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AuthResponse> getAccountById(@PathVariable Long id) {
+        AuthResponse response = accountDetailsService.getAccountDetailsById(id);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
 
     @PutMapping("/account/{id}")
-    public AuthResponse updateAccountDetails(
+    public ResponseEntity<?> updateAccountDetails(
             @PathVariable Long id,
             @RequestBody AccountDetails updatedDetails) {
-        AccountDetails updated = accountDetailsService.updateAccountDetails(id, updatedDetails);
-        return new AuthResponse(HttpStatus.OK.value(), "success",null);
+        AuthResponse response = accountDetailsService.updateAccountDetails(id, updatedDetails);
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
-        accountDetailsService.deleteAccountDetails(id);
-        return ResponseEntity.ok("Account deleted successfully");
+    public ResponseEntity<?> deleteAccount(@PathVariable Long id) {
+        AuthResponse response = accountDetailsService.deleteAccountDetails(id);
+        return  ResponseEntity.status(response.getCode()).body(response);
     }
+
 }

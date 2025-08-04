@@ -1,15 +1,11 @@
 package com.sample.sample.Controller;
 
 
-
-
 import com.sample.sample.Model.Design;
+import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.DesignService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/designs")
@@ -20,27 +16,28 @@ public class DesignController {
     private DesignService designService;
 
     @PostMapping
-    public Design addDesign(@RequestBody Design design) {
+    public AuthResponse addDesign(@RequestBody Design design) {
         return designService.addDesign(design);
     }
 
     @PutMapping("/{id}")
-    public Design updateDesign(@PathVariable Long id, @RequestBody Design design) {
+    public AuthResponse updateDesign(@PathVariable Long id, @RequestBody Design design) {
         return designService.updateDesign(id, design);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDesign(@PathVariable Long id) {
-        designService.deleteDesign(id);
+    public AuthResponse deleteDesign(@PathVariable Long id) {
+        return designService.deleteDesign(id);
     }
 
     @GetMapping
-    public List<Design> getAllDesigns() {
+    public AuthResponse getAllDesigns() {
         return designService.getAllDesigns();
     }
 
     @GetMapping("/{id}")
-    public Optional<Design> getDesignById(@PathVariable Long id) {
+    public AuthResponse getDesignById(@PathVariable Long id) {
         return designService.getDesignById(id);
     }
 }
+

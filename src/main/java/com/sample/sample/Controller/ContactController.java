@@ -17,14 +17,14 @@ public class ContactController {
     @Autowired
     private ContactService contactservice;
 
-    // ✅ POST - Send a message
+
     @PostMapping("/message")
     public ResponseEntity<AuthResponse> createPostMessage(@RequestBody ContactDTO contactDTO) {
         AuthResponse response = contactservice.postContactMessage(contactDTO);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // ✅ GET - Get all messages
+
     @GetMapping("/all")
     public ResponseEntity<AuthResponse> getAllMessages() {
         AuthResponse response = contactservice.getAllMessages();

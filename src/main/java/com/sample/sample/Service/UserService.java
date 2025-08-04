@@ -110,7 +110,7 @@ public class UserService {
             user.setEmail(signUpDTO.getEmail());
         }
         if (signUpDTO.getPassword() != null) {
-            user.setPassword(signUpDTO.getPassword()); // Consider hashing!
+            user.setPassword(signUpDTO.getPassword());
         }
 
         userRepository.save(user);
@@ -159,7 +159,7 @@ public class UserService {
         mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
     }
 
-    // ✅ NEW: Change Password
+
     public void changePassword(String userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

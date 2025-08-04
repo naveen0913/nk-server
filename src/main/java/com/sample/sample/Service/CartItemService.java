@@ -40,11 +40,11 @@ public class CartItemService {
 
     @Transactional
     public AuthResponse addCartItem(Long productId, String userId, String cartPayload, List<MultipartFile> customImages) throws IOException {
-        // Convert JSON string to DTO
+
         ObjectMapper objectMapper = new ObjectMapper();
         CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
 
-        // Map DTO to Entity
+
         CartItem cartItem = new CartItem();
         cartItem.setCartItemName(cartDTO.getCartItemName());
         cartItem.setCartQuantity(cartDTO.getCartQuantity());
@@ -56,11 +56,11 @@ public class CartItemService {
         cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
         cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
 
-        // Fetch User
+
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Fetch Product
+
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -84,7 +84,7 @@ public class CartItemService {
         cartItem.setCustomImages(imageUrls.isEmpty() ? null : imageUrls);
         cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
 
-        // Save Cart Item
+
         cartItemRepository.save(cartItem);
 
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
@@ -110,7 +110,7 @@ public class CartItemService {
         }
 
         if (customImages != null && !customImages.isEmpty()) {
-            // Delete old images
+
             List<String> existingImages = cartItem.getCustomImages();
             if (existingImages != null) {
                 for (String fileName : existingImages) {
@@ -123,7 +123,7 @@ public class CartItemService {
                 }
             }
 
-            // Save new images
+
             List<String> newImageUrls = new ArrayList<>();
             for (MultipartFile file : customImages) {
                 if (!file.isEmpty()) {

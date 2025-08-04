@@ -1,10 +1,6 @@
 package com.sample.sample.Service;
 
 
-
-import java.util.Date;
-import java.util.List;
-
 import com.sample.sample.DTO.ContactDTO;
 import com.sample.sample.Model.Contact;
 import com.sample.sample.Repository.ContactRepo;
@@ -12,6 +8,8 @@ import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 
@@ -30,7 +28,6 @@ public class ContactService {
         return new AuthResponse(HttpStatus.CREATED.value(), "Message Sent", newContact);
     }
 
-    // ✅ Fixed: Removed static
     public AuthResponse getAllMessages() {
         List<Contact> allContacts = contactRepo.findAll();
         return new AuthResponse(HttpStatus.OK.value(), "Message Sent", allContacts);

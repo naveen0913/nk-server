@@ -1,21 +1,20 @@
 package com.sample.sample.Service;
 
-import com.sample.sample.Model.*;
+import com.sample.sample.Model.AccountDetails;
+import com.sample.sample.Model.Orders;
+import com.sample.sample.Model.Payment;
+import com.sample.sample.Model.UserAddress;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.CartItemRepository;
 import com.sample.sample.Repository.OrderRepository;
 import com.sample.sample.Repository.UserAddressRepository;
-import com.sample.sample.Responses.AccountDetailsResponse;
-import com.sample.sample.Responses.OrdersResponse;
-import com.sample.sample.Responses.PaymentResponse;
-import com.sample.sample.Responses.UserAddressResponse;
+import com.sample.sample.Responses.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,12 +36,12 @@ public class OrderService {
     private MailService mailService;
 
 
-    public List<OrdersResponse> getAllOrders() {
+    public AuthResponse getAllOrders() {
         List<Orders> orders = orderRepository.findAll();
 
-        return orders.stream().map(order -> {
+        List<OrdersResponse> responseList = orders.stream().map(order -> {
 
-            // --- Account Details Mapping ---
+
             AccountDetails acc = order.getPayment().getAccountDetails();
             AccountDetailsResponse accountDTO = new AccountDetailsResponse();
             accountDTO.setId(acc.getId());
@@ -52,7 +51,7 @@ public class OrderService {
             accountDTO.setAccountEmail(acc.getAccountEmail());
             accountDTO.setAlternatePhone(acc.getAlternatePhone());
 
-            // --- Payment Mapping ---
+
             Payment payment = order.getPayment();
             PaymentResponse paymentDTO = new PaymentResponse();
             paymentDTO.setId(payment.getId());
@@ -67,7 +66,7 @@ public class OrderService {
             paymentDTO.setStatus(payment.getStatus().toString());
             paymentDTO.setAccountDetails(accountDTO);
 
-            // --- User Address Mapping ---
+
             UserAddress ua = order.getUserAddress();
             UserAddressResponse userAddressDTO = null;
             if (ua != null) {
@@ -85,7 +84,7 @@ public class OrderService {
                 userAddressDTO.setPincode(ua.getPincode());
             }
 
-            // --- Final Order Response Mapping ---
+
             OrdersResponse dto = new OrdersResponse();
             dto.setId(order.getId());
             dto.setOrderId(order.getOrderId());
@@ -103,13 +102,16 @@ public class OrderService {
 
             return dto;
         }).collect(Collectors.toList());
+
+        return new AuthResponse(HttpStatus.OK.value(), "Orders fetched successfully", responseList);
     }
 
 
-    public List<OrdersResponse> getOrdersByAccountId(Long accountId) {
+
+    public AuthResponse getOrdersByAccountId(Long accountId) {
         List<Orders> orders = orderRepository.findAllByAccountId(accountId);
 
-        return orders.stream().map(order -> {
+        List<OrdersResponse> responseList = orders.stream().map(order -> {
 
             AccountDetails acc = order.getPayment().getAccountDetails();
             AccountDetailsResponse accountDTO = new AccountDetailsResponse();
@@ -137,7 +139,7 @@ public class OrderService {
                 userAddressDTO.setPincode(ua.getPincode());
             }
 
-            // --- Build payment response ---
+
             Payment payment = order.getPayment();
             PaymentResponse paymentDTO = new PaymentResponse();
             paymentDTO.setId(payment.getId());
@@ -152,7 +154,8 @@ public class OrderService {
             paymentDTO.setStatus(payment.getStatus().toString());
             paymentDTO.setAccountDetails(accountDTO);
 
-            // --- Build final response ---
+
+
             OrdersResponse dto = new OrdersResponse();
             dto.setId(order.getId());
             dto.setOrderId(order.getOrderId());
@@ -170,9 +173,13 @@ public class OrderService {
 
             return dto;
         }).collect(Collectors.toList());
+
+        return new AuthResponse(HttpStatus.OK.value(), "Orders fetched successfully", responseList);
     }
 
-    public OrdersResponse getOrderByOrderId(String orderId) {
+
+
+    public AuthResponse getOrderByOrderId(String orderId) {
         Orders order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found with ID: " + orderId));
 
@@ -185,7 +192,7 @@ public class OrderService {
         accountDTO.setAccountEmail(acc.getAccountEmail());
         accountDTO.setAlternatePhone(acc.getAlternatePhone());
 
-        // Map Payment
+
         Payment payment = order.getPayment();
         PaymentResponse paymentDTO = new PaymentResponse();
         paymentDTO.setId(payment.getId());
@@ -200,7 +207,7 @@ public class OrderService {
         paymentDTO.setStatus(payment.getStatus().toString());
         paymentDTO.setAccountDetails(accountDTO);
 
-        // Map UserAddress
+
         UserAddress ua = order.getUserAddress();
         UserAddressResponse userAddressDTO = null;
         if (ua != null) {
@@ -218,7 +225,7 @@ public class OrderService {
             userAddressDTO.setPincode(ua.getPincode());
         }
 
-        // Map to DTO
+
         OrdersResponse dto = new OrdersResponse();
         dto.setId(order.getId());
         dto.setOrderId(order.getOrderId());
@@ -234,7 +241,8 @@ public class OrderService {
         dto.setAccountDetails(accountDTO);
         dto.setUserAddress(userAddressDTO);
 
-        return dto;
+        return new AuthResponse(HttpStatus.OK.value(), "Order fetched successfully", dto);
     }
+
 
 }

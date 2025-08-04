@@ -1,11 +1,11 @@
 package com.sample.sample.Service;
 
 
-import com.sample.sample.DTO.AccountDetailsDTO;
 import com.sample.sample.Model.AccountDetails;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.UserRepo;
+import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,50 +23,76 @@ public class AccountDetailsService {
     @Autowired
     private UserRepo userRepo;
 
-    public AccountDetails saveAccountDetails(String userId, AccountDetails accountDetails) {
-
+    public AuthResponse saveAccountDetails(String userId, AccountDetails accountDetails) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
+
         accountDetails.setUser(user);
         accountDetails.setAccountEmail(user.getEmail());
         user.setAccountDetails(accountDetails);
-        return accountDetailsRepository.save(accountDetails);
+        accountDetailsRepository.save(accountDetails);
+
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
-    public List<AccountDetails> getAllAccountDetails() {
+
+    public AuthResponse getAllAccountDetails() {
         List<AccountDetails> accounts = accountDetailsRepository.findAll();
-        return accounts;
+        return new AuthResponse(HttpStatus.OK.value(), "ok", accounts);
     }
 
-    public Optional<AccountDetails> getUserAccountDetails(String userId){
+
+    public AuthResponse getUserAccountDetails(String userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User not found with ID: " + userId));
-        return accountDetailsRepository.findByUserId(userId);
+
+        Optional<AccountDetails> accountDetails = accountDetailsRepository.findByUserId(userId);
+
+        if (accountDetails.isPresent()) {
+            return new AuthResponse(HttpStatus.OK.value(), "fetched", accountDetails.get());
+        } else {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Account details not found for user ID: " + userId, null);
+        }
     }
 
-    public AccountDetails updateAccountDetails(Long id, AccountDetails updatedDetails) {
+    public AuthResponse updateAccountDetails(Long id, AccountDetails updatedDetails) {
         AccountDetails existingDetails = accountDetailsRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "AccountDetails not found with ID: " + id));
 
-        // Update the fields you want to allow changes for
+
         existingDetails.setFirstName(updatedDetails.getFirstName());
         existingDetails.setLastName(updatedDetails.getLastName());
         existingDetails.setPhone(updatedDetails.getPhone());
         existingDetails.setAlternatePhone(updatedDetails.getAlternatePhone());
 
-        return accountDetailsRepository.save(existingDetails);
+        accountDetailsRepository.save(existingDetails);
+
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
 
 
-    public Optional<AccountDetails> getAccountDetailsById(Long id) {
-        return accountDetailsRepository.findById(id);
+    public AuthResponse getAccountDetailsById(Long id) {
+        Optional<AccountDetails> accountDetails = accountDetailsRepository.findById(id);
+
+        if (accountDetails.isPresent()) {
+            return new AuthResponse(HttpStatus.OK.value(), "fetched", accountDetails.get());
+        } else {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "AccountDetails not found with ID: " + id, null);
+        }
     }
 
-    public void deleteAccountDetails(Long id) {
+
+    public AuthResponse deleteAccountDetails(Long id) {
+        if (!accountDetailsRepository.existsById(id)) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "AccountDetails not found with ID: " + id, null);
+        }
+
         accountDetailsRepository.deleteById(id);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
+
 }
