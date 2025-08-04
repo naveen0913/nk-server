@@ -10,6 +10,7 @@ import com.sample.sample.Responses.AccountDetailsResponse;
 import com.sample.sample.Responses.OrdersResponse;
 import com.sample.sample.Responses.PaymentResponse;
 import com.sample.sample.Responses.UserAddressResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
@@ -63,6 +64,9 @@ public class PaymentService {
 
     @Autowired
     private OrdersTrackingRepository ordersTrackingRepository;
+
+    @Autowired
+    private ProductsRepository productsRepository;
 
     public Payment createOrderPayment(Long accountId, Long addressId, PaymentRequestDTO request)throws RazorpayException{
 
@@ -257,6 +261,9 @@ public class PaymentService {
             orderItem.setPayment(payment);
             orderItem.setOrder(savedOrder);
 
+            Products products = productsRepository.findById(cartItem.getProduct().getProductId()).orElseThrow(()-> new EntityNotFoundException("Product not found"));
+            products.setProductOrdered(true);
+            productsRepository.save(products);
             orderItems.add(orderItem);
         }
         order.setOrderItems(orderItems);

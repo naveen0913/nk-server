@@ -8,6 +8,15 @@ public class ImageResponse {
     private String productName;
     private String productdescription;
     private String productUrl;
+    private boolean productOrdered;
+
+    public boolean isProductOrdered() {
+        return productOrdered;
+    }
+
+    public void setProductOrdered(boolean productOrdered) {
+        this.productOrdered = productOrdered;
+    }
 
     private ProductCustomization productCustomization;
 
@@ -19,11 +28,12 @@ public class ImageResponse {
         this.productCustomization = productCustomization;
     }
 
-    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, ProductCustomization productCustomization) {
+    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, ProductCustomization productCustomization) {
         this.productId = productId;
         this.productName = productName;
         this.productdescription = productdescription;
         this.productUrl = productUrl;
+        this.productOrdered = productOrdered;
         this.productCustomization = productCustomization;
     }
 

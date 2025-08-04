@@ -2,6 +2,7 @@ package com.sample.sample.Service;
 
 import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductsRepository;
+import com.sample.sample.Repository.UserOrderedItemRepository;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Responses.ImageResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,6 +30,9 @@ public class ProductsService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Autowired
+    private UserOrderedItemRepository userOrderedItemRepository;
+
 
     public AuthResponse saveProducts(String name, String description, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
@@ -46,6 +50,7 @@ public class ProductsService {
         data.setProductName(name);
         data.setProductDescription(description);
         data.setProductUrl("/uploads/" + filename);
+        data.setProductOrdered(false);
 
         productsRepository.save(data);
 
@@ -68,6 +73,7 @@ public class ProductsService {
                     product.getProductName(),
                     product.getProductDescription(),
                     finalUrl,
+                    product.isProductOrdered(),
                     product.getProductCustomization()
             ));
         }
@@ -81,19 +87,24 @@ public class ProductsService {
         if (!existedProduct.isPresent()){
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found",null);
         }
-        ImageResponse imageResponse = new ImageResponse(existedProduct.get().getProductId(), existedProduct.get().getProductName(),existedProduct.get().getProductDescription(),existedProduct.get().getProductUrl(),existedProduct.get().getProductCustomization());
+        ImageResponse imageResponse = new ImageResponse(existedProduct.get().getProductId(), existedProduct.get().getProductName(),existedProduct.get().getProductDescription(),existedProduct.get().getProductUrl(),existedProduct.get().isProductOrdered(),existedProduct.get().getProductCustomization());
         return new AuthResponse(HttpStatus.OK.value(), "success",imageResponse);
 
     }
 
-    public AuthResponse deleteProduct(Long id){
-        Products existedProduct = productsRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Product not Found"));
-        if (existedProduct==null){
-            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found",null);
+    public AuthResponse deleteProduct(Long id) {
+        Products existedProduct = productsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+//        boolean hasOrders = userOrderedItemRepository.existsByProduct_ProductId(id);
+        if (existedProduct.isProductOrdered()==true) {
+            return new AuthResponse(HttpStatus.CONFLICT.value(), "Product is placed for Order.Cannot delete!", null);
         }
-        productsRepository.delete(existedProduct);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+
+        productsRepository.deleteById(id);
+        return new AuthResponse(HttpStatus.OK.value(), "Product deleted", null);
     }
+
 
 
     @Transactional

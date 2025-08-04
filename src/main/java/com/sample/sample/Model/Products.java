@@ -13,6 +13,15 @@ public class Products {
     private String productName;
     private String productDescription;
     private String productUrl;
+    private boolean productOrdered;
+
+    public boolean isProductOrdered() {
+        return productOrdered;
+    }
+
+    public void setProductOrdered(boolean productOrdered) {
+        this.productOrdered = productOrdered;
+    }
 
     public ProductCustomization getProductCustomization() {
         return productCustomization;

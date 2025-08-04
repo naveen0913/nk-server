@@ -42,8 +42,9 @@ public class ProductsController {
     }
 
     @DeleteMapping("/{productId}")
-    public AuthResponse deleteProductById(@PathVariable Long productId){
-        return productsService.deleteProduct(productId);
+    public ResponseEntity<?> deleteProductById(@PathVariable Long productId){
+       AuthResponse authResponse = productsService.deleteProduct(productId);
+       return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
     @PutMapping("/{productId}")

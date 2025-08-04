@@ -10,4 +10,8 @@ import java.util.List;
 public interface UserOrderedItemRepository extends JpaRepository<UserOrderedItems,Long> {
 
     List<UserOrderedItems> findByOrderId(Long orderId);
+
+    boolean existsByProduct_ProductId(Long productId);
+    ;
+
 }
