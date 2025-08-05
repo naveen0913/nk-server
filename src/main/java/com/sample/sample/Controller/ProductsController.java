@@ -1,18 +1,14 @@
 package com.sample.sample.Controller;
 
-import com.sample.sample.Model.Products;
+import com.sample.sample.DTO.ProductIdRequest;
 import com.sample.sample.Responses.AuthResponse;
-import com.sample.sample.Responses.ImageResponse;
 import com.sample.sample.Service.ProductsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,9 +19,9 @@ public class ProductsController {
 
     @PostMapping
     public ResponseEntity<?> addProduct(@RequestParam("name") String name,
-                                    @RequestParam("description") String description,
-                                    @RequestParam("file") MultipartFile file) throws IOException {
-        AuthResponse response=  productsService.saveProducts(name, description, file);
+                                        @RequestParam("description") String description,
+                                        @RequestParam("file") MultipartFile file) throws IOException {
+        AuthResponse response = productsService.saveProducts(name, description, file);
         return ResponseEntity.status(response.getCode()).body(response);
 
     }
@@ -37,14 +33,14 @@ public class ProductsController {
     }
 
     @GetMapping("/{productId}")
-    public AuthResponse getProductById(@PathVariable Long productId){
+    public AuthResponse getProductById(@PathVariable Long productId) {
         return productsService.getProductById(productId);
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> deleteProductById(@PathVariable Long productId){
-       AuthResponse authResponse = productsService.deleteProduct(productId);
-       return ResponseEntity.status(authResponse.getCode()).body(authResponse);
+    public ResponseEntity<?> deleteProductById(@PathVariable Long productId) {
+        AuthResponse authResponse = productsService.deleteProduct(productId);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
     @PutMapping("/{productId}")
@@ -54,7 +50,7 @@ public class ProductsController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 
-        AuthResponse authResponse =  productsService.updateProductById(productId, name, description, file);
+        AuthResponse authResponse = productsService.updateProductById(productId, name, description, file);
         return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
@@ -65,4 +61,16 @@ public class ProductsController {
         }
         return baseUrl + "/" + uploadPath + "/" + filename;
     }
+
+
+    @PutMapping("/update-status/{productId}")
+    public ResponseEntity<AuthResponse> updateProductStatus(
+            @PathVariable Long productId,
+            @RequestBody ProductIdRequest request) {
+
+        AuthResponse response = productsService.updateProductStatus(productId, request.getStatus());
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+
 }
