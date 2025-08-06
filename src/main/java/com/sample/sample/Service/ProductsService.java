@@ -55,10 +55,8 @@ public class ProductsService {
         product.setProductUrl("/uploads/" + filename);
         product.setProductOrdered(false);
 
-       
 
-
-        int randomNum = (int)(Math.random() * 9000) + 1000;
+        int randomNum = (int) (Math.random() * 9000) + 1000;
         String customProductId = "PRODUCT" + randomNum + "L";
         product.setCustomProductId(customProductId);
 
@@ -112,6 +110,10 @@ public class ProductsService {
                     product.getProductDescription(),
                     finalUrl,
                     product.isProductOrdered(),
+                    product.getProductStatus(),
+                    product.getCustomProductId(),
+                    product.getCreatedTime(),
+                    product.getUpdatedTime(),
                     product.getProductCustomization()
             ));
         }
@@ -125,7 +127,18 @@ public class ProductsService {
         if (!existedProduct.isPresent()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found", null);
         }
-        ImageResponse imageResponse = new ImageResponse(existedProduct.get().getProductId(), existedProduct.get().getProductName(), existedProduct.get().getProductDescription(), existedProduct.get().getProductUrl(), existedProduct.get().isProductOrdered(), existedProduct.get().getProductCustomization());
+        ImageResponse imageResponse = new ImageResponse(
+                existedProduct.get().getProductId(),
+                existedProduct.get().getProductName(),
+                existedProduct.get().getProductDescription(),
+                existedProduct.get().getProductUrl(),
+                existedProduct.get().isProductOrdered(),
+                existedProduct.get().getProductStatus(),
+                existedProduct.get().getCustomProductId(),
+                existedProduct.get().getCreatedTime(),
+                existedProduct.get().getUpdatedTime(),
+                existedProduct.get().getProductCustomization()
+        );
         return new AuthResponse(HttpStatus.OK.value(), "success", imageResponse);
 
     }
@@ -203,8 +216,6 @@ public class ProductsService {
         productsRepository.save(product);
         return new AuthResponse(HttpStatus.OK.value(), "Product status toggled successfully", null);
     }
-
-
 
 
 }
