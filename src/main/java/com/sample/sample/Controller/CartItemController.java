@@ -74,9 +74,11 @@ public class CartItemController {
     }
 
 
-    @DeleteMapping("/all")
-    public AuthResponse deleteAllCartItems() {
-        cartItemService.deleteAllCartItems();
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+    @DeleteMapping("/delete-all/{userId}")
+    public ResponseEntity<AuthResponse> deleteAllCartItems(@PathVariable String userId) {
+        AuthResponse response = cartItemService.deleteAllCartItems(userId);
+        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
     }
+
+
 }

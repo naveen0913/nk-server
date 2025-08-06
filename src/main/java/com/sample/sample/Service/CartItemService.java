@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartItemService {
@@ -34,6 +35,9 @@ public class CartItemService {
 
     @Autowired
     private ProductsRepository productsRepository;
+
+    @Autowired
+    private  MailService mailService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -87,6 +91,15 @@ public class CartItemService {
 
         cartItemRepository.save(cartItem);
 
+        // ✅ Send email to user
+        String toEmail = user.getEmail(); // assumes User has getEmail()
+        String userName = user.getUsername(); // or getUserName()
+        String productName = product.getProductName();
+        int quantity = cartDTO.getCartQuantity();
+
+        mailService.sendCartItemAddedMail(toEmail, userName, productName, quantity);
+
+
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
@@ -139,6 +152,17 @@ public class CartItemService {
 
         cartItemRepository.save(cartItem);
 
+
+        User user = cartItem.getUser();
+        String toEmail = user.getEmail();
+        String userName = user.getUsername();
+        String productName = cartItem.getProduct().getProductName();
+        int quantity = cartItem.getCartQuantity();
+
+        mailService.sendCartItemUpdatedMail(toEmail, userName, productName, quantity);
+
+
+
         return new AuthResponse(HttpStatus.OK.value(), "updated", null);
     }
 
@@ -159,17 +183,57 @@ public class CartItemService {
     }
 
 
+
     public AuthResponse deleteCartItem(Long cartItemId) {
-        if (!cartItemRepository.existsById(cartItemId)) {
+        Optional<CartItem> optionalCartItem = cartItemRepository.findById(cartItemId);
+
+        if (optionalCartItem.isEmpty()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Cart Item not found with id: " + cartItemId, null);
         }
+
+        CartItem cartItem = optionalCartItem.get();
+
+
+        User user = cartItem.getUser();
+        String toEmail = user.getEmail();
+        String username = user.getUsername(); // use getName() or appropriate method
+        String productName = cartItem.getProduct().getProductName();
+
+        // Delete the item
         cartItemRepository.deleteById(cartItemId);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted", null);
+
+        // Send deletion confirmation email
+        mailService.sendCartItemDeletedMail(toEmail, username, productName);
+
+        return new AuthResponse(HttpStatus.OK.value(), "Cart item deleted and email sent", null);
     }
 
-    public AuthResponse deleteAllCartItems() {
-        cartItemRepository.deleteAll();
-        return new AuthResponse(HttpStatus.OK.value(), "all cart items deleted", null);
+
+    @Transactional
+    public AuthResponse deleteAllCartItems(String userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<CartItem> userCartItems = cartItemRepository.getAllItemsByUser(userId);
+
+        if (userCartItems.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "No items found in cart", null);
+        }
+
+        String toEmail = user.getEmail();
+        String username = user.getUsername();
+
+        List<String> productNames = userCartItems.stream()
+                .map(item -> item.getProduct().getProductName())
+                .toList();
+
+
+        mailService.sendCartClearedMail(toEmail, username, productNames);
+
+
+        cartItemRepository.deleteAll(userCartItems);
+
+        return new AuthResponse(HttpStatus.OK.value(), "All cart items deleted and email sent", null);
     }
 
     public AuthResponse getCartItemsCount() {

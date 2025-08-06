@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class MailService {
@@ -147,6 +148,166 @@ public class MailService {
 
         mailSender.send(message);
     }
+
+
+    public void sendAccountCreationMail(String toEmail, String username) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail); // sender email configured in application.properties
+        message.setTo(toEmail);
+        message.setSubject("Your account has been created successfully - WeLoveYou");
+
+        String body = "Hello " + username + ",\n\n"
+                + "Welcome to WeLoveYou! Your account has been created successfully.\n\n"
+                + "Start customizing your dream product today.\n\n"
+                + "Warm regards,\nWeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void sendLoginMail(String toEmail, String username) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Login Alert - WeLoveYou");
+
+        String body = "Hello " + username + ",\n\n"
+                + "You have successfully logged in to your WeLoveYou account.\n\n"
+                + "Warm regards,\nWeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void sendAddressSavedMail(String toEmail, String username) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Address Updated - WeLoveYou");
+
+        String body = "Hi " + username + ",\n\n"
+                + "Your address has been saved successfully! We're now ready to bring joy to your doorstep.\n\n"
+                + "Warm regards,\n"
+                + "The WeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void sendAddressUpdatedMail(String toEmail, String username) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Address Updated - WeLoveYou");
+
+        String body = "Hi " + username + ",\n\n"
+                + "Your address has been updated successfully! Update received! We're ready to ship your next joy-filled package.\n\n"
+                + "Warm regards,\n"
+                + "The WeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void sendCartItemAddedMail(String toEmail, String username, String productName, int quantity) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Great News! Item Added to Your Cart 🎉 -- WeLoveYou");
+
+        String body = "Hey " + username + ",\n\n"
+                + "Great news! Your cart now includes:\n\n"
+                + quantity + " " + productName + (quantity > 1 ? "s" : "") + "\n"
+                + "Can’t wait to see how you customize them!\n\n"
+                + "Cheers,\n"
+                + "The WeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void sendCartItemUpdatedMail(String toEmail, String username, String productName, int quantity) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Your Cart Was Just Updated -- WeLoveYou");
+
+        String body = "Hi " + username + ",\n\n"
+                + "Your cart has been successfully updated with the following:\n"
+                + productName + " — " + quantity + " unit(s)\n\n"
+                + "Thanks for continuing your design journey with WeLoveYou.\n\n"
+                + "Warm regards,\n"
+                + "The WeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+
+    public void sendCartItemDeletedMail(String toEmail, String username, String productName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Item Removed from Your Cart -- WeLoveYou");
+
+        String body = "Hi " + username + ",\n\n"
+                + "You’ve just removed the following item from your cart:\n"
+                + productName + "\n\n"
+                + "If this was a mistake, you can always add it back anytime.\n\n"
+                + "Warm regards,\n"
+                + "The WeLoveYou Team";
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+    public void sendCartClearedMail(String toEmail, String username, List<String> productNames) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Your Cart Has Been Cleared -- WeLoveYou");
+
+        StringBuilder body = new StringBuilder("Hi " + username + ",\n\n");
+        body.append("You've removed all items from your cart. Here's what was cleared:\n");
+
+        for (String productName : productNames) {
+            body.append("- ").append(productName).append("\n");
+        }
+
+        body.append("\nWe hope to see you back soon for more customizations!\n\n");
+        body.append("Warm regards,\n");
+        body.append("The WeLoveYou Team");
+
+        message.setText(body.toString());
+        mailSender.send(message);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
