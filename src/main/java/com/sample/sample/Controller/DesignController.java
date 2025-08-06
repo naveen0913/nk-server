@@ -1,43 +1,66 @@
 package com.sample.sample.Controller;
 
-
-import com.sample.sample.Model.Design;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.DesignService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/designs")
-@CrossOrigin(origins = "*") // Optional: Enable for frontend access
+@CrossOrigin
 public class DesignController {
 
     @Autowired
     private DesignService designService;
 
     @PostMapping
-    public AuthResponse addDesign(@RequestBody Design design) {
-        return designService.addDesign(design);
+    public ResponseEntity<AuthResponse> createDesign(
+            @RequestParam("productId") Long productId,
+            @RequestParam("designName") String designName,
+            @RequestParam("designUrl") String designUrl,
+            @RequestParam("imageFiles") MultipartFile[] imageFiles
+    ) throws IOException {
+        AuthResponse response = designService.createDesign(productId, designName, designUrl, imageFiles);
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @PutMapping("/{id}")
-    public AuthResponse updateDesign(@PathVariable Long id, @RequestBody Design design) {
-        return designService.updateDesign(id, design);
+
+    @PutMapping("/{designId}")
+    public ResponseEntity<AuthResponse> updateDesign(
+            @PathVariable Long designId,
+            @RequestParam(required = false) String designName,
+            @RequestParam(required = false) String designUrl,
+            @RequestParam(value = "imageFiles", required = false) MultipartFile[] imageFiles
+    ) throws IOException {
+        AuthResponse response = designService.updateDesign(designId, designName, designUrl, imageFiles);
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public AuthResponse deleteDesign(@PathVariable Long id) {
-        return designService.deleteDesign(id);
-    }
 
     @GetMapping
-    public AuthResponse getAllDesigns() {
-        return designService.getAllDesigns();
+    public ResponseEntity<AuthResponse> getAllDesigns() {
+        return ResponseEntity.ok(designService.getAllDesigns());
     }
 
-    @GetMapping("/{id}")
-    public AuthResponse getDesignById(@PathVariable Long id) {
-        return designService.getDesignById(id);
+    @GetMapping("/{designId}")
+    public ResponseEntity<AuthResponse> getDesignById(@PathVariable Long designId) {
+        return ResponseEntity.ok(designService.getDesignById(designId));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<AuthResponse> deleteAllDesigns() {
+        return ResponseEntity.ok(designService.deleteAllDesigns());
+    }
+
+    @DeleteMapping("/{designId}")
+    public ResponseEntity<AuthResponse> deleteDesignById(@PathVariable Long designId) {
+        return ResponseEntity.ok(designService.deleteDesignById(designId));
     }
 }
+
+
 
