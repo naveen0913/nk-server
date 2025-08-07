@@ -245,7 +245,6 @@ public class ProductCustomizationService {
         }
         customizationOption.setUpdatedTime(LocalDateTime.now());
         customOptionRepository.save(customizationOption);
-
         return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
