@@ -11,7 +11,6 @@ public class CustomizationOptionDTO {
     private boolean mostPopular;
     private Integer optionSheetCount;
 
-    // ✅ Add these two fields
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
 

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -50,9 +51,9 @@ public class ProductCustomizationService {
     }
 
     @Transactional
-    public AuthResponse saveCustomization( Long productId, String dtoJson,
-                                                  MultipartFile bannerImage,
-                                                  List<MultipartFile> thumbnails) throws Exception {
+    public AuthResponse saveCustomization(Long productId, String dtoJson,
+                                          MultipartFile bannerImage,
+                                          List<MultipartFile> thumbnails) throws Exception {
         ProductCustomizationDTO dto = mapper.readValue(dtoJson, ProductCustomizationDTO.class);
 
         Products product = productsRepository.findById(productId)
@@ -103,6 +104,7 @@ public class ProductCustomizationService {
                 co.setDiscount(opt.getDiscount());
                 co.setMostPopular(opt.isMostPopular());
                 co.setOptionSheetCount(opt.getOptionSheetCount());
+                co.setCreatedTime(LocalDateTime.now());
                 co.setProductCustomization(entity);
 
                 return co;
@@ -112,7 +114,7 @@ public class ProductCustomizationService {
         entity.setCustomizationOptions(optionEntities);
 
         repo.save(entity);
-        return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
     private String saveFile(MultipartFile file) throws IOException {
@@ -135,7 +137,7 @@ public class ProductCustomizationService {
         if (productList.isEmpty()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "products not found", null);
         }
-        return new AuthResponse(HttpStatus.OK.value(), "ok",productList );
+        return new AuthResponse(HttpStatus.OK.value(), "ok", productList);
     }
 
     public AuthResponse getCustomizationById(Long id) {
@@ -147,7 +149,6 @@ public class ProductCustomizationService {
 
         return new AuthResponse(HttpStatus.OK.value(), "ok", product.get());
     }
-
 
 
     @Transactional
@@ -207,6 +208,7 @@ public class ProductCustomizationService {
                 co.setOldPrice(opt.getOldPrice());
                 co.setDiscount(opt.getDiscount());
                 co.setMostPopular(opt.isMostPopular());
+                co.setOptionSheetCount(opt.getOptionSheetCount());
                 co.setProductCustomization(entity);
                 return co;
             }).collect(Collectors.toList());
@@ -220,7 +222,6 @@ public class ProductCustomizationService {
     }
 
 
-
     @Transactional
     public AuthResponse updateCustomizationOptions(Long id, CustomizationOptionDTO optionDTO) {
         CustomizationOption customizationOption = customOptionRepository.findById(id)
@@ -229,32 +230,24 @@ public class ProductCustomizationService {
         if (optionDTO.getOptionLabel() != null) {
             customizationOption.setOptionLabel(optionDTO.getOptionLabel());
         }
-
         if (optionDTO.getOriginalPrice() != null) {
             customizationOption.setOriginalPrice(optionDTO.getOriginalPrice());
         }
-
         if (optionDTO.getOldPrice() != null) {
             customizationOption.setOldPrice(optionDTO.getOldPrice());
         }
-
         if (optionDTO.getDiscount() != null) {
             customizationOption.setDiscount(optionDTO.getDiscount());
         }
-
         customizationOption.setMostPopular(optionDTO.isMostPopular());
-
-
-        if (customizationOption.getOptionSheetCount() != null && customizationOption.getOptionSheetCount() > 0) {
-            customizationOption.setOptionSheetCount(customizationOption.getOptionSheetCount() - 1);
+        if (customizationOption.getOptionSheetCount() != null) {
+            customizationOption.setOptionSheetCount(optionDTO.getOptionSheetCount());
         }
-
+        customizationOption.setUpdatedTime(LocalDateTime.now());
         customOptionRepository.save(customizationOption);
 
         return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
-
-
 
 
     @Transactional
@@ -279,13 +272,13 @@ public class ProductCustomizationService {
     }
 
     @Transactional
-    public AuthResponse deleteAllCustomizationOptions(Long customizationId){
+    public AuthResponse deleteAllCustomizationOptions(Long customizationId) {
         List<CustomizationOption> customizationOption = customOptionRepository.findAllByProductCustomizationId(customizationId);
-        if (customizationOption.isEmpty()){
-          return  new AuthResponse(HttpStatus.NOT_FOUND.value(), "Option not found",null);
+        if (customizationOption.isEmpty()) {
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Option not found", null);
         }
         customOptionRepository.deleteAllOptionsByProductCustomizationId(customizationId);
-        return  new AuthResponse(HttpStatus.OK.value(), "ok",null);
+        return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
 
 
@@ -300,7 +293,6 @@ public class ProductCustomizationService {
 
         return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
-
 
 
 }
