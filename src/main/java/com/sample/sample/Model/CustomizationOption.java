@@ -1,8 +1,11 @@
 package com.sample.sample.Model;
 
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 public class CustomizationOption {
@@ -17,12 +20,18 @@ public class CustomizationOption {
     private Double discount;
     private boolean mostPopular;
 
+    private Integer optionSheetCount;
+
+    @CreationTimestamp
+    private LocalDateTime createdTime;
+    @UpdateTimestamp
+    private LocalDateTime updatedTime;
     @ManyToOne
-    @JoinColumn(name = "product_customization_id",nullable = false)
+    @JoinColumn(name = "product_customization_id", nullable = false)
     @JsonBackReference
     private ProductCustomization productCustomization;
 
-    // Getters and Setters
+
 
     public Long getId() {
         return id;
@@ -70,6 +79,30 @@ public class CustomizationOption {
 
     public void setMostPopular(boolean mostPopular) {
         this.mostPopular = mostPopular;
+    }
+
+    public Integer getOptionSheetCount() {
+        return optionSheetCount;
+    }
+
+    public void setOptionSheetCount(Integer optionSheetCount) {
+        this.optionSheetCount = optionSheetCount;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public LocalDateTime getUpdatedTime() {
+        return updatedTime;
+    }
+
+    public void setUpdatedTime(LocalDateTime updatedTime) {
+        this.updatedTime = updatedTime;
     }
 
     public ProductCustomization getProductCustomization() {

@@ -102,7 +102,9 @@ public class ProductCustomizationService {
                 co.setOldPrice(opt.getOldPrice());
                 co.setDiscount(opt.getDiscount());
                 co.setMostPopular(opt.isMostPopular());
+                co.setOptionSheetCount(opt.getOptionSheetCount());
                 co.setProductCustomization(entity);
+
                 return co;
             }).collect(Collectors.toList());
         }
@@ -240,13 +242,18 @@ public class ProductCustomizationService {
             customizationOption.setDiscount(optionDTO.getDiscount());
         }
 
-
         customizationOption.setMostPopular(optionDTO.isMostPopular());
+
+
+        if (customizationOption.getOptionSheetCount() != null && customizationOption.getOptionSheetCount() > 0) {
+            customizationOption.setOptionSheetCount(customizationOption.getOptionSheetCount() - 1);
+        }
 
         customOptionRepository.save(customizationOption);
 
         return new AuthResponse(HttpStatus.OK.value(), "ok", null);
     }
+
 
 
 
