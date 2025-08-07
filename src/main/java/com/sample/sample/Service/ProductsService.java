@@ -1,6 +1,7 @@
 package com.sample.sample.Service;
 
 import com.sample.sample.DTO.ProductIdRequest;
+import com.sample.sample.Model.Design;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Repository.UserOrderedItemRepository;
@@ -103,7 +104,7 @@ public class ProductsService {
         for (Products product : productList) {
             String imageUrl = product.getProductUrl();
             String finalUrl = (imageUrl != null && !imageUrl.isEmpty()) ? baseUrl + imageUrl : null;
-
+            List<Design> designs = product.getDesigns();
             responseList.add(new ImageResponse(
                     product.getProductId(),
                     product.getProductName(),
@@ -114,7 +115,8 @@ public class ProductsService {
                     product.getCustomProductId(),
                     product.getCreatedTime(),
                     product.getUpdatedTime(),
-                    product.getProductCustomization()
+                    product.getProductCustomization(),
+                    designs
             ));
         }
 
@@ -127,6 +129,7 @@ public class ProductsService {
         if (!existedProduct.isPresent()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found", null);
         }
+        List<Design> designList = existedProduct.get().getDesigns();
         ImageResponse imageResponse = new ImageResponse(
                 existedProduct.get().getProductId(),
                 existedProduct.get().getProductName(),
@@ -137,7 +140,8 @@ public class ProductsService {
                 existedProduct.get().getCustomProductId(),
                 existedProduct.get().getCreatedTime(),
                 existedProduct.get().getUpdatedTime(),
-                existedProduct.get().getProductCustomization()
+                existedProduct.get().getProductCustomization(),
+                designList
         );
         return new AuthResponse(HttpStatus.OK.value(), "success", imageResponse);
 

@@ -34,7 +34,7 @@ public class DesignService {
     @Value("${file.upload-dir}")
     private String uploadImagePath;
 
-    public AuthResponse createDesign(Long productId, String designName, String designUrl, MultipartFile[] imageFiles) throws IOException {
+    public AuthResponse createDesign(Long productId, String designName, MultipartFile[] imageFiles) throws IOException {
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
@@ -43,7 +43,6 @@ public class DesignService {
 
         Design design = new Design();
         design.setDesignName(designName);
-        design.setDesignUrl(designUrl);
         design.setProduct(product);
 
         List<DesignImage> imageList = new ArrayList<>();
@@ -81,9 +80,9 @@ public class DesignService {
             design.setDesignName(designName);
         }
 
-        if (designUrl != null && !designUrl.isBlank()) {
-            design.setDesignUrl(designUrl);
-        }
+//        if (designUrl != null && !designUrl.isBlank()) {
+//            design.setDesignUrl(designUrl);
+//        }
 
         // Upload new images if any
         if (imageFiles != null && imageFiles.length > 0) {
@@ -120,7 +119,6 @@ public class DesignService {
             Map<String, Object> map = new HashMap<>();
             map.put("designId", design.getDesignId());
             map.put("designName", design.getDesignName());
-            map.put("designUrl", design.getDesignUrl());
             map.put("productId", design.getProduct().getProductId());
             map.put("images", design.getDesignImages().stream()
                     .map(img -> Map.of("imageId", img.getDesignImageId(), "url", img.getDesignUrl()))
@@ -138,7 +136,6 @@ public class DesignService {
         Map<String, Object> response = new HashMap<>();
         response.put("designId", design.getDesignId());
         response.put("designName", design.getDesignName());
-        response.put("designUrl", design.getDesignUrl());
         response.put("productId", design.getProduct().getProductId());
         response.put("images", design.getDesignImages().stream()
                 .map(img -> Map.of("imageId", img.getDesignImageId(), "url", img.getDesignUrl()))

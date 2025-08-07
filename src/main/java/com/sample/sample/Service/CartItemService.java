@@ -88,10 +88,8 @@ public class CartItemService {
         cartItem.setCustomImages(imageUrls.isEmpty() ? null : imageUrls);
         cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
 
-
         cartItemRepository.save(cartItem);
 
-        // ✅ Send email to user
         String toEmail = user.getEmail(); // assumes User has getEmail()
         String userName = user.getUsername(); // or getUserName()
         String productName = product.getProductName();

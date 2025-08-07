@@ -1,5 +1,6 @@
 package com.sample.sample.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,6 +14,7 @@ public class DesignImage {
 
     @ManyToOne
     @JoinColumn(name = "design_id")
+    @JsonIgnore
     private Design design;
 
     // Getters and Setters

@@ -66,11 +66,6 @@ public class Payment {
     @JsonIgnore
     private UserAddress userAddress;
 
-//    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonManagedReference
-//    private List<CartItem> cartItemList;
-
-
     public UserAddress getUserAddress() {
         return userAddress;
     }

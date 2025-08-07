@@ -1,10 +1,12 @@
 package com.sample.sample.Responses;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.sample.sample.Model.Design;
 import com.sample.sample.Model.ProductCustomization;
 import com.sample.sample.Repository.productStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ImageResponse {
     private Long productId;
@@ -16,6 +18,8 @@ public class ImageResponse {
     private String customProductId;
     private LocalDateTime created;
     private LocalDateTime updated;
+    private ProductCustomization productCustomization;
+    private List<Design> productDesigns;
 
     public productStatus getStatus() {
         return status;
@@ -33,7 +37,15 @@ public class ImageResponse {
         this.productOrdered = productOrdered;
     }
 
-    private ProductCustomization productCustomization;
+
+
+    public List<Design> getProductDesigns() {
+        return productDesigns;
+    }
+
+    public void setProductDesigns(List<Design> productDesigns) {
+        this.productDesigns = productDesigns;
+    }
 
     public ProductCustomization getProductCustomization() {
         return productCustomization;
@@ -99,7 +111,7 @@ public class ImageResponse {
         this.productUrl = productUrl;
     }
 
-    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization) {
+    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns) {
         this.productId = productId;
         this.productName = productName;
         this.productdescription = productdescription;
@@ -110,5 +122,6 @@ public class ImageResponse {
         this.created = created;
         this.updated = updated;
         this.productCustomization = productCustomization;
+        this.productDesigns = productDesigns;
     }
 }

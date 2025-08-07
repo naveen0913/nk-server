@@ -1,5 +1,6 @@
 package com.sample.sample.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +14,9 @@ public class Design {
 
     private String designName;
 
-    private String designUrl;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnore
     private Products product;
 
     @OneToMany(mappedBy = "design", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -37,14 +37,6 @@ public class Design {
 
     public void setDesignName(String designName) {
         this.designName = designName;
-    }
-
-    public String getDesignUrl() {
-        return designUrl;
-    }
-
-    public void setDesignUrl(String designUrl) {
-        this.designUrl = designUrl;
     }
 
     public Products getProduct() {

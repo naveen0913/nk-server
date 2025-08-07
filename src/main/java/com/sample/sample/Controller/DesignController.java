@@ -21,10 +21,11 @@ public class DesignController {
     public ResponseEntity<AuthResponse> createDesign(
             @RequestParam("productId") Long productId,
             @RequestParam("designName") String designName,
-            @RequestParam("designUrl") String designUrl,
+//            @RequestParam(value = "designUrl",required = false) String designUrl,
             @RequestParam("imageFiles") MultipartFile[] imageFiles
+
     ) throws IOException {
-        AuthResponse response = designService.createDesign(productId, designName, designUrl, imageFiles);
+        AuthResponse response = designService.createDesign(productId, designName, imageFiles);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
