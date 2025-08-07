@@ -5,7 +5,9 @@ import com.sample.sample.DTO.ChangePasswordRequest;
 import com.sample.sample.DTO.LoginDTO;
 import com.sample.sample.DTO.SignupDTO;
 import com.sample.sample.JWT.JwtUtil;
+import com.sample.sample.Model.AccountDetails;
 import com.sample.sample.Model.User;
+import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.UserRepo;
 import com.sample.sample.Responses.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class UserService {
     @Autowired
     private MailService mailService;
 
+    @Autowired
+    private AccountDetailsRepository    accountDetailsRepository;
+
     public AuthResponse registerUser(SignupDTO signUpDTO, boolean isAdmin) {
         Optional<User> existedUser = userRepository.findByEmail(signUpDTO.getEmail());
         if (existedUser.isPresent()) {
@@ -41,7 +46,18 @@ public class UserService {
         newUser.setCreated(new Date());
         newUser.setRole("user");
         newUser.setPasswordUpdated(false);
+
+        AccountDetails accountDetails = new AccountDetails();
+        accountDetails.setAccountEmail(signUpDTO.getEmail());
+        accountDetails.setUser(newUser);
+
+        newUser.setAccountDetails(accountDetails);
         userRepository.save(newUser);
+        accountDetailsRepository.save(accountDetails);
+
+        mailService.sendAccountCreationMail(newUser.getEmail(), newUser.getUsername());
+
+
 
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
@@ -83,6 +99,10 @@ public class UserService {
         responseBody.put("user", user);
         responseBody.put("token", token);
 
+
+//        mailService.sendLoginMail(user.getEmail(), user.getUsername());
+
+
         return new AuthResponse(HttpStatus.OK.value(), "Login success", responseBody);
     }
 
@@ -114,6 +134,10 @@ public class UserService {
         }
 
         userRepository.save(user);
+
+
+
+        mailService.sendProfileUpdateMail(user.getEmail(), user.getUsername());
         return new AuthResponse(HttpStatus.OK.value(), "User updated successfully", user);
     }
 
@@ -177,7 +201,7 @@ public class UserService {
         user.setPasswordUpdatedTime(LocalDateTime.now());
 
         userRepository.save(user);
-//        mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
+      mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
     }
 
 }
