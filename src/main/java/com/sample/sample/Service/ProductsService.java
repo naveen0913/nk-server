@@ -1,7 +1,7 @@
 package com.sample.sample.Service;
 
-import com.sample.sample.DTO.ProductIdRequest;
 import com.sample.sample.Model.Design;
+import com.sample.sample.Model.ProductShapeType;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Repository.UserOrderedItemRepository;
@@ -23,7 +23,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class ProductsService {
@@ -37,7 +36,7 @@ public class ProductsService {
     @Autowired
     private UserOrderedItemRepository userOrderedItemRepository;
 
-    public AuthResponse saveProducts(String name, String description, MultipartFile file) throws IOException {
+    public AuthResponse saveProducts(String name, String description,String shapeType, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "File is required", null);
         }
@@ -57,8 +56,12 @@ public class ProductsService {
         product.setProductOrdered(false);
 
 
-        int randomNum = (int) (Math.random() * 9000) + 1000;
-        String customProductId = "PRODUCT" + randomNum + "L";
+
+        product.setProductShapeType(ProductShapeType.valueOf(shapeType.toLowerCase()));
+
+
+        int randomNum = (int)(Math.random() * 9000) + 1000;
+        String customProductId = "PRODUCT" + randomNum;
         product.setCustomProductId(customProductId);
 
 
@@ -71,28 +74,6 @@ public class ProductsService {
     }
 
 
-//    public AuthResponse saveProducts(String name, String description, MultipartFile file) throws IOException {
-//        if (file == null || file.isEmpty()) {
-//            return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
-//        }
-//
-//        String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-//        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-//        Files.createDirectories(uploadPath);
-//
-//        Path filePath = uploadPath.resolve(filename);
-//        Files.write(filePath, file.getBytes());
-//
-//        Products data = new Products();
-//        data.setProductName(name);
-//        data.setProductDescription(description);
-//        data.setProductUrl("/uploads/" + filename);
-//        data.setProductOrdered(false);
-//
-//        productsRepository.save(data);
-//
-//        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
-//    }
 
     public AuthResponse getAllProducts() {
         List<Products> productList = productsRepository.findAll();
@@ -220,6 +201,8 @@ public class ProductsService {
         productsRepository.save(product);
         return new AuthResponse(HttpStatus.OK.value(), "Product status toggled successfully", null);
     }
+
+
 
 
 }

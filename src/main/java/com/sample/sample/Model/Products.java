@@ -23,8 +23,19 @@ public class Products {
     private String productUrl;
     private boolean productOrdered;
 
+    @Enumerated(EnumType.STRING)
+    private ProductShapeType productShapeType;
 
-    // One product to many designs
+
+    public ProductShapeType getProductShapeType() {
+        return productShapeType;
+    }
+
+    public void setProductShapeType(ProductShapeType productShapeType) {
+        this.productShapeType = productShapeType;
+    }
+
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Design> designs = new ArrayList<>();

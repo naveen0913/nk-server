@@ -20,8 +20,9 @@ public class ProductsController {
     @PostMapping
     public ResponseEntity<?> addProduct(@RequestParam("name") String name,
                                         @RequestParam("description") String description,
+                                        @RequestParam String shapeType,
                                         @RequestParam("file") MultipartFile file) throws IOException {
-        AuthResponse response = productsService.saveProducts(name, description, file);
+        AuthResponse response = productsService.saveProducts(name, description,shapeType, file);
         return ResponseEntity.status(response.getCode()).body(response);
 
     }
