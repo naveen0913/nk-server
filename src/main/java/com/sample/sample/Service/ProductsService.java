@@ -190,13 +190,22 @@ public class ProductsService {
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
 
+//        if (product.getProductStatus() == productStatus.active) {
+//            product.setProductStatus(productStatus.inactive);
+//        } else if (product.getProductStatus() == productStatus.inactive) {
+//            product.setProductStatus(productStatus.active);
+//        } else {
+//            return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "Unknown product status", null);
+//        }
+
         if (product.getProductStatus() == productStatus.active) {
-            product.setProductStatus(productStatus.inactive);
+            product.setProductStatus(productStatus.valueOf(status));
         } else if (product.getProductStatus() == productStatus.inactive) {
-            product.setProductStatus(productStatus.active);
+            product.setProductStatus(productStatus.valueOf(status));
         } else {
             return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "Unknown product status", null);
         }
+
 
         productsRepository.save(product);
         return new AuthResponse(HttpStatus.OK.value(), "Product status toggled successfully", null);
