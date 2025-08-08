@@ -48,25 +48,19 @@ public class ProductsService {
         Path filePath = uploadPath.resolve(filename);
         Files.write(filePath, file.getBytes());
 
-
         Products product = new Products();
         product.setProductName(name);
         product.setProductDescription(description);
         product.setProductUrl("/uploads/" + filename);
         product.setProductOrdered(false);
 
-
-
-        product.setProductShapeType(ProductShapeType.valueOf(shapeType.toLowerCase()));
-
+        product.setProductShapeType(shapeType);
 
         int randomNum = (int)(Math.random() * 9000) + 1000;
         String customProductId = "PRODUCT" + randomNum;
         product.setCustomProductId(customProductId);
 
-
         product.setProductStatus(productStatus.active);
-
 
         productsRepository.save(product);
 
@@ -97,7 +91,8 @@ public class ProductsService {
                     product.getCreatedTime(),
                     product.getUpdatedTime(),
                     product.getProductCustomization(),
-                    designs
+                    designs,
+                    product.getProductShapeType()
             ));
         }
 
@@ -122,7 +117,8 @@ public class ProductsService {
                 existedProduct.get().getCreatedTime(),
                 existedProduct.get().getUpdatedTime(),
                 existedProduct.get().getProductCustomization(),
-                designList
+                designList,
+                existedProduct.get().getProductShapeType()
         );
         return new AuthResponse(HttpStatus.OK.value(), "success", imageResponse);
 
@@ -143,9 +139,9 @@ public class ProductsService {
 
 
     @Transactional
-    public AuthResponse updateProductById(Long id, String name, String description, MultipartFile file) throws IOException {
+    public AuthResponse updateProductById(Long id, String name, String description,String shape, MultipartFile file) throws IOException {
         Products existingProduct = productsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 
         if (name != null && !name.isBlank()) {
             existingProduct.setProductName(name);
@@ -153,6 +149,10 @@ public class ProductsService {
 
         if (description != null && !description.isBlank()) {
             existingProduct.setProductDescription(description);
+        }
+
+        if (shape!=null && !shape.isBlank()){
+            existingProduct.setProductShapeType(shape);
         }
 
         if (file != null && !file.isEmpty()) {

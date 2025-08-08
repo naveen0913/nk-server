@@ -23,15 +23,16 @@ public class CartItemController {
         return this.cartItemService =  cartItemService;
     }
 
-    @PostMapping(value = "/add/{userId}/{productId}", consumes = {"multipart/form-data"})
-    public AuthResponse addCartItem(
+    @PostMapping(value = "/add/{option}/{userId}/{productId}", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> addCartItem(
+            @PathVariable Long option,
             @PathVariable Long productId,
             @PathVariable String userId,
             @RequestParam("cartPayload") String cartItem,
             @RequestParam(defaultValue = "customImages", required = false) List<MultipartFile> customImages) throws IOException {
 
-        cartItemService.addCartItem(productId,userId, cartItem, customImages);
-        return new AuthResponse(HttpStatus.CREATED.value(),"created",null);
+        AuthResponse response = cartItemService.addCartItem(option,productId,userId, cartItem, customImages);
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
 

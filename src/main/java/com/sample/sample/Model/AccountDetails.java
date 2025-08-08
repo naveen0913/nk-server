@@ -25,7 +25,7 @@ public class AccountDetails {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
-    @JsonIgnore // 🔁 Prevent circular reference
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "accountDetails", cascade = CascadeType.ALL, orphanRemoval = true)

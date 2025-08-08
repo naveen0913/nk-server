@@ -23,17 +23,7 @@ public class Products {
     private String productUrl;
     private boolean productOrdered;
 
-    @Enumerated(EnumType.STRING)
-    private ProductShapeType productShapeType;
-
-
-    public ProductShapeType getProductShapeType() {
-        return productShapeType;
-    }
-
-    public void setProductShapeType(ProductShapeType productShapeType) {
-        this.productShapeType = productShapeType;
-    }
+    private String productShapeType;
 
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -52,15 +42,11 @@ public class Products {
     private String customProductId;
 
 
-
-
     @Enumerated(EnumType.STRING)
     private productStatus productStatus;
 
     @CreationTimestamp
     private LocalDateTime createdTime;
-
-
 
     @UpdateTimestamp
     private LocalDateTime updatedTime;
@@ -153,6 +139,14 @@ public class Products {
 
     public void setProductUrl(String productUrl) {
         this.productUrl = productUrl;
+    }
+
+    public String getProductShapeType() {
+        return productShapeType;
+    }
+
+    public void setProductShapeType(String productShapeType) {
+        this.productShapeType = productShapeType;
     }
 }
 

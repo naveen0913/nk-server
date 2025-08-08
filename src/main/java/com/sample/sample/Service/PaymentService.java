@@ -118,12 +118,6 @@ public class PaymentService {
                 RazorpayClient razorpayClient = new RazorpayClient(key, secret);
                 com.razorpay.Payment razorpayPayment = razorpayClient.payments.fetch(dto.getPaymentId());
 
-                // Extract payment method (mode) like card, upi, netbanking, etc.
-//                String method = razorpayPayment.get("method");
-//                String bank = razorpayPayment.has("bank") ? razorpayPayment.get("bank") : null;
-//                String wallet = razorpayPayment.has("wallet") ? razorpayPayment.get("wallet") : null;
-//                String payLater = razorpayPayment.has("paylater") ? razorpayPayment.get("paylater") : null;
-
 
                 payment.setPaymentId(dto.getPaymentId());
                 payment.setSignature(dto.getSignature());
@@ -258,7 +252,7 @@ public class PaymentService {
             orderItem.setOptionDiscount(cartItem.getOptiondiscount());
             orderItem.setOptionDiscountPrice(cartItem.getOptiondiscountPrice());
             orderItem.setCustomImages(new ArrayList<>(cartItem.getCustomImages()));
-            orderItem.setLabelDesigns(new HashMap<>(cartItem.getLabelDesigns()));
+            orderItem.setDesigns(new HashMap<>(cartItem.getDesigns()));
             orderItem.setProduct(cartItem.getProduct());
             orderItem.setPayment(payment);
             orderItem.setOrder(savedOrder);

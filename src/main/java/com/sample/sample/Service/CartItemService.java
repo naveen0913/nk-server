@@ -3,12 +3,15 @@ package com.sample.sample.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.CartDTO;
 import com.sample.sample.Model.CartItem;
+import com.sample.sample.Model.CustomizationOption;
 import com.sample.sample.Model.Products;
 import com.sample.sample.Model.User;
 import com.sample.sample.Repository.CartItemRepository;
+import com.sample.sample.Repository.CustomOptionRepository;
 import com.sample.sample.Repository.ProductsRepository;
 import com.sample.sample.Repository.UserRepo;
 import com.sample.sample.Responses.AuthResponse;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,8 +45,11 @@ public class CartItemService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    @Autowired
+    private CustomOptionRepository customOptionRepository;
+
     @Transactional
-    public AuthResponse addCartItem(Long productId, String userId, String cartPayload, List<MultipartFile> customImages) throws IOException {
+    public AuthResponse addCartItem(Long optionId,Long productId, String userId, String cartPayload, List<MultipartFile> customImages) throws IOException {
 
         ObjectMapper objectMapper = new ObjectMapper();
         CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
@@ -60,18 +66,19 @@ public class CartItemService {
         cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
         cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
 
-
         User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
+        CustomizationOption option = customOptionRepository.findById(optionId)
+                                .orElseThrow(() -> new EntityNotFoundException("Custom Option not found"));
 
         Products product = productsRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         cartItem.setUser(user);
         cartItem.setProduct(product);
+        cartItem.setCustomizationOption(option);
 
-        // Process Images
         List<String> imageUrls = new ArrayList<>();
         if (customImages != null && !customImages.isEmpty()) {
             for (MultipartFile file : customImages) {
@@ -86,7 +93,7 @@ public class CartItemService {
         }
 
         cartItem.setCustomImages(imageUrls.isEmpty() ? null : imageUrls);
-        cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
+        cartItem.setDesigns(cartDTO.getCartItemDesigns());
 
         cartItemRepository.save(cartItem);
 
@@ -96,8 +103,6 @@ public class CartItemService {
         int quantity = cartDTO.getCartQuantity();
 
         mailService.sendCartItemAddedMail(toEmail, userName, productName, quantity);
-
-
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
@@ -116,9 +121,9 @@ public class CartItemService {
         cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
         cartItem.setCartQuantity(cartDTO.getCartQuantity());
 
-        if (cartDTO.getLabelDesigns() != null) {
-            cartItem.setLabelDesigns(cartDTO.getLabelDesigns());
-        }
+//        if (cartDTO.getCartItemDesigns() != null) {
+//            cartItem.setDesigns(cartDTO.getCartItemDesigns());
+//        }
 
         if (customImages != null && !customImages.isEmpty()) {
 
@@ -149,8 +154,6 @@ public class CartItemService {
         }
 
         cartItemRepository.save(cartItem);
-
-
         User user = cartItem.getUser();
         String toEmail = user.getEmail();
         String userName = user.getUsername();
@@ -158,9 +161,6 @@ public class CartItemService {
         int quantity = cartItem.getCartQuantity();
 
         mailService.sendCartItemUpdatedMail(toEmail, userName, productName, quantity);
-
-
-
         return new AuthResponse(HttpStatus.OK.value(), "updated", null);
     }
 
@@ -179,7 +179,6 @@ public class CartItemService {
         List<User> users = userRepo.findAll();
         return new AuthResponse(HttpStatus.OK.value(), "fetched", users);
     }
-
 
 
     public AuthResponse deleteCartItem(Long cartItemId) {
@@ -227,8 +226,6 @@ public class CartItemService {
 
 
         mailService.sendCartClearedMail(toEmail, username, productNames);
-
-
         cartItemRepository.deleteAll(userCartItems);
 
         return new AuthResponse(HttpStatus.OK.value(), "All cart items deleted and email sent", null);

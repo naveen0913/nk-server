@@ -20,6 +20,15 @@ public class ImageResponse {
     private LocalDateTime updated;
     private ProductCustomization productCustomization;
     private List<Design> productDesigns;
+    private String productShapeType;
+
+    public String getProductShapeType() {
+        return productShapeType;
+    }
+
+    public void setProductShapeType(String productShapeType) {
+        this.productShapeType = productShapeType;
+    }
 
     public productStatus getStatus() {
         return status;
@@ -111,7 +120,7 @@ public class ImageResponse {
         this.productUrl = productUrl;
     }
 
-    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns) {
+    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns, String productShapeType) {
         this.productId = productId;
         this.productName = productName;
         this.productdescription = productdescription;
@@ -123,5 +132,6 @@ public class ImageResponse {
         this.updated = updated;
         this.productCustomization = productCustomization;
         this.productDesigns = productDesigns;
+        this.productShapeType = productShapeType;
     }
 }

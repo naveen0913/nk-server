@@ -22,14 +22,17 @@ public class CartDTO {
 
     private double optiondiscountPrice;
 
-    private Map<String, Boolean> labelDesigns;
+    private Map<String, Long> cartItemDesigns;
 
-    public Map<String, Boolean> getLabelDesigns() {
-        return labelDesigns;
+//    private List<Map<String, Long>> cartItemDesigns;
+
+
+    public Map<String, Long> getCartItemDesigns() {
+        return cartItemDesigns;
     }
 
-    public void setLabelDesigns(Map<String, Boolean> labelDesigns) {
-        this.labelDesigns = labelDesigns;
+    public void setCartItemDesigns(Map<String, Long> cartItemDesigns) {
+        this.cartItemDesigns = cartItemDesigns;
     }
 
     public String getCartItemName() {

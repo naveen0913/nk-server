@@ -41,9 +41,14 @@ public class CartItem {
     private List<String> customImages = new ArrayList<>();
 
     @ElementCollection
-    @MapKeyColumn(name = "label_name")
-    @Column(name = "label_value")
-    private Map<String, Boolean> labelDesigns = new HashMap<>();
+    @MapKeyColumn(name = "design_id")
+    @Column(name = "design")
+    private Map<String, Long> designs = new HashMap<>();
+
+//    @Lob
+//    @Column(name = "designs", columnDefinition = "TEXT")
+//    private String designs;
+
 
     @ManyToOne(optional = false) // Mandatory
     @JoinColumn(name = "user_id", nullable = false)
@@ -53,6 +58,17 @@ public class CartItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
 
+    @OneToOne(optional = false)
+    @JoinColumn(name = "customOption_id", nullable = false)
+    private CustomizationOption customizationOption;
+
+    public CustomizationOption getCustomizationOption() {
+        return customizationOption;
+    }
+
+    public void setCustomizationOption(CustomizationOption customizationOption) {
+        this.customizationOption = customizationOption;
+    }
 
     // add timestamps optionally
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -186,11 +202,21 @@ public class CartItem {
         this.customImages = customImages;
     }
 
-    public Map<String, Boolean> getLabelDesigns() {
-        return labelDesigns;
+    public Map<String, Long> getDesigns() {
+        return designs;
     }
 
-    public void setLabelDesigns(Map<String, Boolean> labelDesigns) {
-        this.labelDesigns = labelDesigns;
+    public void setDesigns(Map<String, Long> designs) {
+        this.designs = designs;
     }
+
+    //
+//    public String getDesignsJson() {
+//        return designsJson;
+//    }
+//
+//    public void setDesignsJson(String designsJson) {
+//        this.designsJson = designsJson;
+//    }
+
 }

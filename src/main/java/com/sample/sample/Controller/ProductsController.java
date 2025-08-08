@@ -20,7 +20,7 @@ public class ProductsController {
     @PostMapping
     public ResponseEntity<?> addProduct(@RequestParam("name") String name,
                                         @RequestParam("description") String description,
-                                        @RequestParam String shapeType,
+                                        @RequestParam("shape") String shapeType,
                                         @RequestParam("file") MultipartFile file) throws IOException {
         AuthResponse response = productsService.saveProducts(name, description,shapeType, file);
         return ResponseEntity.status(response.getCode()).body(response);
@@ -49,9 +49,10 @@ public class ProductsController {
             @PathVariable Long productId,
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "shape", required = false) String shape,
             @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 
-        AuthResponse authResponse = productsService.updateProductById(productId, name, description, file);
+        AuthResponse authResponse = productsService.updateProductById(productId, name, description,shape, file);
         return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 

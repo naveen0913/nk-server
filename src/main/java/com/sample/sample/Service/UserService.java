@@ -137,7 +137,7 @@ public class UserService {
 
 
 
-        mailService.sendProfileUpdateMail(user.getEmail(), user.getUsername());
+//        mailService.sendProfileUpdateMail(user.getEmail(), user.getUsername());
         return new AuthResponse(HttpStatus.OK.value(), "User updated successfully", user);
     }
 

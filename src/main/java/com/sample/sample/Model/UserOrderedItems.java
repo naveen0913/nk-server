@@ -30,9 +30,9 @@ public class UserOrderedItems {
     private List<String> customImages = new ArrayList<>();
 
     @ElementCollection
-    @MapKeyColumn(name = "label_name")
-    @Column(name = "label_value")
-    private Map<String, Boolean> labelDesigns = new HashMap<>();
+    @MapKeyColumn(name = "ordered_design")
+    @Column(name = "design_id")
+    private Map<String, Long> designs = new HashMap<>();
 
     @ManyToOne
     @JoinColumn(name = "order_id")
@@ -144,12 +144,12 @@ public class UserOrderedItems {
         this.customImages = customImages;
     }
 
-    public Map<String, Boolean> getLabelDesigns() {
-        return labelDesigns;
+    public Map<String, Long> getDesigns() {
+        return designs;
     }
 
-    public void setLabelDesigns(Map<String, Boolean> labelDesigns) {
-        this.labelDesigns = labelDesigns;
+    public void setDesigns(Map<String, Long> designs) {
+        this.designs = designs;
     }
 
     public Orders getOrder() {
