@@ -44,6 +44,10 @@ public class DashboardService {
         return paymentRepository.count();
     }
 
+    public long getTodayPayments(){
+        return paymentRepository.countTodayPayments();
+    }
+
     public long getTotalCartItems(){
         return cartItemRepository.count();
     }
@@ -54,6 +58,10 @@ public class DashboardService {
 
     public long getTotalDesigns(){
         return designRepo.count();
+    }
+
+    public long getCurrentDateOrders(){
+        return  orderRepository.countTodayOrders();
     }
 
 }

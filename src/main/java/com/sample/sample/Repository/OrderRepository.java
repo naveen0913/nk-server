@@ -9,9 +9,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderRepository extends JpaRepository<Orders,Long> {
-@Query("SELECT o FROM Orders o WHERE o.payment.accountDetails.id = :accountId")
-List<Orders> findAllByAccountId(@Param("accountId") Long accountId);
+public interface OrderRepository extends JpaRepository<Orders, Long> {
+    @Query("SELECT o FROM Orders o WHERE o.payment.accountDetails.id = :accountId")
+    List<Orders> findAllByAccountId(@Param("accountId") Long accountId);
 
     Optional<Orders> findByOrderId(String orderId);
+
+    @Query("SELECT COUNT(o) FROM Orders o WHERE DATE(o.createdAt) = CURRENT_DATE")
+    long countTodayOrders();
+
 }

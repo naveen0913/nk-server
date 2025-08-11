@@ -33,11 +33,10 @@ public class DesignController {
     @PutMapping("/{designId}")
     public ResponseEntity<AuthResponse> updateDesign(
             @PathVariable Long designId,
-            @RequestParam(required = false) String designName,
-            @RequestParam(required = false) String designUrl,
+            @RequestParam(value = "designName", required = false) String designName,
             @RequestParam(value = "imageFiles", required = false) MultipartFile[] imageFiles
     ) throws IOException {
-        AuthResponse response = designService.updateDesign(designId, designName, designUrl, imageFiles);
+        AuthResponse response = designService.updateDesign(designId, designName, imageFiles);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
