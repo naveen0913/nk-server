@@ -123,7 +123,6 @@ public class PaymentService {
                 payment.setSignature(dto.getSignature());
                 payment.setStatus(PaymentStatus.SUCCESS);
                 payment.setPaymentPaidDate(new Date());
-//                payment.setPaymentMode(method);
 
                 paymentRepository.save(payment);
                 createOrderAfterPayment(payment);
