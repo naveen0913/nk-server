@@ -68,7 +68,7 @@ public class DesignService {
 
 
 
-    public AuthResponse updateDesign(Long designId, String designName, String designUrl, MultipartFile[] imageFiles) throws IOException {
+    public AuthResponse updateDesign(Long designId, String designName, MultipartFile[] imageFiles) throws IOException {
         Optional<Design> optionalDesign = designRepository.findById(designId);
         if (optionalDesign.isEmpty()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Design not found with ID: " + designId, null);

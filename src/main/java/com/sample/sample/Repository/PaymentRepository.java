@@ -19,5 +19,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByAccountDetails_Id(Long accountId);
 
+    @Query("SELECT COUNT(o) FROM Payment o WHERE DATE(o.paymentPaidDate) = CURRENT_DATE")
+    long countTodayPayments();
+
 }
 

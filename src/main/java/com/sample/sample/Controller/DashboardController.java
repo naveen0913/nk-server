@@ -24,6 +24,8 @@ public class DashboardController {
         long totalPayments = dashboardService.getTotalPayments();
         long totalAddresses = dashboardService.getTotalAddresses();
         long totalDesigns = dashboardService.getTotalDesigns();
-        return new DashboardResponse(totalProducts, totalUsers,totalOrders,totalPayments,totalCartItems,totalAddresses,totalDesigns);
+        long todayOrders = dashboardService.getCurrentDateOrders();
+        long todayPayments = dashboardService.getTodayPayments();
+        return new DashboardResponse(totalProducts, totalUsers,totalOrders,totalPayments,totalCartItems,totalAddresses,totalDesigns,todayOrders,todayPayments);
     }
 }
