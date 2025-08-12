@@ -64,7 +64,7 @@ public class ProductsService {
 
         productsRepository.save(product);
 
-        return new AuthResponse(HttpStatus.CREATED.value(), "Product created successfully", null);
+        return new AuthResponse(HttpStatus.CREATED.value(), "Product created successfully", product);
     }
 
 

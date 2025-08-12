@@ -60,7 +60,7 @@ public class ProductCustomizationService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         ProductCustomization entity = new ProductCustomization();
-        entity.setDescription(dto.getDescription());
+//        entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
         entity.setCart(dto.isCart());
@@ -166,7 +166,7 @@ public class ProductCustomizationService {
                 .orElseThrow(() -> new RuntimeException("Customization not found"));
 
 
-        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
+//        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
         entity.setUpload(dto.isUpload());
