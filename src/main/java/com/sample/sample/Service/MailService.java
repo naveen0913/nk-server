@@ -1,10 +1,13 @@
 package com.sample.sample.Service;
 
 import com.sample.sample.Model.TrackingStatus;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -287,25 +290,31 @@ public class MailService {
         mailSender.send(message);
     }
 
+    public void sendTransactionSuccessfulMail(String email, String username, byte[] receipt) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+            helper.setFrom(fromEmail);
+            helper.setTo(email);
+            helper.setSubject("Transaction Successful");
 
+            String body = "Hi " + username + ",\n\n"
+                    + "Your transaction was successful. Please find the transaction receipt attached.\n\n"
+                    + "Warm regards,\n"
+                    + "The WeLoveYou Team";
 
+            helper.setText(body);
 
+            // Attach PDF receipt
+            helper.addAttachment("Transaction_Receipt.pdf", new ByteArrayResource(receipt));
 
+            mailSender.send(message);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

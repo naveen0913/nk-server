@@ -1,5 +1,10 @@
 package com.sample.sample.Service;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
@@ -19,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -108,33 +114,51 @@ public class PaymentService {
 
     public boolean verifyPayment(PaymentRequestDTO dto) {
         try {
+            Payment payment = paymentRepository.findByRazorpayOrderId(dto.getRazorpayOrderId())
+                    .orElseThrow(() -> new RuntimeException(
+                            "Payment not found for order ID: " + dto.getRazorpayOrderId()));
+
             String payload = dto.getRazorpayOrderId() + "|" + dto.getPaymentId();
             String generatedSignature = hmacSHA256(payload, secret);
-
-            if (generatedSignature.equals(dto.getSignature())) {
-                Payment payment = paymentRepository.findByRazorpayOrderId(dto.getRazorpayOrderId())
-                        .orElseThrow(() -> new RuntimeException("Payment not found for order ID: " + dto.getRazorpayOrderId()));
-
-                RazorpayClient razorpayClient = new RazorpayClient(key, secret);
-                com.razorpay.Payment razorpayPayment = razorpayClient.payments.fetch(dto.getPaymentId());
-
-
-                payment.setPaymentId(dto.getPaymentId());
-                payment.setSignature(dto.getSignature());
-                payment.setStatus(PaymentStatus.SUCCESS);
-                payment.setPaymentPaidDate(new Date());
-
+            if (!generatedSignature.equals(dto.getSignature())) {
+                payment.setStatus(PaymentStatus.FAILED);
                 paymentRepository.save(payment);
-                createOrderAfterPayment(payment);
-
-                return true;
+                return false;
             }
+
+            RazorpayClient razorpayClient = new RazorpayClient(key, secret);
+            com.razorpay.Payment razorpayPayment = razorpayClient.payments.fetch(dto.getPaymentId());
+            String razorpayStatus = razorpayPayment.get("status");
+
+            if (!"captured".equalsIgnoreCase(razorpayStatus)) {
+                payment.setStatus(PaymentStatus.FAILED);
+                paymentRepository.save(payment);
+                return false;
+            }
+
+            payment.setPaymentId(dto.getPaymentId());
+            payment.setSignature(dto.getSignature());
+            payment.setStatus(PaymentStatus.SUCCESS);
+            payment.setPaymentPaidDate(new Date());
+
+            createOrderAfterPayment(payment);
+
+            byte[] receiptPdf = generateTransactionPDF(payment);
+
+            mailService.sendTransactionSuccessfulMail(
+                    payment.getAccountDetails().getAccountEmail(),
+                    payment.getAccountDetails().getUser().getUsername(),
+                    receiptPdf
+            );
+            paymentRepository.save(payment);
+            return true;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
     }
+
 
     private String hmacSHA256(String data, String secret) throws Exception {
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
@@ -256,7 +280,7 @@ public class PaymentService {
             orderItem.setPayment(payment);
             orderItem.setOrder(savedOrder);
 
-            Products products = productsRepository.findById(cartItem.getProduct().getProductId()).orElseThrow(()-> new EntityNotFoundException("Product not found"));
+            Products products = productsRepository.findById(cartItem.getProduct().getProductId()).orElseThrow(() -> new EntityNotFoundException("Product not found"));
             products.setProductOrdered(true);
             productsRepository.save(products);
             orderItems.add(orderItem);
@@ -271,8 +295,7 @@ public class PaymentService {
 
         String email = payment.getAccountDetails().getAccountEmail();
         String orderNumber = order.getOrderId();
-        mailService.sendOrderStatusMail(email, orderNumber,payment.getAccountDetails().getFirstName(), payment.getAccountDetails().getLastName(), TrackingStatus.ORDER_PLACED);
-
+        mailService.sendOrderStatusMail(email, orderNumber, payment.getAccountDetails().getFirstName(), payment.getAccountDetails().getLastName(), TrackingStatus.ORDER_PLACED);
 
 
         OrdersTracking tracking = new OrdersTracking();
@@ -295,15 +318,6 @@ public class PaymentService {
         ordersTrackingRepository.save(tracking);
         savedOrder.setOrderTracking(tracking);
         orderRepository.save(savedOrder);
-
-        // Notify admin
-//        NotificationDTO dto = new NotificationDTO();
-//        dto.setTitle("New Order");
-//        dto.setMessage("Order " + order.getOrderId() + " has been placed.");
-//        dto.setRecipientType("ADMIN");
-//        dto.setOrderId(order.getOrderId());
-//        notificationService.notifyAdmin(dto);
-
 
     }
 
@@ -381,5 +395,36 @@ public class PaymentService {
     }
 
 
+    private byte[] generateTransactionPDF(Payment payment) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Document document = new Document();
+            PdfWriter.getInstance(document, out);
+            document.open();
 
+            document.add(new Paragraph("Transaction Receipt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
+            document.add(new Paragraph(" "));
+
+            PdfPTable table = new PdfPTable(2);
+            table.setWidthPercentage(100);
+            table.addCell("Payment ID");
+            table.addCell(payment.getPaymentId());
+            table.addCell("Order ID");
+            table.addCell(payment.getRazorpayOrderId());
+            table.addCell("Amount");
+            table.addCell("₹" + payment.getAmount());
+            table.addCell("Status");
+            table.addCell(payment.getStatus().toString());
+            table.addCell("Paid Date");
+            table.addCell(payment.getPaymentPaidDate().toString());
+
+            document.add(table);
+            document.close();
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
+
+    }
 }

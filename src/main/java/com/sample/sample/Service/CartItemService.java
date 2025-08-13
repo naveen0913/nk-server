@@ -102,7 +102,7 @@ public class CartItemService {
         String productName = product.getProductName();
         int quantity = cartDTO.getCartQuantity();
 
-        mailService.sendCartItemAddedMail(toEmail, userName, productName, quantity);
+//        mailService.sendCartItemAddedMail(toEmail, userName, productName, quantity);
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
@@ -160,7 +160,7 @@ public class CartItemService {
         String productName = cartItem.getProduct().getProductName();
         int quantity = cartItem.getCartQuantity();
 
-        mailService.sendCartItemUpdatedMail(toEmail, userName, productName, quantity);
+//        mailService.sendCartItemUpdatedMail(toEmail, userName, productName, quantity);
         return new AuthResponse(HttpStatus.OK.value(), "updated", null);
     }
 
@@ -196,11 +196,9 @@ public class CartItemService {
         String username = user.getUsername(); // use getName() or appropriate method
         String productName = cartItem.getProduct().getProductName();
 
-        // Delete the item
         cartItemRepository.deleteById(cartItemId);
 
-        // Send deletion confirmation email
-        mailService.sendCartItemDeletedMail(toEmail, username, productName);
+//        mailService.sendCartItemDeletedMail(toEmail, username, productName);
 
         return new AuthResponse(HttpStatus.OK.value(), "Cart item deleted and email sent", null);
     }
@@ -225,7 +223,7 @@ public class CartItemService {
                 .toList();
 
 
-        mailService.sendCartClearedMail(toEmail, username, productNames);
+//        mailService.sendCartClearedMail(toEmail, username, productNames);
         cartItemRepository.deleteAll(userCartItems);
 
         return new AuthResponse(HttpStatus.OK.value(), "All cart items deleted and email sent", null);
