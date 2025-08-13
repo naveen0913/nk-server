@@ -13,7 +13,7 @@ public class ProductCustomization {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
+//    private String description;
     private boolean cart;
     private boolean input;
     private boolean quantity;
@@ -62,13 +62,6 @@ public class ProductCustomization {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public boolean isInput() {
         return input;
