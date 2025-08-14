@@ -394,7 +394,6 @@ public class PaymentService {
         return new AuthResponse(HttpStatus.OK.value(), "All payments fetched successfully", responseList);
     }
 
-
     private byte[] generateTransactionPDF(Payment payment) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Document document = new Document();
