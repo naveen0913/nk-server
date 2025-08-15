@@ -21,7 +21,7 @@ public class ImageResponse {
     private LocalDateTime updated;
     private ProductCustomization productCustomization;
     private List<Design> productDesigns;
-    private List<CustomImageResponse> customImageResponses;
+    private List<CustomImageResponse> customImageResponse;
 
 
     public productStatus getStatus() {
@@ -40,12 +40,13 @@ public class ImageResponse {
         this.productOrdered = productOrdered;
     }
 
-    public List<CustomImageResponse> getCustomImageResponses() {
-        return customImageResponses;
+
+    public List<CustomImageResponse> getCustomImageResponse() {
+        return customImageResponse;
     }
 
-    public void setCustomImageResponses(List<CustomImageResponse> customImageResponses) {
-        this.customImageResponses = customImageResponses;
+    public void setCustomImageResponse(List<CustomImageResponse> customImageResponse) {
+        this.customImageResponse = customImageResponse;
     }
 
     public List<Design> getProductDesigns() {
@@ -120,7 +121,7 @@ public class ImageResponse {
         this.productUrl = productUrl;
     }
 
-    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns, List<CustomImageResponse> customImageResponses) {
+    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns, List<CustomImageResponse> customImageResponse) {
         this.productId = productId;
         this.productName = productName;
         this.productdescription = productdescription;
@@ -132,6 +133,6 @@ public class ImageResponse {
         this.updated = updated;
         this.productCustomization = productCustomization;
         this.productDesigns = productDesigns;
-        this.customImageResponses = customImageResponses;
+        this.customImageResponse = customImageResponse;
     }
 }
