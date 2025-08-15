@@ -58,15 +58,15 @@ public class CartItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "customOption_id", nullable = false)
-    private CustomizationOption customizationOption;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "cart_item_id", nullable = false) // New FK name
+    private List<CustomizationOption> customizationOption = new ArrayList<>();
 
-    public CustomizationOption getCustomizationOption() {
+    public List<CustomizationOption> getCustomizationOption() {
         return customizationOption;
     }
 
-    public void setCustomizationOption(CustomizationOption customizationOption) {
+    public void setCustomizationOption(List<CustomizationOption> customizationOption) {
         this.customizationOption = customizationOption;
     }
 

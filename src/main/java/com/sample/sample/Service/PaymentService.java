@@ -1,8 +1,7 @@
 package com.sample.sample.Service;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.razorpay.Order;
@@ -26,7 +25,11 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 //import static com.sample.sample.Model.TrackingStatus.ORDER_PLACED;
@@ -394,36 +397,381 @@ public class PaymentService {
         return new AuthResponse(HttpStatus.OK.value(), "All payments fetched successfully", responseList);
     }
 
+//    private byte[] generateTransactionPDF(Payment payment) {
+//        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+//            Document document = new Document();
+//            PdfWriter.getInstance(document, out);
+//            document.open();
+//
+//            document.add(new Paragraph("Transaction Receipt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
+//            document.add(new Paragraph(" "));
+//
+//            PdfPTable table = new PdfPTable(2);
+//            table.setWidthPercentage(100);
+//            table.addCell("Payment ID");
+//            table.addCell(payment.getPaymentId());
+//            table.addCell("Order ID");
+//            table.addCell(payment.getRazorpayOrderId());
+//            table.addCell("Amount");
+//            table.addCell("₹" + payment.getAmount());
+//            table.addCell("Status");
+//            table.addCell(payment.getStatus().toString());
+//            table.addCell("Paid Date");
+//            table.addCell(payment.getPaymentPaidDate().toString());
+//
+//            document.add(table);
+//            document.close();
+//            return out.toByteArray();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new byte[0];
+//        }
+//
+//    }
+
+//    private byte[] generateTransactionPDF(Payment payment) {
+//        try {
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+//            PdfWriter.getInstance(document, baos);
+//            document.open();
+//
+//            // Fonts
+//            Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+//            Font boldFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+//            Font normalFont = new Font(Font.FontFamily.HELVETICA, 10);
+//
+//            // --- Logo + Title ---
+//            Paragraph logoTitle = new Paragraph("WeLoveYou - TAX INVOICE", titleFont);
+//            logoTitle.setAlignment(Element.ALIGN_CENTER);
+//            document.add(logoTitle);
+//            document.add(Chunk.NEWLINE);
+//
+//            // --- Invoice Info ---
+//            PdfPTable invoiceInfoTable = new PdfPTable(2);
+//            invoiceInfoTable.setWidthPercentage(100);
+//            invoiceInfoTable.setWidths(new float[]{1, 1});
+//
+//            invoiceInfoTable.addCell(getNoBorderCell("Order ID: " + payment.getOrder().getOrderId(), normalFont));
+//            invoiceInfoTable.addCell(getNoBorderCell("Invoice Date: " + payment.getPaymentPaidDate(), normalFont));
+//
+//            invoiceInfoTable.addCell(getNoBorderCell("Invoice Number: INV-" + payment.getId(), normalFont));
+//            invoiceInfoTable.addCell(getNoBorderCell("Order Status: " + payment.getStatus(), normalFont));
+//
+//            document.add(invoiceInfoTable);
+//            document.add(Chunk.NEWLINE);
+//
+//            // --- Addresses ---
+//            UserAddress userAddress = payment.getUserAddress();
+//            String shippingAddress = (userAddress != null)
+//                    ? userAddress.getFirstName() + "\n" + userAddress.getAddressLine1()+ userAddress.getAddressLine2() + "\n" +
+//                    userAddress.getCity() + ", " + userAddress.getState() + " - " +
+//                    userAddress.getPincode() + "\n" + userAddress.getCountry()
+//                    : "N/A";
+//
+//            PdfPTable addressTable = new PdfPTable(2);
+//            addressTable.setWidthPercentage(100);
+//            addressTable.setWidths(new float[]{1, 1});
+//
+//            PdfPCell shippingCell = new PdfPCell();
+//            shippingCell.addElement(new Paragraph("Shipping Address:", boldFont));
+//            shippingCell.addElement(new Paragraph(shippingAddress, normalFont));
+//
+//            PdfPCell billingCell = new PdfPCell();
+//            billingCell.addElement(new Paragraph("Billing Address:", boldFont));
+//            billingCell.addElement(new Paragraph(shippingAddress, normalFont));
+//
+//            addressTable.addCell(shippingCell);
+//            addressTable.addCell(billingCell);
+//
+//            document.add(addressTable);
+//            document.add(Chunk.NEWLINE);
+//
+//            // --- Items Table ---
+//            PdfPTable itemTable = new PdfPTable(4);
+//            itemTable.setWidthPercentage(100);
+//            itemTable.setWidths(new float[]{4, 1, 2, 2});
+//
+//            itemTable.addCell(getHeaderCell("Item"));
+//            itemTable.addCell(getHeaderCell("Qty"));
+//            itemTable.addCell(getHeaderCell("Price"));
+//            itemTable.addCell(getHeaderCell("Total"));
+//
+//            double subtotal = 0;
+//
+//            if (payment.getOrder() != null && payment.getOrder().getOrderItems() != null) {
+//                for (UserOrderedItems item : payment.getOrder().getOrderItems()) {
+//                    double totalPrice = item.getQuantity() * item.getTotalPrice();
+//                    subtotal += totalPrice;
+//
+//                    itemTable.addCell(getNormalCell(item.getItemName()));
+//                    itemTable.addCell(getNormalCell(String.valueOf(item.getQuantity())));
+//                    itemTable.addCell(getNormalCell("₹" + item.getTotalPrice()));
+//                    itemTable.addCell(getNormalCell("₹" + totalPrice));
+//                }
+//            }
+//
+//            document.add(itemTable);
+//
+//            // --- Summary ---
+//            double gst = payment.getGstAmount() != null ? payment.getGstAmount() : 0;
+//            double shipping = payment.getShippingPrice() != null ? payment.getShippingPrice() : 0;
+//            double total = subtotal + gst + shipping;
+//
+//            PdfPTable summaryTable = new PdfPTable(2);
+//            summaryTable.setWidthPercentage(40);
+//            summaryTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
+//
+//            summaryTable.addCell(getNoBorderCell("Subtotal:", boldFont));
+//            summaryTable.addCell(getNoBorderRightAlign("₹" + subtotal, boldFont));
+//
+//            summaryTable.addCell(getNoBorderCell("GST:", boldFont));
+//            summaryTable.addCell(getNoBorderRightAlign("₹" + gst, boldFont));
+//
+//            summaryTable.addCell(getNoBorderCell("Shipping:", boldFont));
+//            summaryTable.addCell(getNoBorderRightAlign("₹" + shipping, boldFont));
+//
+//            summaryTable.addCell(getNoBorderCell("Total:", boldFont));
+//            summaryTable.addCell(getNoBorderRightAlign("₹" + total, boldFont));
+//
+//            document.add(summaryTable);
+//
+//            // Footer note
+//            Paragraph footer = new Paragraph("This is a computer-generated invoice and does not require a signature.", normalFont);
+//            footer.setAlignment(Element.ALIGN_CENTER);
+//            document.add(Chunk.NEWLINE);
+//            document.add(footer);
+//
+//            document.close();
+//            return baos.toByteArray();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+//
+//    // Helper methods
+//    private PdfPCell getHeaderCell(String text) {
+//        Font boldFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
+//        PdfPCell cell = new PdfPCell(new Paragraph(text, boldFont));
+//        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+//        return cell;
+//    }
+//
+//    private PdfPCell getNormalCell(String text) {
+//        Font normalFont = new Font(Font.FontFamily.HELVETICA, 10);
+//        PdfPCell cell = new PdfPCell(new Paragraph(text, normalFont));
+//        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+//        return cell;
+//    }
+//
+//    private PdfPCell getNoBorderCell(String text, Font font) {
+//        PdfPCell cell = new PdfPCell(new Paragraph(text, font));
+//        cell.setBorder(Rectangle.NO_BORDER);
+//        return cell;
+//    }
+//
+//    private PdfPCell getNoBorderRightAlign(String text, Font font) {
+//        PdfPCell cell = new PdfPCell(new Paragraph(text, font));
+//        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+//        cell.setBorder(Rectangle.NO_BORDER);
+//        return cell;
+//    }
+//
+
+
     private byte[] generateTransactionPDF(Payment payment) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Document document = new Document();
-            PdfWriter.getInstance(document, out);
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+            PdfWriter.getInstance(document, baos);
             document.open();
 
-            document.add(new Paragraph("Transaction Receipt", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
-            document.add(new Paragraph(" "));
+            // Fonts
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+            Font headerBoldFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.HELVETICA, 10);
 
-            PdfPTable table = new PdfPTable(2);
-            table.setWidthPercentage(100);
-            table.addCell("Payment ID");
-            table.addCell(payment.getPaymentId());
-            table.addCell("Order ID");
-            table.addCell(payment.getRazorpayOrderId());
-            table.addCell("Amount");
-            table.addCell("₹" + payment.getAmount());
-            table.addCell("Status");
-            table.addCell(payment.getStatus().toString());
-            table.addCell("Paid Date");
-            table.addCell(payment.getPaymentPaidDate().toString());
+            // --- Logo + Title ---
+            Paragraph logoTitle = new Paragraph("WeLoveYou - TAX INVOICE", titleFont);
+            logoTitle.setAlignment(Element.ALIGN_CENTER);
+            document.add(logoTitle);
+            document.add(Chunk.NEWLINE);
 
-            document.add(table);
+            // Transform Order ID for display and invoice number
+            String originalOrderId = payment.getOrder().getOrderId();
+            String transformedOrderId = originalOrderId;
+            String invoiceNumberPart = originalOrderId;
+
+            if (originalOrderId != null && originalOrderId.length() > 1) {
+                int halfLength = originalOrderId.length() / 2;
+                String firstHalf = originalOrderId.substring(0, halfLength).toUpperCase();
+                String lastDigits = originalOrderId.substring(originalOrderId.length() - 4);
+                transformedOrderId = firstHalf + originalOrderId.substring(halfLength).toLowerCase();
+                invoiceNumberPart = firstHalf + lastDigits;
+            }
+
+            // --- Format Invoice Date + Time ---
+            String formattedDateTime = "";
+            if (payment.getPaymentPaidDate() != null) {
+                ZonedDateTime zonedDateTime = payment.getPaymentPaidDate().toInstant()
+                        .atZone(ZoneId.systemDefault());
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM, h:mm a");
+                formattedDateTime = zonedDateTime.format(formatter); // Example: 14 August, 6:00 PM
+            }
+
+            // --- Amazon-style Invoice Info Box ---
+            PdfPTable invoiceInfoTable = new PdfPTable(2);
+            invoiceInfoTable.setWidthPercentage(100);
+            invoiceInfoTable.setWidths(new float[]{1, 1});
+
+            invoiceInfoTable.addCell(getAmazonStyleCell("Order ID: " + transformedOrderId, headerBoldFont));
+            invoiceInfoTable.addCell(getAmazonStyleCell("Invoice Date: " + formattedDateTime, headerBoldFont));
+
+            invoiceInfoTable.addCell(getAmazonStyleCell("Invoice Number: INV-" + invoiceNumberPart, headerBoldFont));
+            invoiceInfoTable.addCell(getAmazonStyleCell("Payment ID: " + payment.getPaymentId(), headerBoldFont));
+
+            invoiceInfoTable.addCell(getAmazonStyleCell("Payment Status: " + payment.getStatus(), headerBoldFont));
+            invoiceInfoTable.addCell(getAmazonStyleCell("", headerBoldFont)); // Empty cell
+
+            document.add(invoiceInfoTable);
+            document.add(Chunk.NEWLINE);
+
+            // --- Addresses ---
+            UserAddress userAddress = payment.getUserAddress();
+            String shippingAddress = (userAddress != null)
+                    ? userAddress.getFirstName() + "\n" + userAddress.getAddressLine1() + userAddress.getAddressLine2() + "\n" +
+                    userAddress.getCity() + ", " + userAddress.getState() + " - " +
+                    userAddress.getPincode() + "\n" + userAddress.getCountry()
+                    : "N/A";
+
+            PdfPTable addressTable = new PdfPTable(2);
+            addressTable.setWidthPercentage(100);
+            addressTable.setWidths(new float[]{1, 1});
+
+            PdfPCell shippingCell = new PdfPCell();
+            shippingCell.addElement(new Paragraph("Shipping Address:", headerBoldFont));
+            shippingCell.addElement(new Paragraph(shippingAddress, normalFont));
+
+            PdfPCell billingCell = new PdfPCell();
+            billingCell.addElement(new Paragraph("Billing Address:", headerBoldFont));
+            billingCell.addElement(new Paragraph(shippingAddress, normalFont));
+
+            addressTable.addCell(shippingCell);
+            addressTable.addCell(billingCell);
+
+            document.add(addressTable);
+            document.add(Chunk.NEWLINE);
+
+            // --- Items Table ---
+            PdfPTable itemTable = new PdfPTable(4);
+            itemTable.setWidthPercentage(100);
+            itemTable.setWidths(new float[]{4, 1, 2, 2});
+
+            itemTable.addCell(getHeaderCell("Item"));
+            itemTable.addCell(getHeaderCell("Qty"));
+            itemTable.addCell(getHeaderCell("Price"));
+            itemTable.addCell(getHeaderCell("Total"));
+
+            double subtotal = 0;
+
+            if (payment.getOrder() != null && payment.getOrder().getOrderItems() != null) {
+                for (UserOrderedItems item : payment.getOrder().getOrderItems()) {
+                    double totalPrice = item.getQuantity() * item.getTotalPrice();
+                    subtotal += totalPrice;
+
+                    itemTable.addCell(getNormalCell(item.getItemName()));
+                    itemTable.addCell(getNormalCell(String.valueOf(item.getQuantity())));
+                    itemTable.addCell(getNormalCell("₹" + item.getTotalPrice()));
+                    itemTable.addCell(getNormalCell("₹" + totalPrice));
+                }
+            }
+
+            document.add(itemTable);
+
+            // --- Summary ---
+            double gst = payment.getGstAmount() != null ? payment.getGstAmount() : 0;
+            double shipping = payment.getShippingPrice() != null ? payment.getShippingPrice() : 0;
+            double total = subtotal + gst + shipping;
+
+            PdfPTable summaryTable = new PdfPTable(2);
+            summaryTable.setWidthPercentage(40);
+            summaryTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+            summaryTable.addCell(getNoBorderCell("Subtotal:", headerBoldFont));
+            summaryTable.addCell(getNoBorderRightAlign("₹" + subtotal, headerBoldFont));
+
+            summaryTable.addCell(getNoBorderCell("GST:", headerBoldFont));
+            summaryTable.addCell(getNoBorderRightAlign("₹" + gst, headerBoldFont));
+
+            summaryTable.addCell(getNoBorderCell("Shipping:", headerBoldFont));
+            summaryTable.addCell(getNoBorderRightAlign("₹" + shipping, headerBoldFont));
+
+            summaryTable.addCell(getNoBorderCell("Total:", headerBoldFont));
+            summaryTable.addCell(getNoBorderRightAlign("₹" + total, headerBoldFont));
+
+            document.add(summaryTable);
+
+            // Footer note
+            Paragraph footer = new Paragraph("This is a computer-generated invoice and does not require a signature.", normalFont);
+            footer.setAlignment(Element.ALIGN_CENTER);
+            document.add(Chunk.NEWLINE);
+            document.add(footer);
+
             document.close();
-            return out.toByteArray();
+            return baos.toByteArray();
 
         } catch (Exception e) {
             e.printStackTrace();
-            return new byte[0];
+            return null;
         }
-
     }
+
+    // --- Helper methods ---
+    private PdfPCell getAmazonStyleCell(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Paragraph(text, font));
+        cell.setBackgroundColor(new BaseColor(242, 242, 242)); // light gray
+        cell.setBorder(Rectangle.BOX);
+        cell.setPadding(8f);
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        return cell;
+    }
+
+    private PdfPCell getHeaderCell(String text) {
+        Font boldFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
+        PdfPCell cell = new PdfPCell(new Paragraph(text, boldFont));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        return cell;
+    }
+
+    private PdfPCell getNormalCell(String text) {
+        Font normalFont = new Font(Font.FontFamily.HELVETICA, 10);
+        PdfPCell cell = new PdfPCell(new Paragraph(text, normalFont));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        return cell;
+    }
+
+    private PdfPCell getNoBorderCell(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Paragraph(text, font));
+        cell.setBorder(Rectangle.NO_BORDER);
+        return cell;
+    }
+
+    private PdfPCell getNoBorderRightAlign(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Paragraph(text, font));
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setBorder(Rectangle.NO_BORDER);
+        return cell;
+    }
+
+
+
+
+
 }
+
+

@@ -77,7 +77,13 @@ public class CartItemService {
 
         cartItem.setUser(user);
         cartItem.setProduct(product);
-        cartItem.setCustomizationOption(option);
+
+
+        List<CustomizationOption> optionList = new ArrayList<>();
+        optionList.add(option);
+        cartItem.setCustomizationOption(optionList);
+
+        
 
         List<String> imageUrls = new ArrayList<>();
         if (customImages != null && !customImages.isEmpty()) {
