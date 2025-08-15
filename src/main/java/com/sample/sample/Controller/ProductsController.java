@@ -1,5 +1,6 @@
 package com.sample.sample.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sample.sample.DTO.ProductIdRequest;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.ProductsService;
@@ -20,7 +21,7 @@ public class ProductsController {
     @PostMapping
     public ResponseEntity<?> addProduct(@RequestParam("name") String name,
                                         @RequestParam("description") String description,
-                                        @RequestParam("shape") String shapeType,
+                                        @RequestParam(value = "shape",required = false) String shapeType,
                                         @RequestParam("file") MultipartFile file) throws IOException {
         AuthResponse response = productsService.saveProducts(name, description,shapeType, file);
         return ResponseEntity.status(response.getCode()).body(response);
@@ -28,13 +29,13 @@ public class ProductsController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllProducts() {
+    public ResponseEntity<?> getAllProducts() throws JsonProcessingException {
         AuthResponse serviceResponse = productsService.getAllProducts();
         return ResponseEntity.status(serviceResponse.getCode()).body(serviceResponse);
     }
 
     @GetMapping("/{productId}")
-    public AuthResponse getProductById(@PathVariable Long productId) {
+    public AuthResponse getProductById(@PathVariable Long productId) throws JsonProcessingException {
         return productsService.getProductById(productId);
     }
 

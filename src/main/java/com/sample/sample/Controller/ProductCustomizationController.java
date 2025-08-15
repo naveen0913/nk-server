@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,7 +30,7 @@ public class ProductCustomizationController {
             @RequestParam("bannerImage") MultipartFile bannerImage,
             @RequestParam("thumbnails") List<MultipartFile> thumbnails) {
         try {
-            AuthResponse saved = service.saveCustomization(productId,jsonData, bannerImage, thumbnails);
+            AuthResponse saved = service.saveCustomization(productId, jsonData, bannerImage, thumbnails);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(saved);
         } catch (Exception e) {
@@ -38,12 +39,26 @@ public class ProductCustomizationController {
         }
     }
 
+    @PostMapping(value = "/{productId}/custom-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> saveCustomizationImage(
+            @PathVariable Long productId,
+            @RequestParam("customImage") MultipartFile customImage,
+            @RequestParam("hotspots") String jsonData) throws IOException {
+        try {
+            AuthResponse saved = service.addProductCustomizationImage(productId, customImage, jsonData);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to save customized image: " + e.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<AuthResponse> getAllCustomizations() {
         AuthResponse response = service.getAllCustomizations();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
 
 
     @GetMapping("/{id}")
@@ -89,19 +104,19 @@ public class ProductCustomizationController {
     }
 
     @DeleteMapping("/option/{optionId}")
-    public AuthResponse deleteCustomizationOptionById(@PathVariable Long optionId){
+    public AuthResponse deleteCustomizationOptionById(@PathVariable Long optionId) {
         service.deleteCustomizationOptionById(optionId);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+        return new AuthResponse(HttpStatus.OK.value(), "deleted", null);
     }
 
     @DeleteMapping("/thumbnail/{thumbnailId}")
-    public AuthResponse deleteCustomizationThumbnailById(@PathVariable Long thumbnailId){
+    public AuthResponse deleteCustomizationThumbnailById(@PathVariable Long thumbnailId) {
         service.deleteCustomizationThumbnailUrl(thumbnailId);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+        return new AuthResponse(HttpStatus.OK.value(), "deleted", null);
     }
 
     @DeleteMapping("/delete/all-options/{customization}")
-    public ResponseEntity<?> deleteAllOptions(@PathVariable long customization){
+    public ResponseEntity<?> deleteAllOptions(@PathVariable long customization) {
         AuthResponse authResponse = service.deleteAllCustomizationOptions(customization);
         return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }

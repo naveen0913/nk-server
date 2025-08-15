@@ -3,6 +3,7 @@ package com.sample.sample.Responses;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sample.sample.Model.Design;
 import com.sample.sample.Model.ProductCustomization;
+import com.sample.sample.Model.ProductCustomizationImage;
 import com.sample.sample.Repository.productStatus;
 
 import java.time.LocalDateTime;
@@ -20,15 +21,8 @@ public class ImageResponse {
     private LocalDateTime updated;
     private ProductCustomization productCustomization;
     private List<Design> productDesigns;
-    private String productShapeType;
+    private List<CustomImageResponse> customImageResponses;
 
-    public String getProductShapeType() {
-        return productShapeType;
-    }
-
-    public void setProductShapeType(String productShapeType) {
-        this.productShapeType = productShapeType;
-    }
 
     public productStatus getStatus() {
         return status;
@@ -46,7 +40,13 @@ public class ImageResponse {
         this.productOrdered = productOrdered;
     }
 
+    public List<CustomImageResponse> getCustomImageResponses() {
+        return customImageResponses;
+    }
 
+    public void setCustomImageResponses(List<CustomImageResponse> customImageResponses) {
+        this.customImageResponses = customImageResponses;
+    }
 
     public List<Design> getProductDesigns() {
         return productDesigns;
@@ -120,7 +120,7 @@ public class ImageResponse {
         this.productUrl = productUrl;
     }
 
-    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns, String productShapeType) {
+    public ImageResponse(Long productId, String productName, String productdescription, String productUrl, boolean productOrdered, productStatus status, String customProductId, LocalDateTime created, LocalDateTime updated, ProductCustomization productCustomization, List<Design> productDesigns, List<CustomImageResponse> customImageResponses) {
         this.productId = productId;
         this.productName = productName;
         this.productdescription = productdescription;
@@ -132,6 +132,6 @@ public class ImageResponse {
         this.updated = updated;
         this.productCustomization = productCustomization;
         this.productDesigns = productDesigns;
-        this.productShapeType = productShapeType;
+        this.customImageResponses = customImageResponses;
     }
 }

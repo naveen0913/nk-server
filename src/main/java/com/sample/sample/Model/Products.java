@@ -108,6 +108,16 @@ public class Products {
     @JsonBackReference
     private ProductCustomization productCustomization;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductCustomizationImage> images = new ArrayList<>();
+
+    public List<ProductCustomizationImage> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductCustomizationImage> images) {
+        this.images = images;
+    }
 
     public Long getProductId() {
         return productId;

@@ -1,12 +1,12 @@
 package com.sample.sample.Service;
 
-import com.sample.sample.Model.Design;
-import com.sample.sample.Model.ProductShapeType;
-import com.sample.sample.Model.Products;
-import com.sample.sample.Repository.ProductsRepository;
-import com.sample.sample.Repository.UserOrderedItemRepository;
-import com.sample.sample.Repository.productStatus;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sample.sample.Model.*;
+import com.sample.sample.Repository.*;
 import com.sample.sample.Responses.AuthResponse;
+import com.sample.sample.Responses.CustomImageResponse;
 import com.sample.sample.Responses.ImageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -36,11 +37,16 @@ public class ProductsService {
     @Autowired
     private UserOrderedItemRepository userOrderedItemRepository;
 
-    public AuthResponse saveProducts(String name, String description,String shapeType, MultipartFile file) throws IOException {
+    @Autowired
+    private CustomizationImageRepo customizationImageRepo;
+
+    @Autowired
+    private HotspotRepo hotspotRepo;
+
+    public AuthResponse saveProducts(String name, String description, String shapeType, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "File is required", null);
         }
-
 
         String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
@@ -56,7 +62,7 @@ public class ProductsService {
 
         product.setProductShapeType(shapeType);
 
-        int randomNum = (int)(Math.random() * 9000) + 1000;
+        int randomNum = (int) (Math.random() * 9000) + 1000;
         String customProductId = "PRODUCT" + randomNum;
         product.setCustomProductId(customProductId);
 
@@ -68,8 +74,7 @@ public class ProductsService {
     }
 
 
-
-    public AuthResponse getAllProducts() {
+    public AuthResponse getAllProducts() throws JsonProcessingException {
         List<Products> productList = productsRepository.findAll();
         if (productList.isEmpty()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "products not found", null);
@@ -80,6 +85,8 @@ public class ProductsService {
             String imageUrl = product.getProductUrl();
             String finalUrl = (imageUrl != null && !imageUrl.isEmpty()) ? baseUrl + imageUrl : null;
             List<Design> designs = product.getDesigns();
+            List<CustomImageResponse> customImageResponses = buildCustomImageResponses(product.getProductId());
+
             responseList.add(new ImageResponse(
                     product.getProductId(),
                     product.getProductName(),
@@ -92,7 +99,7 @@ public class ProductsService {
                     product.getUpdatedTime(),
                     product.getProductCustomization(),
                     designs,
-                    product.getProductShapeType()
+                    customImageResponses
             ));
         }
 
@@ -100,12 +107,14 @@ public class ProductsService {
     }
 
 
-    public AuthResponse getProductById(Long id) {
+    public AuthResponse getProductById(Long id) throws JsonProcessingException {
         Optional<Products> existedProduct = productsRepository.findById(id);
         if (!existedProduct.isPresent()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found", null);
         }
         List<Design> designList = existedProduct.get().getDesigns();
+        List<CustomImageResponse> customImageResponses = buildCustomImageResponses(id);
+
         ImageResponse imageResponse = new ImageResponse(
                 existedProduct.get().getProductId(),
                 existedProduct.get().getProductName(),
@@ -118,7 +127,7 @@ public class ProductsService {
                 existedProduct.get().getUpdatedTime(),
                 existedProduct.get().getProductCustomization(),
                 designList,
-                existedProduct.get().getProductShapeType()
+                customImageResponses
         );
         return new AuthResponse(HttpStatus.OK.value(), "success", imageResponse);
 
@@ -139,7 +148,7 @@ public class ProductsService {
 
 
     @Transactional
-    public AuthResponse updateProductById(Long id, String name, String description,String shape, MultipartFile file) throws IOException {
+    public AuthResponse updateProductById(Long id, String name, String description, String shape, MultipartFile file) throws IOException {
         Products existingProduct = productsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 
@@ -151,7 +160,7 @@ public class ProductsService {
             existingProduct.setProductDescription(description);
         }
 
-        if (shape!=null && !shape.isBlank()){
+        if (shape != null && !shape.isBlank()) {
             existingProduct.setProductShapeType(shape);
         }
 
@@ -206,12 +215,46 @@ public class ProductsService {
             return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "Unknown product status", null);
         }
 
-
         productsRepository.save(product);
         return new AuthResponse(HttpStatus.OK.value(), "Product status toggled successfully", null);
     }
 
+    private List<CustomImageResponse> buildCustomImageResponses(Long productId) throws JsonProcessingException {
+        List<ProductCustomizationImage> customizationImages = customizationImageRepo.findAllByProduct_Id(productId);
+        ObjectMapper mapper = new ObjectMapper();
+        List<CustomImageResponse> imageResponses = new ArrayList<>();
 
+        for (ProductCustomizationImage img : customizationImages) {
+            CustomImageResponse imageResponse = new CustomImageResponse();
+            imageResponse.setId(img.getId());
+            imageResponse.setImageUrl(img.getCustomImage());
+
+            List<Hotspot> hotspots = hotspotRepo.findByProductCustomImageId(img.getId());
+            List<List<CustomImageResponse.CoordinateResponse>> hotspotShapes = new ArrayList<>();
+
+            for (Hotspot h : hotspots) {
+                List<Map<String, Object>> pointList =
+                        mapper.readValue(h.getCoordinates(), new TypeReference<List<Map<String, Object>>>() {
+                        });
+                List<CustomImageResponse.CoordinateResponse> coords = new ArrayList<>();
+
+                for (Map<String, Object> point : pointList) {
+                    CustomImageResponse.CoordinateResponse coord = new CustomImageResponse.CoordinateResponse();
+                    coord.setX(((Number) point.get("x")).doubleValue());
+                    coord.setY(((Number) point.get("y")).doubleValue());
+                    coord.setShape(h.getShapeType());
+                    coords.add(coord);
+                }
+
+                hotspotShapes.add(coords);
+            }
+
+            imageResponse.setHotspots(hotspotShapes);
+            imageResponses.add(imageResponse);
+        }
+
+        return imageResponses;
+    }
 
 
 }

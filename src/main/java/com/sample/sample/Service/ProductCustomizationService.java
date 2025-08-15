@@ -1,17 +1,13 @@
 package com.sample.sample.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sample.sample.DTO.CustomizationOptionDTO;
 import com.sample.sample.DTO.CustomizationThumbnailDTO;
 import com.sample.sample.DTO.ProductCustomizationDTO;
-import com.sample.sample.Model.CustomizationOption;
-import com.sample.sample.Model.CustomizationThumbnailUrls;
-import com.sample.sample.Model.ProductCustomization;
-import com.sample.sample.Model.Products;
-import com.sample.sample.Repository.CustomOptionRepository;
-import com.sample.sample.Repository.CustomizationThumbnailsRepo;
-import com.sample.sample.Repository.ProductCustomizationRepo;
-import com.sample.sample.Repository.ProductsRepository;
+import com.sample.sample.Model.*;
+import com.sample.sample.Repository.*;
 import com.sample.sample.Responses.AuthResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,16 +35,20 @@ public class ProductCustomizationService {
     private final ProductsRepository productsRepository;
     private final CustomOptionRepository customOptionRepository;
     private final CustomizationThumbnailsRepo customizationThumbnailsRepo;
+    private final CustomizationImageRepo customizationImageRepo;
+    private final HotspotRepo hotspotRepo;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Value("${file.upload-dir}")
     private String uploadPath;
 
-    public ProductCustomizationService(ProductCustomizationRepo repo, ProductsRepository productsRepository, CustomOptionRepository customOptionRepository, CustomizationThumbnailsRepo customizationThumbnailsRepo) {
+    public ProductCustomizationService(ProductCustomizationRepo repo, ProductsRepository productsRepository, CustomOptionRepository customOptionRepository, CustomizationThumbnailsRepo customizationThumbnailsRepo, CustomizationImageRepo customizationImageRepo, HotspotRepo hotspotRepo) {
         this.repo = repo;
         this.productsRepository = productsRepository;
         this.customOptionRepository = customOptionRepository;
         this.customizationThumbnailsRepo = customizationThumbnailsRepo;
+        this.customizationImageRepo = customizationImageRepo;
+        this.hotspotRepo = hotspotRepo;
     }
 
     @Transactional
@@ -117,16 +118,48 @@ public class ProductCustomizationService {
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
     }
 
+
+    @Transactional
+    public AuthResponse addProductCustomizationImage(Long productId, MultipartFile customFile, String hotspotsJson) throws IOException {
+        Products product = productsRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        ProductCustomizationImage customizationImage = new ProductCustomizationImage();
+
+        if (customFile != null && !customFile.isEmpty()) {
+            String customImageUrl = saveFile(customFile);
+            customizationImage.setCustomImage(customImageUrl);
+        }
+        customizationImage.setProduct(product);
+        customizationImageRepo.save(customizationImage);
+
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, Object>> hotspots =
+                mapper.readValue(hotspotsJson, new TypeReference<List<Map<String, Object>>>() {
+                });
+
+        for (Map<String, Object> hotspotData : hotspots) {
+            String shapeType = (String) hotspotData.get("shape");
+            List<Map<String, Object>> points = (List<Map<String, Object>>) hotspotData.get("points");
+
+            Hotspot hotspot = new Hotspot();
+            hotspot.setShapeType(shapeType); // assuming setShapeType(String) exists
+            hotspot.setProductCustomizationImage(customizationImage);
+            // Store points as JSON string
+            hotspot.setCoordinates(mapper.writeValueAsString(points));
+            hotspotRepo.save(hotspot);
+        }
+        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+    }
+
+
     private String saveFile(MultipartFile file) throws IOException {
         String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-
         Path directory = Paths.get("").toAbsolutePath().resolve(uploadPath);
         Files.createDirectories(directory);
 
         Path filePath = directory.resolve(filename);
         file.transferTo(filePath.toFile());
-
 
         return "/uploads/" + filename;
     }

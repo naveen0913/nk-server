@@ -70,11 +70,9 @@ public class CartItem {
         this.customizationOption = customizationOption;
     }
 
-    // add timestamps optionally
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
 
-    // Getters, Setters
     @PreUpdate
     public void setLastUpdate() {
         this.updatedAt = LocalDateTime.now();
@@ -210,13 +208,5 @@ public class CartItem {
         this.designs = designs;
     }
 
-    //
-//    public String getDesignsJson() {
-//        return designsJson;
-//    }
-//
-//    public void setDesignsJson(String designsJson) {
-//        this.designsJson = designsJson;
-//    }
 
 }
