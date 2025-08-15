@@ -142,6 +142,8 @@ public class MailService {
     }
 
 
+
+
     public void sendPasswordChangeEmail(String toEmail, String username) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
@@ -315,6 +317,12 @@ public class MailService {
             e.printStackTrace();
         }
     }
+
+
+
+
+
+
 
 
 
