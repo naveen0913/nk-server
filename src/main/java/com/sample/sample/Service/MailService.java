@@ -318,14 +318,15 @@ public class MailService {
         }
     }
 
-
-
-
-
-
-
-
-
-
+    public void sendEmailWithAttachment(String to, byte[] pdfBytes, String filename) throws Exception {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom(fromEmail);
+        helper.setTo(to);
+        helper.setSubject("Customization Image Preview");
+        helper.setText("Hello, please find your customized product preview attached.");
+        helper.addAttachment(filename, new ByteArrayResource(pdfBytes));
+        mailSender.send(message);
+    }
 
 }

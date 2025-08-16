@@ -31,6 +31,10 @@ public class CustomizationOption {
     @JsonBackReference
     private ProductCustomization productCustomization;
 
+    @ManyToOne
+    @JoinColumn(name = "cart_item_id")
+    @JsonBackReference
+    private CartItem cartItem;
 
 
     public Long getId() {
@@ -39,6 +43,14 @@ public class CustomizationOption {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public CartItem getCartItem() {
+        return cartItem;
+    }
+
+    public void setCartItem(CartItem cartItem) {
+        this.cartItem = cartItem;
     }
 
     public String getOptionLabel() {

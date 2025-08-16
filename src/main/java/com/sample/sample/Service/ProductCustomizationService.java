@@ -61,7 +61,6 @@ public class ProductCustomizationService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         ProductCustomization entity = new ProductCustomization();
-//        entity.setDescription(dto.getDescription());
         entity.setInput(dto.isInput());
         entity.setQuantity(dto.isQuantity());
         entity.setCart(dto.isCart());
@@ -70,7 +69,6 @@ public class ProductCustomizationService {
         entity.setGiftWrap(dto.isGiftWrap());
         entity.setMultiUpload(dto.isMultiUpload());
         entity.setProduct(product);
-
 
         if (bannerImage != null && !bannerImage.isEmpty()) {
             String bannerUrl = saveFile(bannerImage);

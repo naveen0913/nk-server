@@ -3,8 +3,10 @@ package com.sample.sample.Controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sample.sample.DTO.ProductIdRequest;
 import com.sample.sample.Responses.AuthResponse;
+import com.sample.sample.Service.CustomizationImageService;
 import com.sample.sample.Service.ProductsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,9 @@ import java.io.IOException;
 public class ProductsController {
     @Autowired
     private ProductsService productsService;
+
+    @Autowired
+    private CustomizationImageService customizationImageService;
 
     @PostMapping
     public ResponseEntity<?> addProduct(@RequestParam("name") String name,
@@ -73,6 +78,22 @@ public class ProductsController {
 
         AuthResponse response = productsService.updateProductStatus(productId, request.getStatus());
         return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    @PostMapping("/{productId}/{hotspotId}")
+    public ResponseEntity<?> sendCustomImagePreviewPDF(
+            @PathVariable Long productId,
+            @PathVariable Long hotspotId,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("email") String email
+    ) {
+        try {
+            customizationImageService.processAndSendCustomImagePdf(productId, hotspotId, file, email);
+            return ResponseEntity.ok("PDF generated and sent to " + email);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
+        }
     }
 
 

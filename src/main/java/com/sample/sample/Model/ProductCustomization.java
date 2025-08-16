@@ -135,13 +135,5 @@ public class ProductCustomization {
         this.thumbnailImages = thumbnailImages;
     }
 
-    //    public List<String> getThumbnailImageUrls() {
-//        return thumbnailImageUrls;
-//    }
-//
-//    public void setThumbnailImageUrls(List<String> thumbnailImageUrls) {
-//        this.thumbnailImageUrls = thumbnailImageUrls;
-//    }
-
 
 }

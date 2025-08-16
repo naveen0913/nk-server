@@ -7,10 +7,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 public class CartItem {
@@ -59,8 +56,8 @@ public class CartItem {
     private Products product;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cart_item_id", nullable = false) // New FK name
-    private List<CustomizationOption> customizationOption = new ArrayList<>();
+    @JoinColumn(name = "cart_item_id")
+    private List<CustomizationOption> customizationOption;
 
     public List<CustomizationOption> getCustomizationOption() {
         return customizationOption;
@@ -69,7 +66,6 @@ public class CartItem {
     public void setCustomizationOption(List<CustomizationOption> customizationOption) {
         this.customizationOption = customizationOption;
     }
-
 
 
     private LocalDateTime createdAt = LocalDateTime.now();
