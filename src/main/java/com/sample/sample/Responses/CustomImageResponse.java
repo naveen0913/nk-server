@@ -41,16 +41,26 @@ public class CustomImageResponse {
     }
 
     public static class CoordinateResponse {
+        private Long id;
         private double x;
         private double y;
         private String shape;
 
         public CoordinateResponse(){}
 
-        public CoordinateResponse(double x, double y, String shape) {
+        public CoordinateResponse(Long id, double x, double y, String shape) {
+            this.id = id;
             this.x = x;
             this.y = y;
             this.shape = shape;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
         }
 
         public String getShape() {

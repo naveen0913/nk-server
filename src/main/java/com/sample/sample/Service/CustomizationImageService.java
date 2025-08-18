@@ -6,6 +6,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.sample.sample.Model.CustomerPreviewImage;
 import com.sample.sample.Model.Hotspot;
+import com.sample.sample.Model.Products;
 import com.sample.sample.Repository.CustomerPreviewImageRepo;
 import com.sample.sample.Repository.CustomizationImageRepo;
 import com.sample.sample.Repository.HotspotRepo;
@@ -35,9 +36,14 @@ public class CustomizationImageService {
     @Autowired
     private MailService mailService;
 
-    public void processAndSendCustomImagePdf(Long productId, Long hotspotId, MultipartFile file, String email) throws Exception {
-        Hotspot hotspot = hotspotRepo.findById(hotspotId)
+    public void processAndSendCustomImagePdf(Long productId, MultipartFile file, String email) throws Exception {
+
+        Hotspot hotspot = hotspotRepo.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Hotspot not found"));
+
+        Products products = productsRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException(" not found"));
+
 
         Path uploadDir = Paths.get("uploads/customer-preview-files");
         Files.createDirectories(uploadDir);
@@ -46,7 +52,7 @@ public class CustomizationImageService {
         Files.copy(file.getInputStream(), filePath);
 
         CustomerPreviewImage upload = new CustomerPreviewImage();
-        upload.setHotspot(hotspot);
+//        upload.setHotspot(hotspot);
         upload.setProductId(productId);
         upload.setFinalImageUrl("/uploads/customer-preview-files/" + filename);
         customerPreviewImageRepo.save(upload);

@@ -240,6 +240,7 @@ public class ProductsService {
 
                 for (Map<String, Object> point : pointList) {
                     CustomImageResponse.CoordinateResponse coord = new CustomImageResponse.CoordinateResponse();
+//                    coord.setId(coord.getId());
                     coord.setX(((Number) point.get("x")).doubleValue());
                     coord.setY(((Number) point.get("y")).doubleValue());
                     coord.setShape(h.getShapeType());

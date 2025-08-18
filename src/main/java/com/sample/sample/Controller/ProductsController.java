@@ -80,15 +80,14 @@ public class ProductsController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-    @PostMapping("/{productId}/{hotspotId}")
+    @PostMapping("/{productId}/custom-image")
     public ResponseEntity<?> sendCustomImagePreviewPDF(
             @PathVariable Long productId,
-            @PathVariable Long hotspotId,
             @RequestParam("file") MultipartFile file,
             @RequestParam("email") String email
     ) {
         try {
-            customizationImageService.processAndSendCustomImagePdf(productId, hotspotId, file, email);
+            customizationImageService.processAndSendCustomImagePdf(productId, file, email);
             return ResponseEntity.ok("PDF generated and sent to " + email);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
