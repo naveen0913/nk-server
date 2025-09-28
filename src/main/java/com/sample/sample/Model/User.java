@@ -1,7 +1,5 @@
 package com.sample.sample.Model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -21,39 +19,29 @@ public class User {
 
     private String email;
 
-    /**
-     * This is the encoded (hashed) user password.
-     */
     private String password;
 
     private Date created;
 
     private String role;
 
-    /**
-     * One-to-One mapping with account details.
-     */
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference("user-account")
     private AccountDetails accountDetails;
 
-    /**
-     * Flag indicating whether the password was ever updated.
-     */
     private boolean passwordUpdated;
 
-    /**
-     * Time of last password update.
-     */
     private LocalDateTime passwordUpdatedTime;
 
-    /**
-     * OTP and time for password reset.
-     */
     private String resetOtp;
     private LocalDateTime otpGeneratedTime;
 
-    // ======== Getters and Setters ========
+    public  User(String userId) {
+        this.id = userId;
+    }
+
+    public User() {
+    }
 
     public String getId() {
         return id;

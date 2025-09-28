@@ -1,6 +1,8 @@
 package com.sample.sample.Controller;
 
+import com.sample.sample.Model.Cart;
 import com.sample.sample.Responses.AuthResponse;
+import com.sample.sample.Responses.CartResponse;
 import com.sample.sample.Service.CartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,74 +14,97 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-    @RequestMapping("/api/cart")
-@CrossOrigin("*")
+@RequestMapping("/api/cart")
 public class CartItemController {
 
     @Autowired
     private CartItemService cartItemService;
 
     public CartItemService getCartItemService(CartItemService cartItemService) {
-        return this.cartItemService =  cartItemService;
+        return this.cartItemService = cartItemService;
     }
 
-    @PostMapping(value = "/add/{option}/{userId}/{productId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> addCartItem(
-            @PathVariable Long option,
-            @PathVariable Long productId,
-            @PathVariable String userId,
-            @RequestParam("cartPayload") String cartItem,
-            @RequestParam(defaultValue = "customImages", required = false) List<MultipartFile> customImages) throws IOException {
+    @PostMapping("/add")
+    public ResponseEntity<?> addItem(
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "sessionId", required = false) String sessionId,
+            @RequestParam Long productId,
+            @RequestParam int quantity) {
+        try {
+            Cart cart = cartItemService.addItem(userId, sessionId, productId, quantity);
+            return ResponseEntity.ok(
+                    new AuthResponse(HttpStatus.CREATED.value(), "Item added to cart successfully", null)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(
+                    new AuthResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred", null)
+            );
+        }
+    }
 
-        AuthResponse response = cartItemService.addCartItem(option,productId,userId, cartItem, customImages);
+    @PostMapping("/merge/cart")
+    public ResponseEntity<AuthResponse> mergeCart(
+            @RequestParam String userId,
+            @RequestParam String sessionId) {
+        try {
+            Cart mergedCart = cartItemService.mergeCart(userId, sessionId);
+            return ResponseEntity.ok(
+                    new AuthResponse(HttpStatus.OK.value(), "Guest cart merged successfully", mergedCart)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(
+                    new AuthResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred", null)
+            );
+        }
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<?> getCartItems(
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) String sessionId) {
+
+        CartResponse cartResponse = cartItemService.getCart(userId, sessionId);
+
+        return ResponseEntity.ok(
+                new AuthResponse(
+                        HttpStatus.OK.value(),
+                        "Cart fetched successfully",
+                        cartResponse
+                )
+        );
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateCart(@RequestParam(required = false) String userId,
+                                        @RequestParam(required = false) String sessionId,
+                                        @RequestParam Long productId,
+                                        @RequestParam int quantity) {
+        AuthResponse response = cartItemService.updateCartItem(userId, sessionId, productId, quantity);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-
-    @PutMapping(value = "/update/{cartItemId}", consumes = {"multipart/form-data"})
-    public AuthResponse updateCartItem(
-            @PathVariable Long cartItemId,
-            @RequestParam("cartPayload") String cartPayload,
-            @RequestParam(value = "customImages", required = false) List<MultipartFile> customImages) throws IOException {
-
-        cartItemService.updateCartItemById(cartItemId, cartPayload, customImages);
-        return new AuthResponse(HttpStatus.OK.value(), "Cart Item Updated", null);
+    @DeleteMapping("/delete/{cartId}")
+    public ResponseEntity<?> deleteItem(@PathVariable Long cartId,
+                                        @RequestParam(required = false) String userId,
+                                        @RequestParam(required = false) String sessionId) {
+        AuthResponse authResponse = cartItemService.deleteCartById(cartId,userId,sessionId);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<AuthResponse> getUserCartItems(@PathVariable String userId) {
-        AuthResponse response = cartItemService.getUserCartList(userId);
-        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
+    @DeleteMapping("/delete/all/")
+    public ResponseEntity<?> deleteAllItems(
+                                        @RequestParam(required = false) String userId,
+                                        @RequestParam(required = false) String sessionId) {
+        AuthResponse authResponse = cartItemService.deleteAllCarts(userId,sessionId);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
-
-    @GetMapping("/all")
-    public ResponseEntity<AuthResponse> getAllItems() {
-        AuthResponse response = cartItemService.getAllCartItems();
-        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
-    }
-
-    @GetMapping("/users")
-    public ResponseEntity<AuthResponse> getAllUsers() {
-        AuthResponse response = cartItemService.getAllUsers();
-        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
-    }
-
-
-
-
-
-    @DeleteMapping("/{id}")
-    public AuthResponse deleteCartItem(@PathVariable Long id) {
-        cartItemService.deleteCartItem(id);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
-    }
-
-
-    @DeleteMapping("/delete-all/{userId}")
-    public ResponseEntity<AuthResponse> deleteAllCartItems(@PathVariable String userId) {
-        AuthResponse response = cartItemService.deleteAllCartItems(userId);
-        return new ResponseEntity<>(response, HttpStatus.valueOf(response.getCode()));
-    }
-
 
 }

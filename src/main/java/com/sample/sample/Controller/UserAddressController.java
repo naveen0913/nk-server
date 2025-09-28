@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user-address")
-@CrossOrigin("*")
 public class UserAddressController {
 
     @Autowired
@@ -24,9 +23,9 @@ public class UserAddressController {
     }
 
     @DeleteMapping("/{id}")
-    public AuthResponse deleteAddress(@PathVariable Long id) {
-        userAddressService.deleteAddress(id);
-        return new AuthResponse(HttpStatus.OK.value(), "deleted",null);
+    public ResponseEntity<?> deleteAddress(@PathVariable Long id) {
+        AuthResponse authResponse =  userAddressService.deleteAddress(id);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
 

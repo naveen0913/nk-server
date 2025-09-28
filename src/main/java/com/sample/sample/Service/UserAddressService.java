@@ -62,7 +62,7 @@ public class UserAddressService {
         UserAddress exists = userAddressRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Address not found with ID: " + id));
 
-        userAddressRepository.delete(exists);
+        userAddressRepository.deleteById(id);
         return new AuthResponse(HttpStatus.OK.value(), "Address deleted successfully", null);
     }
 
@@ -83,6 +83,7 @@ public class UserAddressService {
             existingAddress.setState(updatedAddress.getState());
             existingAddress.setCountry(updatedAddress.getCountry());
             existingAddress.setPincode(updatedAddress.getPincode());
+            existingAddress.setIsDefault(updatedAddress.isDefault());
 
             UserAddress savedAddress = userAddressRepository.save(existingAddress);
             return new AuthResponse(HttpStatus.OK.value(), "Address updated successfully", null);

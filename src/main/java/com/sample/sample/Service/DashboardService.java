@@ -25,9 +25,6 @@ public class DashboardService {
     @Autowired
     private UserAddressRepository userAddressRepository;
 
-    @Autowired
-    private DesignRepo designRepo;
-
     public long getTotalProducts() {
         return productsRepository.count();
     }
@@ -54,10 +51,6 @@ public class DashboardService {
 
     public long getTotalAddresses(){
         return userAddressRepository.count();
-    }
-
-    public long getTotalDesigns(){
-        return designRepo.count();
     }
 
     public long getCurrentDateOrders(){

@@ -3,6 +3,7 @@ package com.sample.sample.Responses;
 import com.sample.sample.Model.OrdersTracking;
 import com.sample.sample.Model.UserOrderedItems;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -12,16 +13,17 @@ public class OrdersResponse {
         private String orderId;
         private Date createdAt;
         private String orderStatus;
-        private Integer orderTotal;
+        private BigDecimal orderTotal;
         private String orderDiscount;
         private String orderGstPercent;
         private String orderShippingCharges;
 
         private PaymentResponse payment;
         private OrdersTracking orderTracking;
-        private List<UserOrderedItems> orderItems;
+        private List<UserOrdereditemsResponse> orderItems;
         private AccountDetailsResponse accountDetails;
         private UserAddressResponse userAddress;
+        private DeliveryResponse deliveryResponse;
 
     public UserAddressResponse getUserAddress() {
         return userAddress;
@@ -63,11 +65,11 @@ public class OrdersResponse {
         this.orderStatus = orderStatus;
     }
 
-    public Integer getOrderTotal() {
+    public BigDecimal getOrderTotal() {
         return orderTotal;
     }
 
-    public void setOrderTotal(Integer orderTotal) {
+    public void setOrderTotal(BigDecimal orderTotal) {
         this.orderTotal = orderTotal;
     }
 
@@ -111,13 +113,6 @@ public class OrdersResponse {
         this.orderTracking = orderTracking;
     }
 
-    public List<UserOrderedItems> getOrderItems() {
-        return orderItems;
-    }
-
-    public void setOrderItems(List<UserOrderedItems> orderItems) {
-        this.orderItems = orderItems;
-    }
 
     public AccountDetailsResponse getAccountDetails() {
         return accountDetails;
@@ -125,5 +120,21 @@ public class OrdersResponse {
 
     public void setAccountDetails(AccountDetailsResponse accountDetails) {
         this.accountDetails = accountDetails;
+    }
+
+    public List<UserOrdereditemsResponse> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<UserOrdereditemsResponse> orderItems) {
+        this.orderItems = orderItems;
+    }
+
+    public DeliveryResponse getDeliveryResponse() {
+        return deliveryResponse;
+    }
+
+    public void setDeliveryResponse(DeliveryResponse deliveryResponse) {
+        this.deliveryResponse = deliveryResponse;
     }
 }

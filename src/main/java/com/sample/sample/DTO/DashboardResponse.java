@@ -9,21 +9,9 @@ public class DashboardResponse {
     private long totalPayments;
     private long totalCartItems;
     private long totalAddresses;
-    private long totalDesigns;
     private long todayOrders;
     private long todayPayments;
 
-    public DashboardResponse(long totalProducts, long totalUsers, long totalOrders, long totalPayments, long totalCartItems, long totalAddresses, long totalDesigns, long todayOrders, long todayPayments) {
-        this.totalProducts = totalProducts;
-        this.totalUsers = totalUsers;
-        this.totalOrders = totalOrders;
-        this.totalPayments = totalPayments;
-        this.totalCartItems = totalCartItems;
-        this.totalAddresses = totalAddresses;
-        this.totalDesigns = totalDesigns;
-        this.todayOrders = todayOrders;
-        this.todayPayments = todayPayments;
-    }
 
     public long getTodayPayments() {
         return todayPayments;
@@ -33,13 +21,6 @@ public class DashboardResponse {
         this.todayPayments = todayPayments;
     }
 
-    public long getTotalDesigns() {
-        return totalDesigns;
-    }
-
-    public void setTotalDesigns(long totalDesigns) {
-        this.totalDesigns = totalDesigns;
-    }
 
     public long getTotalAddresses() {
         return totalAddresses;

@@ -3,6 +3,7 @@ package com.sample.sample.Model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,13 +22,17 @@ public class Orders {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
-    private String orderStatus;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
-    private Integer orderTotal;
+    private BigDecimal orderTotal;
 
-    private String orderDiscount;
+    private String orderNote;
 
-    private String orderGstPercent;
+    @ManyToOne
+    private User user;
+
+    private String sessionId;
 
     private String orderShippingCharges;
 
@@ -41,6 +46,33 @@ public class Orders {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserOrderedItems> orderItems;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Delivery delivery;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public Delivery getDelivery() {
+        return delivery;
+    }
+
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id")
@@ -75,20 +107,12 @@ public class Orders {
         this.payment = payment;
     }
 
-    public Integer getOrderTotal() {
+    public BigDecimal getOrderTotal() {
         return orderTotal;
     }
 
-    public void setOrderTotal(Integer orderTotal) {
+    public void setOrderTotal(BigDecimal orderTotal) {
         this.orderTotal = orderTotal;
-    }
-
-    public String getOrderDiscount() {
-        return orderDiscount;
-    }
-
-    public void setOrderDiscount(String orderDiscount) {
-        this.orderDiscount = orderDiscount;
     }
 
     public Long getId() {
@@ -123,12 +147,13 @@ public class Orders {
         this.createdAt = createdAt;
     }
 
-    public String getOrderStatus() {
-        return orderStatus;
+
+    public OrderStatus getStatus() {
+        return status;
     }
 
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 
     public String getOrderShippingCharges() {
@@ -139,36 +164,12 @@ public class Orders {
         this.orderShippingCharges = orderShippingCharges;
     }
 
-//    public AccountDetails getAccountDetails() {
-//        return accountDetails;
-//    }
-//
-//    public void setAccountDetails(AccountDetails accountDetails) {
-//        this.accountDetails = accountDetails;
-//    }
-
-//    public UserAddress getUserAddress() {
-//        return userAddress;
-//    }
-//
-//    public void setUserAddress(UserAddress userAddress) {
-//        this.userAddress = userAddress;
-//    }
-
-//    public List<CartItem> getCartItemList() {
-//        return cartItemList;
-//    }
-//
-//    public void setCartItemList(List<CartItem> cartItemList) {
-//        this.cartItemList = cartItemList;
-//    }
-
-    public String getOrderGstPercent() {
-        return orderGstPercent;
+    public String getOrderNote() {
+        return orderNote;
     }
 
-    public void setOrderGstPercent(String orderGstPercent) {
-        this.orderGstPercent = orderGstPercent;
+    public void setOrderNote(String orderNote) {
+        this.orderNote = orderNote;
     }
 
 }

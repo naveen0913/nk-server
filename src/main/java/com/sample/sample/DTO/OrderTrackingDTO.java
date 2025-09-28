@@ -4,6 +4,7 @@ import com.sample.sample.Model.TrackingStatus;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class OrderTrackingDTO {
@@ -18,8 +19,18 @@ public class OrderTrackingDTO {
     @Temporal(TemporalType.DATE)
     private Date deliveryDate;
 
+    private LocalDateTime deliveryTime;
+
     @Temporal(TemporalType.DATE)
     private Date estimatedDelivery;
+
+    public LocalDateTime getDeliveryTime() {
+        return deliveryTime;
+    }
+
+    public void setDeliveryTime(LocalDateTime deliveryTime) {
+        this.deliveryTime = deliveryTime;
+    }
 
     public String getTrackingLink() {
         return trackingLink;

@@ -1,31 +1,20 @@
 package com.sample.sample.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sample.sample.DTO.CartDTO;
-import com.sample.sample.Model.CartItem;
-import com.sample.sample.Model.CustomizationOption;
-import com.sample.sample.Model.Products;
-import com.sample.sample.Model.User;
-import com.sample.sample.Repository.CartItemRepository;
-import com.sample.sample.Repository.CustomOptionRepository;
-import com.sample.sample.Repository.ProductsRepository;
-import com.sample.sample.Repository.UserRepo;
+import com.sample.sample.Model.*;
+import com.sample.sample.Repository.*;
 import com.sample.sample.Responses.AuthResponse;
+import com.sample.sample.Responses.CartItemResponse;
+import com.sample.sample.Responses.CartResponse;
+import com.sample.sample.Responses.ImageResponse;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CartItemService {
@@ -34,211 +23,259 @@ public class CartItemService {
     private CartItemRepository cartItemRepository;
 
     @Autowired
+    private CartRepo cartRepo;
+
+    @Autowired
     private UserRepo userRepo;
 
     @Autowired
     private ProductsRepository productsRepository;
 
     @Autowired
-    private  MailService mailService;
+    private MailService mailService;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @Autowired
-    private CustomOptionRepository customOptionRepository;
+    public Cart addItem(String userId, String sessionId, Long productId, int quantity) {
+        Products product = productsRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-    @Transactional
-    public AuthResponse addCartItem(Long optionId,Long productId, String userId, String cartPayload, List<MultipartFile> customImages) throws IOException {
+        Cart cart;
+        if (userId != null) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
+            cart = cartRepo.findByUserAndStatus(user, Cart.Status.ACTIVE)
+                    .orElseGet(() -> {
+                        Cart c = new Cart();
+                        c.setUser(user);
+                        c.setStatus(Cart.Status.ACTIVE);
+                        return cartRepo.save(c);
+                    });
+        } else {
 
+            if (sessionId == null) {
+                throw new RuntimeException("Session ID required for guest cart");
+            }
+            cart = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE)
+                    .orElseGet(() -> {
+                        Cart c = new Cart();
+                        c.setSessionId(sessionId);
+                        c.setStatus(Cart.Status.ACTIVE);
+                        return cartRepo.save(c);
+                    });
+        }
 
-        CartItem cartItem = new CartItem();
-        cartItem.setCartItemName(cartDTO.getCartItemName());
-        cartItem.setCartQuantity(cartDTO.getCartQuantity());
-        cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
-        cartItem.setTotalPrice(cartDTO.getTotalPrice());
-        cartItem.setCustomName(cartDTO.getCustomName());
-        cartItem.setOptionCount(cartDTO.getOptionCount());
-        cartItem.setOptionPrice(cartDTO.getOptionPrice());
-        cartItem.setOptiondiscount(cartDTO.getOptiondiscount());
-        cartItem.setOptiondiscountPrice(cartDTO.getOptiondiscountPrice());
+        CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
+                .orElseGet(() -> {
+                    CartItem ci = new CartItem();
+                    ci.setCart(cart);
+                    ci.setProduct(product);
+                    ci.setCartQuantity(0);
+                    return ci;
+                });
 
+        item.setCartQuantity(item.getCartQuantity() + quantity);
+        cartItemRepository.save(item);
+        return cart;
+    }
+
+    public Cart mergeCart(String userId, String sessionId) {
+        // Find active guest cart
+        Optional<Cart> guestCartOpt = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE);
+
+        if (guestCartOpt.isEmpty()) {
+            throw new RuntimeException("Guest cart not found");
+        }
+        Cart guestCart = guestCartOpt.get();
+        // Find or create user's active cart
         User user = userRepo.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        CustomizationOption option = customOptionRepository.findById(optionId)
-                                .orElseThrow(() -> new EntityNotFoundException("Custom Option not found"));
+        Cart userCart = cartRepo.findByUserAndStatus(user, Cart.Status.ACTIVE)
+                .orElseGet(() -> {
+                    Cart c = new Cart();
+                    c.setUser(user);
+                    c.setStatus(Cart.Status.ACTIVE);
+                    return cartRepo.save(c);
+                });
+        // Merge items
+        for (CartItem guestItem : guestCart.getItems()) {
+            CartItem existingItem = cartItemRepository.findByCartAndProduct(userCart, guestItem.getProduct())
+                    .orElseGet(() -> {
+                        CartItem ci = new CartItem();
+                        ci.setCart(userCart);
+                        ci.setProduct(guestItem.getProduct());
+                        ci.setCartQuantity(0);
+                        return ci;
+                    });
+
+            existingItem.setCartQuantity(existingItem.getCartQuantity() + guestItem.getCartQuantity());
+            cartItemRepository.save(existingItem);
+        }
+        // Mark guest cart as COMPLETED
+        guestCart.setStatus(Cart.Status.COMPLETED);
+        cartRepo.save(guestCart);
+        return userCart;
+    }
+
+    public CartResponse getCart(String userId, String sessionId) {
+        Cart cart;
+
+        if (userId != null) {
+            cart = cartRepo.findByUserAndStatus(new User(userId), Cart.Status.ACTIVE)
+                    .orElse(null);
+        } else {
+            cart = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE)
+                    .orElse(null);
+        }
+
+        if (cart == null) {
+            return new CartResponse(null, userId, sessionId, "EMPTY", List.of());
+        }
+
+        List<CartItemResponse> itemResponses = cart.getItems().stream()
+                .map(item -> new CartItemResponse(
+                        item.getCartItemId(),
+                        item.getCartQuantity(),
+
+                        new ImageResponse(
+                                item.getProduct().getProductId(),
+                                item.getProduct().getProductName(),
+                                item.getProduct().getProductDescription(),
+                                item.getProduct().isProductOrdered(),
+                                item.getProduct().getProductStatus(),
+                                item.getProduct().getCustomProductId(),
+                                item.getProduct().getCreatedTime(),
+                                item.getProduct().getUpdatedTime(),
+                                item.getProduct().getpCategory(),
+                                item.getProduct().getpSubCategory(),
+                                item.getProduct().isInStock(),
+                                item.getProduct().getTotalQuantity(),
+                                item.getProduct().getAvailableQuantity(),
+                                item.getProduct().getpTag(),
+                                item.getProduct().getPrice(),
+                                item.getProduct().getDiscountPrice(),
+                                item.getProduct().getWeight(),
+                                item.getProduct().getWeightUnit(),
+                                item.getProduct().getAttributeName(),
+                                item.getProduct().getAttributeValue(),
+                                productImageResponse(item.getProduct()),
+                                item.getProduct().isWishlisted()
+                        )
+                ))
+                .toList();
+        String userIdFromCart = (cart.getUser() != null) ? cart.getUser().getId() : null;
+
+        return new CartResponse(cart.getCartId(),
+                userIdFromCart,
+                cart.getSessionId(),
+                cart.getStatus().name(),
+                itemResponses);
+    }
+
+    private List<ImageResponse.ProductImagesResponse> productImageResponse(Products product) {
+        String baseUrl = "http://localhost:8083";
+        List<ImageResponse.ProductImagesResponse> imageResponses = product.getProductImages()
+                .stream()
+                .map(image -> new ImageResponse.ProductImagesResponse(
+                        image.getImageId(),
+                        baseUrl + image.getImageUrl(),
+                        product.getProductId()
+                ))
+                .collect(Collectors.toList());
+        return imageResponses;
+    }
+
+    public AuthResponse deleteCartById(
+            Long cartId,
+            String userId,
+            String sessionId) {
+        Cart cart = cartRepo.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
+
+        if (userId != null) {
+            if (cart.getUser() == null || !cart.getUser().getId().equals(userId)) {
+                 return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
+            }
+        } else if (sessionId != null) {
+            if (cart.getSessionId() == null || !cart.getSessionId().equals(sessionId)) {
+                return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Session user not found", null);
+            }
+        } else {
+            throw new RuntimeException("Either userId or sessionId must be provided");
+        }
+
+        cartItemRepository.deleteAll(cart.getItems());
+        cartRepo.delete(cart);
+
+        return new AuthResponse(HttpStatus.OK.value(), "deleted", null);
+    }
+
+
+    public AuthResponse deleteAllCarts(String userId, String sessionId) {
+        if (userId != null) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+            List<Cart> userCarts = cartRepo.findByUser(user);
+            userCarts.forEach(cart -> {
+                cartItemRepository.deleteAll(cart.getItems());
+                cartRepo.delete(cart);
+            });
+
+        } else if (sessionId != null) {
+            List<Cart> guestCarts = cartRepo.findBySessionId(sessionId);
+            guestCarts.forEach(cart -> {
+                cartItemRepository.deleteAll(cart.getItems());
+                cartRepo.delete(cart);
+            });
+
+        } else {
+            return new AuthResponse(HttpStatus.OK.value(), "Either userId or sessionId must be provided", null);
+        }
+
+        return new AuthResponse(HttpStatus.OK.value(), "deleted", null);
+    }
+
+
+    public AuthResponse updateCartItem(String userId, String sessionId, Long productId, int quantity) {
+        Cart cart;
+
+        if (userId != null) {
+            User user = userRepo.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+            cart = cartRepo.findByUserAndStatus(user, Cart.Status.ACTIVE)
+                    .orElseThrow(() -> new EntityNotFoundException("User cart not found"));
+
+        } else if (sessionId != null) {
+            cart = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE)
+                    .orElseThrow(() -> new EntityNotFoundException("Guest cart not found"));
+
+        } else {
+            return new AuthResponse(HttpStatus.OK.value(), "Either userId or sessionId must be provided", null);
+        }
 
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        cartItem.setUser(user);
-        cartItem.setProduct(product);
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product)
+                .orElseThrow(() -> new EntityNotFoundException("Cart item not found"));
 
-
-        List<CustomizationOption> optionList = new ArrayList<>();
-        optionList.add(option);
-        cartItem.setCustomizationOption(optionList);
-
-
-
-
-        List<String> imageUrls = new ArrayList<>();
-        if (customImages != null && !customImages.isEmpty()) {
-            for (MultipartFile file : customImages) {
-                if (!file.isEmpty()) {
-                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                    Path filePath = Paths.get(uploadDir + fileName);
-                    Files.createDirectories(filePath.getParent());
-                    Files.write(filePath, file.getBytes());
-                    imageUrls.add(fileName);
-                }
-            }
+        if (quantity <= 0) {
+            cartItemRepository.delete(cartItem);
+        } else {
+            cartItem.setCartQuantity(quantity);
+            cartItemRepository.save(cartItem);
         }
 
-        cartItem.setCustomImages(imageUrls.isEmpty() ? null : imageUrls);
-        cartItem.setDesigns(cartDTO.getCartItemDesigns());
-
-        cartItemRepository.save(cartItem);
-
-        String toEmail = user.getEmail(); // assumes User has getEmail()
-        String userName = user.getUsername(); // or getUserName()
-        String productName = product.getProductName();
-        int quantity = cartDTO.getCartQuantity();
-
-//        mailService.sendCartItemAddedMail(toEmail, userName, productName, quantity);
-        return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
+        return new AuthResponse(HttpStatus.OK.value(), "updated",null);
     }
 
 
-    @Transactional
-    public AuthResponse updateCartItemById(Long cartItemId, String cartPayload, List<MultipartFile> customImages) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        CartDTO cartDTO = objectMapper.readValue(cartPayload, CartDTO.class);
-
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new RuntimeException("Cart Item not found with id: " + cartItemId));
-
-        if (cartDTO.getCustomName() != null) {
-            cartItem.setCustomName(cartDTO.getCustomName());
-        }
-        cartItem.setCartGiftWrap(cartDTO.isCartGiftWrap());
-        cartItem.setCartQuantity(cartDTO.getCartQuantity());
-
-//        if (cartDTO.getCartItemDesigns() != null) {
-//            cartItem.setDesigns(cartDTO.getCartItemDesigns());
-//        }
-
-        if (customImages != null && !customImages.isEmpty()) {
-
-            List<String> existingImages = cartItem.getCustomImages();
-            if (existingImages != null) {
-                for (String fileName : existingImages) {
-                    Path filePath = Paths.get(uploadDir + fileName);
-                    try {
-                        Files.deleteIfExists(filePath);
-                    } catch (IOException e) {
-                        System.err.println("Failed to delete old image: " + filePath);
-                    }
-                }
-            }
 
 
-            List<String> newImageUrls = new ArrayList<>();
-            for (MultipartFile file : customImages) {
-                if (!file.isEmpty()) {
-                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                    Path filePath = Paths.get(uploadDir + fileName);
-                    Files.createDirectories(filePath.getParent());
-                    Files.write(filePath, file.getBytes());
-                    newImageUrls.add(fileName);
-                }
-            }
-            cartItem.setCustomImages(newImageUrls);
-        }
-
-        cartItemRepository.save(cartItem);
-        User user = cartItem.getUser();
-        String toEmail = user.getEmail();
-        String userName = user.getUsername();
-        String productName = cartItem.getProduct().getProductName();
-        int quantity = cartItem.getCartQuantity();
-
-//        mailService.sendCartItemUpdatedMail(toEmail, userName, productName, quantity);
-        return new AuthResponse(HttpStatus.OK.value(), "updated", null);
-    }
-
-
-    public AuthResponse getUserCartList(String userId) {
-        List<CartItem> userCartItems = cartItemRepository.getAllItemsByUser(userId);
-        return new AuthResponse(HttpStatus.OK.value(), "fetched", userCartItems);
-    }
-
-    public AuthResponse getAllCartItems() {
-        List<CartItem> cartItems = cartItemRepository.findAll();
-        return new AuthResponse(HttpStatus.OK.value(), "fetched", cartItems);
-    }
-
-    public AuthResponse getAllUsers() {
-        List<User> users = userRepo.findAll();
-        return new AuthResponse(HttpStatus.OK.value(), "fetched", users);
-    }
-
-
-    public AuthResponse deleteCartItem(Long cartItemId) {
-        Optional<CartItem> optionalCartItem = cartItemRepository.findById(cartItemId);
-
-        if (optionalCartItem.isEmpty()) {
-            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Cart Item not found with id: " + cartItemId, null);
-        }
-
-        CartItem cartItem = optionalCartItem.get();
-
-
-        User user = cartItem.getUser();
-        String toEmail = user.getEmail();
-        String username = user.getUsername(); // use getName() or appropriate method
-        String productName = cartItem.getProduct().getProductName();
-
-        cartItemRepository.deleteById(cartItemId);
-
-//        mailService.sendCartItemDeletedMail(toEmail, username, productName);
-
-        return new AuthResponse(HttpStatus.OK.value(), "Cart item deleted and email sent", null);
-    }
-
-
-    @Transactional
-    public AuthResponse deleteAllCartItems(String userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<CartItem> userCartItems = cartItemRepository.getAllItemsByUser(userId);
-
-        if (userCartItems.isEmpty()) {
-            return new AuthResponse(HttpStatus.NOT_FOUND.value(), "No items found in cart", null);
-        }
-
-        String toEmail = user.getEmail();
-        String username = user.getUsername();
-
-        List<String> productNames = userCartItems.stream()
-                .map(item -> item.getProduct().getProductName())
-                .toList();
-
-
-//        mailService.sendCartClearedMail(toEmail, username, productNames);
-        cartItemRepository.deleteAll(userCartItems);
-
-        return new AuthResponse(HttpStatus.OK.value(), "All cart items deleted and email sent", null);
-    }
-
-    public AuthResponse getCartItemsCount() {
-        long count = cartItemRepository.count();
-        return new AuthResponse(HttpStatus.OK.value(), "ok", count);
-    }
 
 }

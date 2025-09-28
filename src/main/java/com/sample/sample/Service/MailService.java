@@ -60,7 +60,7 @@ public class MailService {
         String messageBody;
 
         switch (status) {
-            case ORDER_PLACED:
+            case CREATED:
                 subject = "🛍️ Order Placed Successfully - WeLoveYou";
                 messageBody = "Hi " + fullName + ",\n\n"
                         + "Your order has been successfully placed.\n\n"
@@ -70,14 +70,7 @@ public class MailService {
                         + "We’ll notify you once it is packed.\n";
                 break;
 
-            case PACKED:
-                subject = "📦 Order Packed - WeLoveYou";
-                messageBody = "Hi " + fullName + ",\n\n"
-                        + "Good news! Your order has been packed and is getting ready to ship.\n\n"
-                        + "🆔 Order ID: #" + orderNumber + "\n"
-                        + "📦 Status: Packed\n\n"
-                        + "You’ll receive another update when your order is shipped.\n";
-                break;
+
 
             case SHIPPED:
                 subject = "🚚 Order Shipped - WeLoveYou";
@@ -88,14 +81,7 @@ public class MailService {
                         + "Stay tuned! You’ll get a message when it’s out for delivery.\n";
                 break;
 
-            case OUT_FOR_DELIVERY:
-                subject = "🛵 Out for Delivery - WeLoveYou";
-                messageBody = "Hi " + fullName + ",\n\n"
-                        + "Your order is out for delivery and will reach you soon.\n\n"
-                        + "🆔 Order ID: #" + orderNumber + "\n"
-                        + "📦 Status: Out for Delivery\n\n"
-                        + "Please keep your phone nearby and ensure someone is available to receive it.\n";
-                break;
+
 
             case DELIVERED:
                 subject = "📬 Order Delivered - WeLoveYou";
@@ -307,7 +293,6 @@ public class MailService {
                     + "The WeLoveYou Team";
 
             helper.setText(body);
-
             // Attach PDF receipt
             helper.addAttachment("Transaction_Receipt.pdf", new ByteArrayResource(receipt));
 

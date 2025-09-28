@@ -6,61 +6,80 @@ import java.util.List;
 
 public class OrderDTO {
 
+    private String userId;
+    private String sessionId;
+    private Long shippingAddress;
+    private String paymentMethod;
 
-    private Integer orderTotal;
-    private String orderDiscount;
-    private List<Long> cartItemIds;
-    private String shippingCharges;
-    private String orderGstPercent;
+//    user requirements
+    private String orderNote;
 
-    public String getOrderGstPercent() {
-        return orderGstPercent;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setOrderGstPercent(String orderGstPercent) {
-        this.orderGstPercent = orderGstPercent;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    private Payment payment;
-
-    public Payment getPayment() {
-        return payment;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setPayment(Payment payment) {
-        this.payment = payment;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public Integer getOrderTotal() {
-        return orderTotal;
+    public String getOrderNote() {
+        return orderNote;
     }
 
-    public void setOrderTotal(Integer orderTotal) {
-        this.orderTotal = orderTotal;
+    public void setOrderNote(String orderNote) {
+        this.orderNote = orderNote;
     }
 
-    public String getOrderDiscount() {
-        return orderDiscount;
+    public Long getShippingAddress() {
+        return shippingAddress;
     }
 
-    public void setOrderDiscount(String orderDiscount) {
-        this.orderDiscount = orderDiscount;
+    public void setShippingAddress(Long shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 
-    public List<Long> getCartItemIds() {
-        return cartItemIds;
+    public String getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setCartItemIds(List<Long> cartItemIds) {
-        this.cartItemIds = cartItemIds;
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
+//    public void setOrderTotal(Integer orderTotal) {
+//        this.orderTotal = orderTotal;
+//    }
+//
+//    public String getOrderDiscount() {
+//        return orderDiscount;
+//    }
+//
+//    public void setOrderDiscount(String orderDiscount) {
+//        this.orderDiscount = orderDiscount;
+//    }
+//
+//    public List<Long> getCartItemIds() {
+//        return cartItemIds;
+//    }
+//
+//    public void setCartItemIds(List<Long> cartItemIds) {
+//        this.cartItemIds = cartItemIds;
+//    }
+//
+//    public String getShippingCharges() {
+//        return shippingCharges;
+//    }
+//
+//    public void setShippingCharges(String shippingCharges) {
+//        this.shippingCharges = shippingCharges;
+//    }
 
-    public String getShippingCharges() {
-        return shippingCharges;
-    }
-
-    public void setShippingCharges(String shippingCharges) {
-        this.shippingCharges = shippingCharges;
-    }
 
 }

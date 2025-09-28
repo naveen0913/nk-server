@@ -11,7 +11,6 @@ public interface UserOrderedItemRepository extends JpaRepository<UserOrderedItem
 
     List<UserOrderedItems> findByOrderId(Long orderId);
 
-    boolean existsByProduct_ProductId(Long productId);
-    ;
+    boolean existsByProduct_ProductId(Long productId);;
 
 }

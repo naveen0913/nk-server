@@ -13,6 +13,15 @@ public class UserAddressResponse {
     private String state;
     private String country;
     private String pincode;
+    private boolean isDefault;
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean isDefault) {
+        isDefault = isDefault;
+    }
 
     public Long getAddressId() {
         return addressId;

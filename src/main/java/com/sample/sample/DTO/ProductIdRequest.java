@@ -2,9 +2,6 @@ package com.sample.sample.DTO;
 
 public class ProductIdRequest {
 
-
-
-
     private String status;
 
     public String getStatus() {
@@ -16,6 +13,6 @@ public class ProductIdRequest {
     }
 
 
-    }
+}
 
 

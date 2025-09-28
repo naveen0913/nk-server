@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -18,11 +19,23 @@ public class Payment {
     private Long id;
 
     private String razorpayOrderId;
+    private String razorpayPaymentId;
     private String paymentId;
     private String signature;
 
-    private Integer amount;
+    @Enumerated(EnumType.STRING)
+    private PaymetMethod method;
+
+    private BigDecimal amount;
     private Integer gstAmount;
+
+    public PaymetMethod getMethod() {
+        return method;
+    }
+
+    public void setMethod(PaymetMethod method) {
+        this.method = method;
+    }
 
     public String getPaymentMode() {
         return paymentMode;
@@ -40,7 +53,6 @@ public class Payment {
         this.paymentPaidDate = paymentPaidDate;
     }
 
-    private Integer shippingPrice;
     private String currency;
 
     private String paymentMode;
@@ -82,6 +94,14 @@ public class Payment {
         this.id = id;
     }
 
+    public String getRazorpayPaymentId() {
+        return razorpayPaymentId;
+    }
+
+    public void setRazorpayPaymentId(String razorpayPaymentId) {
+        this.razorpayPaymentId = razorpayPaymentId;
+    }
+
     public String getRazorpayOrderId() {
         return razorpayOrderId;
     }
@@ -106,11 +126,11 @@ public class Payment {
         this.signature = signature;
     }
 
-    public Integer getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(BigDecimal  amount) {
         this.amount = amount;
     }
 
@@ -122,13 +142,6 @@ public class Payment {
         this.gstAmount = gstAmount;
     }
 
-    public Integer getShippingPrice() {
-        return shippingPrice;
-    }
-
-    public void setShippingPrice(Integer shippingPrice) {
-        this.shippingPrice = shippingPrice;
-    }
 
     public String getCurrency() {
         return currency;
@@ -170,20 +183,6 @@ public class Payment {
         this.accountDetails = accountDetails;
     }
 
-//    public UserAddress getUserAddress() {
-//        return userAddress;
-//    }
-//
-//    public void setUserAddress(UserAddress userAddress) {
-//        this.userAddress = userAddress;
-//    }
-//
-//    public List<CartItem> getCartItemList(List<Long> cartItemIds) {
-//        return cartItemList;
-//    }
-//
-//    public void setCartItemList(List<CartItem> cartItemList) {
-//        this.cartItemList = cartItemList;
-//    }
+
 }
 

@@ -10,6 +10,8 @@ import com.sample.sample.Model.User;
 import com.sample.sample.Repository.AccountDetailsRepository;
 import com.sample.sample.Repository.UserRepo;
 import com.sample.sample.Responses.AuthResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -98,10 +100,6 @@ public class UserService {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("user", user);
         responseBody.put("token", token);
-
-
-//        mailService.sendLoginMail(user.getEmail(), user.getUsername());
-
 
         return new AuthResponse(HttpStatus.OK.value(), "Login success", responseBody);
     }
@@ -203,5 +201,44 @@ public class UserService {
         userRepository.save(user);
       mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
     }
+
+
+        public AuthResponse getUserFromRequest(HttpServletRequest request) {
+            try {
+                // 1. Get JWT token from cookie
+                String token = extractJwtFromCookies(request);
+                if (token == null || token.isEmpty()) {
+                    return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Missing token", null);
+                }
+
+                String email = jwtUtil.extractEmail(token);
+                if (email == null || !jwtUtil.validateToken(token, email)) {
+                    return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid or expired token", null);
+                }
+
+                User existed = userRepository.findByEmail(email).orElse(null);
+                if (existed == null) {
+                    return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
+                }
+
+                return new AuthResponse(HttpStatus.OK.value(), "Success", existed);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error: " + e.getMessage(), null);
+            }
+        }
+
+        private String extractJwtFromCookies(HttpServletRequest request) {
+            if (request.getCookies() == null) return null;
+            for (Cookie cookie : request.getCookies()) {
+                if ("token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+            return null;
+    }
+
+
 
 }

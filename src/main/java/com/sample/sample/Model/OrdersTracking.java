@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -26,22 +27,15 @@ public class OrdersTracking {
     @Enumerated(EnumType.STRING)
     @Column(length = 30)
     private TrackingStatus trackingStatus;
-    private Boolean shipped;
-    private Boolean packed;
-    private Boolean outOfDelivery;
+
     private Boolean delivered;
 
-
-    public Boolean getPacked() {
-        return packed;
-    }
+    private String note;
 
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     private Date trackingUpdated;
 
-    @Temporal(TemporalType.DATE)
-    private Date estimatedDelivery;
 
     @OneToOne
     @JoinColumn(name = "order_id", unique = true)
@@ -50,9 +44,7 @@ public class OrdersTracking {
     private Orders order;
 
 
-    private String trackingRefNo;
-    private String trackingLink;
-    private Date deliveryDate;
+    private LocalDateTime deliveryTime;
 
     // --- Getters and Setters ---
     public Long getId() {
@@ -87,25 +79,6 @@ public class OrdersTracking {
         this.trackingStatus = trackingStatus;
     }
 
-    public Boolean getShipped() {
-        return shipped;
-    }
-
-    public void setShipped(Boolean shipped) {
-        this.shipped = shipped;
-    }
-
-    public void setPacked(Boolean packed) {
-        this.packed = packed;
-    }
-
-    public Boolean getOutOfDelivery() {
-        return outOfDelivery;
-    }
-
-    public void setOutOfDelivery(Boolean outOfDelivery) {
-        this.outOfDelivery = outOfDelivery;
-    }
 
     public Boolean getDelivered() {
         return delivered;
@@ -123,13 +96,6 @@ public class OrdersTracking {
         this.trackingUpdated = trackingUpdated;
     }
 
-    public Date getEstimatedDelivery() {
-        return estimatedDelivery;
-    }
-
-    public void setEstimatedDelivery(Date estimatedDelivery) {
-        this.estimatedDelivery = estimatedDelivery;
-    }
 
     public Orders getOrder() {
         return order;
@@ -139,27 +105,19 @@ public class OrdersTracking {
         this.order = order;
     }
 
-    public String getTrackingRefNo() {
-        return trackingRefNo;
+    public String getNote() {
+        return note;
     }
 
-    public void setTrackingRefNo(String trackingRefNo) {
-        this.trackingRefNo = trackingRefNo;
+    public void setNote(String note) {
+        this.note = note;
     }
 
-    public String getTrackingLink() {
-        return trackingLink;
+    public LocalDateTime getDeliveryTime() {
+        return deliveryTime;
     }
 
-    public void setTrackingLink(String trackingLink) {
-        this.trackingLink = trackingLink;
-    }
-
-    public Date getDeliveryDate() {
-        return deliveryDate;
-    }
-
-    public void setDeliveryDate(Date deliveryDate) {
-        this.deliveryDate = deliveryDate;
+    public void setDeliveryTime(LocalDateTime deliveryTime) {
+        this.deliveryTime = deliveryTime;
     }
 }

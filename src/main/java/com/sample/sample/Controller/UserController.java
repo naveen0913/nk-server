@@ -3,14 +3,18 @@ package com.sample.sample.Controller;
 import com.sample.sample.DTO.*;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/user/")
-@CrossOrigin("*")
 public class UserController {
 
     @Autowired
@@ -27,8 +31,39 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public AuthResponse userLogin(@RequestBody LoginDTO loginDTO) {
-        return userService.userLogin(loginDTO);
+    public ResponseEntity<AuthResponse> userLogin(@RequestBody LoginDTO loginDTO) {
+        AuthResponse response = userService.userLogin(loginDTO);
+        if (response.getCode() != HttpStatus.OK.value()) {
+            return ResponseEntity.status(response.getCode()).body(response);
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> responseData = (Map<String, Object>) response.getData();
+        String token = (String) responseData.get("token");
+
+        ResponseCookie cookie = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(false) // true in production with HTTPS
+                .path("/")
+                .maxAge(24 * 60 * 60)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(response);
+
+//        return userService.userLogin(loginDTO);
+    }
+
+
+    @GetMapping("/authorized")
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        AuthResponse response = userService.getUserFromRequest(request);
+
+        if (response.getCode() != HttpStatus.OK.value()) {
+            return ResponseEntity.status(response.getCode()).body(response.getMessage());
+        }
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{userId}")
@@ -83,6 +118,22 @@ public class UserController {
                     ));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser() {
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(false) // set true in production
+                .path("/")
+                .maxAge(0) // delete cookie immediately
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(Map.of("message", "Logged out successfully"));
+    }
+
 
 }
 

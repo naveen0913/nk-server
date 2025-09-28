@@ -15,6 +15,15 @@ public class UserAddress {
     private String alterPhone;
     private String addressType;
     private String addressLine1;
+    private boolean isDefault;
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(boolean isDefault) {
+        isDefault = isDefault;
+    }
 
     public String getAlterPhone() {
         return alterPhone;
@@ -34,6 +43,10 @@ public class UserAddress {
     @JoinColumn(name = "account_details_id")
     @JsonBackReference
     private AccountDetails accountDetails;
+
+    private Double latitude;
+
+    private Double longitude;
 
     public AccountDetails getAccountDetails() {
         return accountDetails;
@@ -129,5 +142,25 @@ public class UserAddress {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

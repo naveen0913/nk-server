@@ -1,5 +1,6 @@
 package com.sample.sample.Responses;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -10,14 +11,31 @@ public class PaymentResponse {
     private String signature;
     private Integer amount;
     private Integer gstAmount;
-    private Integer shippingPrice;
     private String currency;
     private String receipt;
     private String status;
     private String paymentMode;
     private Date paymentDate;
-    private AccountDetailsResponse accountDetails;
     private OrdersResponse ordersResponse;
+    private String  orderedItem;
+
+    public String getRazorpayKeyId() {
+        return razorpayKeyId;
+    }
+
+    public String getOrderedItem() {
+        return orderedItem;
+    }
+
+    public void setOrderedItem(String orderedItem) {
+        this.orderedItem = orderedItem;
+    }
+
+    public void setRazorpayKeyId(String razorpayKeyId) {
+        this.razorpayKeyId = razorpayKeyId;
+    }
+
+    private String razorpayKeyId;
 
     public String getPaymentMode() {
         return paymentMode;
@@ -91,13 +109,6 @@ public class PaymentResponse {
         this.gstAmount = gstAmount;
     }
 
-    public Integer getShippingPrice() {
-        return shippingPrice;
-    }
-
-    public void setShippingPrice(Integer shippingPrice) {
-        this.shippingPrice = shippingPrice;
-    }
 
     public String getCurrency() {
         return currency;
@@ -123,13 +134,7 @@ public class PaymentResponse {
         this.status = status;
     }
 
-    public AccountDetailsResponse getAccountDetails() {
-        return accountDetails;
-    }
 
-    public void setAccountDetails(AccountDetailsResponse accountDetails) {
-        this.accountDetails = accountDetails;
-    }
 }
 
 

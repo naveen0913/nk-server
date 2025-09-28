@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment")
-@CrossOrigin("*")
 public class PaymentController {
 
     private final PaymentService paymentService;
@@ -27,47 +26,39 @@ public class PaymentController {
         this.paymentRepository = paymentRepository;
     }
 
-    @PostMapping("/create/{accountId}/{addressId}")
-    public ResponseEntity<?> createOrder(
-            @PathVariable Long accountId,
-            @PathVariable Long addressId,
-            @RequestBody PaymentRequestDTO request) throws RazorpayException {
-
-        AuthResponse response = paymentService.createOrderPayment(accountId, addressId, request);
-        return ResponseEntity.ok(response);
-    }
-
-
-    @PostMapping("/verify-payment")
-    public ResponseEntity<?> verifyPayment(@RequestBody PaymentRequestDTO dto) {
-        boolean isValid = paymentService.verifyPayment(dto);
-        if (isValid) {
-            return ResponseEntity.status(HttpStatus.OK.value()).body("Payment Verified Successful");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body("Invalid payment signature.");
-        }
-    }
-
-//    @GetMapping("/all")
-//    public ResponseEntity<AuthResponse> getAllPayments() {
-//        List<PaymentResponse> payments = paymentService.getAllPayments();
-//        AuthResponse response = new AuthResponse(HttpStatus.OK.value(), "Payments fetched successfully", payments);
+//    @PostMapping("/create/{accountId}/{addressId}")
+//    public ResponseEntity<?> createOrder(
+//            @PathVariable Long accountId,
+//            @PathVariable Long addressId,
+//            @RequestBody PaymentRequestDTO request) throws RazorpayException {
+//
+//        AuthResponse response = paymentService.createOrderPayment(accountId, addressId, request);
 //        return ResponseEntity.ok(response);
 //    }
 
 
-    @GetMapping("/all")
-    public ResponseEntity<AuthResponse> getAllPayments() {
-        AuthResponse response = paymentService.getAllPayments();
-        return ResponseEntity.ok(response);
-    }
+//    @PostMapping("/verify-payment")
+//    public ResponseEntity<?> verifyPayment(@RequestBody PaymentRequestDTO dto) {
+//        boolean isValid = paymentService.verifyPayment(dto);
+//        if (isValid) {
+//            return ResponseEntity.status(HttpStatus.OK.value()).body("Payment Verified Successful");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body("Invalid payment signature.");
+//        }
+//    }
+
+//    @GetMapping("/all")
+//    public ResponseEntity<AuthResponse> getAllPayments() {
+//        AuthResponse response = paymentService.getAllPayments();
+//        return ResponseEntity.ok(response);
+//    }
 
     
-    @GetMapping("/account/{accountId}")
-    public ResponseEntity<AuthResponse> getPaymentsByAccount(@PathVariable Long accountId) {
-        AuthResponse response = paymentService.getPaymentsByAccount(accountId);
-        return ResponseEntity.status(response.getCode()).body(response);
-    }
+//    @GetMapping("/account/{accountId}")
+//    public ResponseEntity<AuthResponse> getPaymentsByAccount(@PathVariable Long accountId) {
+//        AuthResponse response = paymentService.getPaymentsByAccount(accountId);
+//        return ResponseEntity.status(response.getCode()).body(response);
+//    }
 
 
 }

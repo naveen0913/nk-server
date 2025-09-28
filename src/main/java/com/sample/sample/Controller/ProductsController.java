@@ -3,7 +3,6 @@ package com.sample.sample.Controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sample.sample.DTO.ProductIdRequest;
 import com.sample.sample.Responses.AuthResponse;
-import com.sample.sample.Service.CustomizationImageService;
 import com.sample.sample.Service.ProductsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,22 +14,45 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin("*")
 public class ProductsController {
     @Autowired
     private ProductsService productsService;
 
-    @Autowired
-    private CustomizationImageService customizationImageService;
+    @PostMapping("/add")
+    public ResponseEntity<?> addProduct(
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("category") String category,
+            @RequestParam("price") double price,
+            @RequestParam("discountPrice") double discountPrice,
+            @RequestParam("subCategory") String subCategory,
+            @RequestParam("pTag") String pTag,
+            @RequestParam("inStock") boolean inStock,
+            @RequestParam("totalQuantity") Long totalQuantity,
+            @RequestParam("availableQuantity") Long availableQuantity,
+            @RequestParam(value = "weight",required = false) String weight,
+            @RequestParam(value = "weightUnit",required = false) String weightUnit,
+            @RequestParam(value = "attributeName",required = false) String attributeName,
+            @RequestParam(value = "attributeValue",required = false) String attributeValue,
+            @RequestParam("files") MultipartFile[] files
+    ) throws IOException {
 
-    @PostMapping
-    public ResponseEntity<?> addProduct(@RequestParam("name") String name,
-                                        @RequestParam("description") String description,
-                                        @RequestParam(value = "shape",required = false) String shapeType,
-                                        @RequestParam("file") MultipartFile file) throws IOException {
-        AuthResponse response = productsService.saveProducts(name, description,shapeType, file);
+        AuthResponse response = productsService.addProduct(
+                name,
+                description,
+                category,
+                price,
+                discountPrice,
+                subCategory,
+                pTag,
+                inStock,
+                totalQuantity,
+                availableQuantity,
+                weight,
+                weightUnit,attributeName,attributeValue,
+                files
+        );
         return ResponseEntity.status(response.getCode()).body(response);
-
     }
 
     @GetMapping
@@ -40,8 +62,9 @@ public class ProductsController {
     }
 
     @GetMapping("/{productId}")
-    public AuthResponse getProductById(@PathVariable Long productId) throws JsonProcessingException {
-        return productsService.getProductById(productId);
+    public ResponseEntity<?> getProductById(@PathVariable Long productId) throws JsonProcessingException {
+        AuthResponse authResponse = productsService.getProductById(productId);
+        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
     @DeleteMapping("/{productId}")
@@ -50,16 +73,33 @@ public class ProductsController {
         return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
-    @PutMapping("/{productId}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(
-            @PathVariable Long productId,
-            @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "shape", required = false) String shape,
-            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+            @PathVariable Long id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double price,
+            @RequestParam(required = false) Double discountPrice,
+            @RequestParam(required = false) String subCategory,
+            @RequestParam(required = false) String pTag,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(required = false) Long totalQuantity,
+            @RequestParam(required = false) Long availableQuantity,
+            @RequestParam(required = false) String weight,
+            @RequestParam(required = false) String weightUnit,
+            @RequestParam(required = false) String attributeName,
+            @RequestParam(required = false) String attributeValue,
+            @RequestParam(value = "files", required = false) MultipartFile[] files
+    ) throws IOException {
 
-        AuthResponse authResponse = productsService.updateProductById(productId, name, description,shape, file);
-        return ResponseEntity.status(authResponse.getCode()).body(authResponse);
+        AuthResponse response = productsService.updateProduct(
+                id, name, description, category, price, discountPrice,
+                subCategory, pTag, inStock, totalQuantity, availableQuantity,
+                weight, weightUnit, attributeName, attributeValue, files
+        );
+
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
     public String buildImageUrl(String baseUrl, String uploadPath, String filename) {
@@ -78,21 +118,6 @@ public class ProductsController {
 
         AuthResponse response = productsService.updateProductStatus(productId, request.getStatus());
         return ResponseEntity.status(response.getCode()).body(response);
-    }
-
-    @PostMapping("/{productId}/custom-image")
-    public ResponseEntity<?> sendCustomImagePreviewPDF(
-            @PathVariable Long productId,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("email") String email
-    ) {
-        try {
-            customizationImageService.processAndSendCustomImagePdf(productId, file, email);
-            return ResponseEntity.ok("PDF generated and sent to " + email);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + e.getMessage());
-        }
     }
 
 

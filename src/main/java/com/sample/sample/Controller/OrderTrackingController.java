@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/tracking")
-@CrossOrigin("*")
 public class OrderTrackingController {
 
     @Autowired

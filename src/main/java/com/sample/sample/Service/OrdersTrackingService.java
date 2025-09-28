@@ -1,6 +1,5 @@
 package com.sample.sample.Service;
 
-import com.sample.sample.DTO.NotificationDTO;
 import com.sample.sample.DTO.OrderTrackingDTO;
 import com.sample.sample.Model.*;
 import com.sample.sample.Repository.OrderRepository;
@@ -9,7 +8,6 @@ import com.sample.sample.Responses.AuthResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,12 +26,6 @@ public class OrdersTrackingService {
 
     @Autowired
     private MailService mailService;
-
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
 
 
     public AuthResponse getOrderTrackingById(Long orderId) {
@@ -78,26 +70,15 @@ public class OrdersTrackingService {
         if (dto.getTrackingStatus() != null) {
             existing.setTrackingStatus(dto.getTrackingStatus());
         }
-        if (dto.getShipped() != null) {
-            existing.setShipped(dto.getShipped());
-        }
-        if (dto.getPacked() != null) {
-            existing.setPacked(dto.getPacked());
-        }
-        if (dto.getOutOfDelivery() != null) {
-            existing.setOutOfDelivery(dto.getOutOfDelivery());
-        }
+
+
         if (dto.getDelivered() != null) {
             existing.setDelivered(dto.getDelivered());
         }
-        if (dto.getEstimatedDelivery() != null) {
-            existing.setEstimatedDelivery(dto.getEstimatedDelivery());
-        }
 
         existing.setTrackingUpdated(new Date());
-        existing.setTrackingLink(dto.getTrackingLink());
-        existing.setTrackingRefNo(dto.getTrackingRefNo());
-        existing.setDeliveryDate(dto.getDeliveryDate());
+
+        existing.setDeliveryTime(dto.getDeliveryTime());
 
 
         if (dto.getTrackingStatus() != null) {
@@ -114,14 +95,6 @@ public class OrdersTrackingService {
                         TrackingStatus.valueOf(dto.getTrackingStatus().toString().toUpperCase()) // converts string to enum
                 );
 
-                NotificationDTO notificationDTO = new NotificationDTO();
-                notificationDTO.setTitle("Order Status Updated");
-                notificationDTO.setMessage("Your order " + order.getId() + " is now " +
-                        TrackingStatus.valueOf(dto.getTrackingStatus().toString().toUpperCase()));
-                notificationDTO.setType("TRACKING_UPDATE");
-                notificationDTO.setUserId(account.getUser().getId());
-
-                messagingTemplate.convertAndSend("/queue/user/" + account.getUser().getId(), notificationDTO);
 
             } catch (Exception e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send order status email: " + e.getMessage());
