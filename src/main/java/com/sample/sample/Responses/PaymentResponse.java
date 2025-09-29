@@ -10,7 +10,6 @@ public class PaymentResponse {
     private String paymentId;
     private String signature;
     private Integer amount;
-    private Integer gstAmount;
     private String currency;
     private String receipt;
     private String status;
@@ -101,13 +100,7 @@ public class PaymentResponse {
         this.amount = amount;
     }
 
-    public Integer getGstAmount() {
-        return gstAmount;
-    }
 
-    public void setGstAmount(Integer gstAmount) {
-        this.gstAmount = gstAmount;
-    }
 
 
     public String getCurrency() {

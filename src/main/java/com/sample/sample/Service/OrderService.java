@@ -290,7 +290,6 @@ public class OrderService {
             paymentDTO.setPaymentId(payment.getPaymentId());
             paymentDTO.setSignature(payment.getSignature());
 //            paymentDTO.setAmount(payment.getAmount());
-            paymentDTO.setGstAmount(payment.getGstAmount());
             paymentDTO.setCurrency(payment.getCurrency());
             paymentDTO.setReceipt(payment.getReceipt());
             paymentDTO.setStatus(payment.getStatus().toString());
@@ -311,6 +310,8 @@ public class OrderService {
                 userAddressDTO.setState(ua.getState());
                 userAddressDTO.setCountry(ua.getCountry());
                 userAddressDTO.setPincode(ua.getPincode());
+                userAddressDTO.setLatitude(ua.getLatitude());
+                userAddressDTO.setLongitude(ua.getLongitude());
             }
 
 
@@ -403,7 +404,6 @@ public class OrderService {
         paymentDTO.setRazorpayOrderId(payment.getRazorpayOrderId());
         paymentDTO.setPaymentId(payment.getPaymentId());
         paymentDTO.setSignature(payment.getSignature());
-        paymentDTO.setGstAmount(payment.getGstAmount());
         paymentDTO.setCurrency(payment.getCurrency());
         paymentDTO.setReceipt(payment.getReceipt());
         paymentDTO.setStatus(payment.getStatus().toString());
@@ -424,6 +424,8 @@ public class OrderService {
             userAddressDTO.setState(ua.getState());
             userAddressDTO.setCountry(ua.getCountry());
             userAddressDTO.setPincode(ua.getPincode());
+            userAddressDTO.setLatitude(ua.getLatitude());
+            userAddressDTO.setLongitude(ua.getLongitude());
         }
 
         // --- Order Items ---
@@ -499,13 +501,12 @@ public class OrderService {
 
             if (order.getUserAddress() != null &&
                     order.getUserAddress().getLatitude() != null &&
-                    order.getUserAddress().getLongitude() != null &&
-                    delivery.getCurrentLatitude() != null &&
-                    delivery.getCurrentLongitude() != null) {
+                    order.getUserAddress().getLongitude() != null
+                    ) {
 
                 double distance = DistanceUtils.calculateDistance(
-                        Double.parseDouble(delivery.getCurrentLatitude()),
-                        Double.parseDouble(delivery.getCurrentLongitude()),
+                        delivery.getCurrentLatitude(),
+                        delivery.getCurrentLongitude(),
                         order.getUserAddress().getLatitude(),
                         order.getUserAddress().getLongitude()
                 );
@@ -542,7 +543,6 @@ public class OrderService {
             paymentDTO.setPaymentId(payment.getPaymentId());
             paymentDTO.setSignature(payment.getSignature());
 //            paymentDTO.setAmount(payment.getAmount());
-            paymentDTO.setGstAmount(payment.getGstAmount());
             paymentDTO.setCurrency(payment.getCurrency());
             paymentDTO.setReceipt(payment.getReceipt());
             paymentDTO.setStatus(payment.getStatus().toString());
@@ -563,6 +563,8 @@ public class OrderService {
                 userAddressDTO.setState(ua.getState());
                 userAddressDTO.setCountry(ua.getCountry());
                 userAddressDTO.setPincode(ua.getPincode());
+                userAddressDTO.setLatitude(ua.getLatitude());
+                userAddressDTO.setLongitude(ua.getLongitude());
             }
 
 

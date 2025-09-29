@@ -13,29 +13,13 @@ public class Delivery {
 
     private String trackingId;
 
-    private String currentLatitude;
-    private String currentLongitude;
+    private double currentLatitude;
+    private double currentLongitude;
     private String deliveryStatus;
 
     @OneToOne
     @JoinColumn(name = "order_id", referencedColumnName = "order_id")
     private Orders order;
-
-    public String getCurrentLatitude() {
-        return currentLatitude;
-    }
-
-    public void setCurrentLatitude(String currentLatitude) {
-        this.currentLatitude = currentLatitude;
-    }
-
-    public String getCurrentLongitude() {
-        return currentLongitude;
-    }
-
-    public void setCurrentLongitude(String currentLongitude) {
-        this.currentLongitude = currentLongitude;
-    }
 
     @ManyToOne
     @JoinColumn(name = "agent_id", referencedColumnName = "id")
@@ -100,5 +84,21 @@ public class Delivery {
 
     public void setDeliveredAt(LocalDateTime deliveredAt) {
         this.deliveredAt = deliveredAt;
+    }
+
+    public double getCurrentLatitude() {
+        return currentLatitude;
+    }
+
+    public void setCurrentLatitude(double currentLatitude) {
+        this.currentLatitude = currentLatitude;
+    }
+
+    public double getCurrentLongitude() {
+        return currentLongitude;
+    }
+
+    public void setCurrentLongitude(double currentLongitude) {
+        this.currentLongitude = currentLongitude;
     }
 }

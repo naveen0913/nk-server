@@ -57,10 +57,6 @@ public class WishlistService {
 
         List<Wishlist> wishlistItems = wishlistRepo.findByUser(user);
 
-        if (wishlistItems.isEmpty()) {
-            return new AuthResponse(HttpStatus.NO_CONTENT.value(), "No data found", null);
-        }
-
         // Map Wishlist entities to WishlistResponse DTOs
         List<WishlistResponse> wishlistResponses = wishlistItems.stream().map(wishlist -> {
             Products product = wishlist.getProduct();
@@ -114,6 +110,7 @@ public class WishlistService {
         User user = userRepo.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         Wishlist wishlist = wishlistRepo.findById(wishlistId)
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist item not found"));
+        wishlist.getProduct().setWishlisted(false);
         wishlistRepo.delete(wishlist);
         return new AuthResponse(HttpStatus.OK.value(), "deleted", null);
     }

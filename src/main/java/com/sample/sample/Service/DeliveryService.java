@@ -1,9 +1,7 @@
 package com.sample.sample.Service;
 
-import com.sample.sample.Model.Delivery;
-import com.sample.sample.Model.DeliveryAgent;
-import com.sample.sample.Model.Orders;
-import com.sample.sample.Model.UserAddress;
+import com.sample.sample.DTO.DeliveryRequest;
+import com.sample.sample.Model.*;
 import com.sample.sample.Repository.DeliveryAgentRepo;
 import com.sample.sample.Repository.DeliveryRepo;
 import com.sample.sample.Repository.OrderRepository;
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -34,11 +33,11 @@ public class DeliveryService {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
-    public DeliveryResponse assignDeliveryAgent(String orderId, Long agentId) {
-        Orders order = orderRepository.findByOrderId(orderId)
+    public DeliveryResponse assignDeliveryAgent(DeliveryRequest req) {
+        Orders order = orderRepository.findByOrderId(req.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        DeliveryAgent agent = deliveryAgentRepo.findById(agentId)
+        DeliveryAgent agent = deliveryAgentRepo.findById(req.getAgentId())
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
         Delivery delivery = new Delivery();
@@ -47,13 +46,16 @@ public class DeliveryService {
         delivery.setAgent(agent);
         delivery.setDeliveryStatus("ASSIGNED");
         delivery.setAssignedAt(LocalDateTime.now());
+        order.setStatus(OrderStatus.CREATED);
+        delivery.setCurrentLatitude(req.getLatitude());
+        delivery.setCurrentLongitude(req.getLongitude());
 
         Delivery saved = deliveryRepository.save(delivery);
 
         return mapToResponse(saved, order);
     }
 
-    public DeliveryResponse updateLocation(String trackingId, String lat, String lng, String status) {
+    public DeliveryResponse updateLocation(String trackingId, double lat, double lng, String status) {
         Delivery delivery = deliveryRepository.findByTrackingId(trackingId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found"));
 
@@ -90,12 +92,11 @@ public class DeliveryService {
         dr.setTrackingWebSocketUrl("ws://localhost:8083/ws/topic/delivery/" + delivery.getTrackingId());
 
         UserAddress ua = order.getUserAddress();
-        if (ua != null && ua.getLatitude() != null && ua.getLongitude() != null &&
-                delivery.getCurrentLatitude() != null && delivery.getCurrentLongitude() != null) {
+        if (ua != null && ua.getLatitude() != null && ua.getLongitude() != null) {
 
             double distance = DistanceUtils.calculateDistance(
-                    Double.parseDouble(delivery.getCurrentLatitude()),
-                    Double.parseDouble(delivery.getCurrentLongitude()),
+                    delivery.getCurrentLatitude(),
+                    delivery.getCurrentLongitude(),
                     ua.getLatitude(),
                     ua.getLongitude()
             );
@@ -112,6 +113,14 @@ public class DeliveryService {
         deliveryAgent.setActive(status);
         deliveryAgentRepo.save(deliveryAgent);
         return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
+    }
+
+    public AuthResponse getAllDeliveryAgents(){
+        List<DeliveryAgent> deliveryAgents = deliveryAgentRepo.findAll();
+        if (deliveryAgents.isEmpty()){
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(),"no agents right now",null);
+        }
+        return new AuthResponse(HttpStatus.OK.value(),"no agents right now",deliveryAgents);
     }
 
 }

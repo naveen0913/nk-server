@@ -14,6 +14,8 @@ public class UserAddressResponse {
     private String country;
     private String pincode;
     private boolean isDefault;
+    private double latitude;
+    private double longitude;
 
     public boolean isDefault() {
         return isDefault;
@@ -117,6 +119,26 @@ public class UserAddressResponse {
 
     public void setPincode(String pincode) {
         this.pincode = pincode;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
 

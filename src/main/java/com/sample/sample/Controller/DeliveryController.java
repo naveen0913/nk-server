@@ -18,7 +18,7 @@ public class DeliveryController {
 
     @PostMapping("/admin/assign")
     public ResponseEntity<?> assignAgent(@RequestBody DeliveryRequest request) {
-        return ResponseEntity.ok(deliveryService.assignDeliveryAgent(request.getOrderId(), request.getAgentId()));
+        return ResponseEntity.ok(deliveryService.assignDeliveryAgent(request));
     }
 
     @PostMapping("/update-location")
@@ -43,6 +43,12 @@ public class DeliveryController {
     ){
         AuthResponse authResponse = deliveryService.addNewDeliveryAgent(name,email,phone,status);
         return ResponseEntity.status(authResponse.getCode()).body(authResponse);
+    }
+
+    @GetMapping("/agent/all")
+    public ResponseEntity<?> getDeliveryAgents(){
+        AuthResponse response = deliveryService.getAllDeliveryAgents();
+        return ResponseEntity.status(response.getCode()).body(response);
     }
 
 

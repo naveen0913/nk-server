@@ -70,19 +70,6 @@ public class MailService {
                         + "We’ll notify you once it is packed.\n";
                 break;
 
-
-
-            case SHIPPED:
-                subject = "🚚 Order Shipped - WeLoveYou";
-                messageBody = "Hi " + fullName + ",\n\n"
-                        + "Your order has been shipped and is on the way.\n\n"
-                        + "🆔 Order ID: #" + orderNumber + "\n"
-                        + "📦 Status: Shipped\n\n"
-                        + "Stay tuned! You’ll get a message when it’s out for delivery.\n";
-                break;
-
-
-
             case DELIVERED:
                 subject = "📬 Order Delivered - WeLoveYou";
                 messageBody = "Hi " + fullName + ",\n\n"

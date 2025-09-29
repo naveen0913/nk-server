@@ -3,8 +3,8 @@ package com.sample.sample.Responses;
 public class DeliveryResponse {
     private String trackingId;
     private String status;
-    private String latitude;
-    private String longitude;
+    private double latitude;
+    private double longitude;
     private String agentName;
     private String agentPhone;
     private String trackingWebSocketUrl;
@@ -27,19 +27,19 @@ public class DeliveryResponse {
         this.status = status;
     }
 
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
