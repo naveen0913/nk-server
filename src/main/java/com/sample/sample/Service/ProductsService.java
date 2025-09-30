@@ -87,13 +87,13 @@ public class ProductsService {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "products not found", null);
         }
         List<ImageResponse> responseList = new ArrayList<>();
-        String baseUrl = "http://localhost:8083";
+//        String baseUrl = "http://localhost:8083";
         for (Products product : productList) {
             List<ImageResponse.ProductImagesResponse> imageResponses = product.getProductImages()
                     .stream()
                     .map(image -> new ImageResponse.ProductImagesResponse(
                             image.getImageId(),
-                            baseUrl + image.getImageUrl(),
+                            image.getImageUrl(),
                             product.getProductId()
                     ))
                     .collect(Collectors.toList());
@@ -133,12 +133,12 @@ public class ProductsService {
         if (!existedProduct.isPresent()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found", null);
         }
-        String baseUrl = "http://localhost:8083";
+//        String baseUrl = "http://localhost:8083";
         List<ImageResponse.ProductImagesResponse> imageResponses = existedProduct.get().getProductImages()
                 .stream()
                 .map(image -> new ImageResponse.ProductImagesResponse(
                         image.getImageId(),
-                        baseUrl + image.getImageUrl(),
+                        image.getImageUrl(),
                         existedProduct.get().getProductId()
                 ))
                 .collect(Collectors.toList());
