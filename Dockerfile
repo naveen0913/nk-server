@@ -1,26 +1,42 @@
-# Use an official JDK runtime as a parent image
+# ---------- Build Stage ----------
 FROM maven:3.8.5-openjdk-17 AS build
 
 # Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper and config
+# Copy Maven files first (for caching dependencies)
+COPY pom.xml .
 COPY mvnw .
 COPY .mvn .mvn
-COPY pom.xml .
 
 # Give execute permission to mvnw
 RUN chmod +x mvnw
 
+# Download dependencies (faster builds on re-deploys)
+RUN ./mvnw dependency:go-offline -B
+
 # Copy source code
 COPY src src
 
-RUN ./mvnw clean package
+# Build the application (skip tests for Docker builds)
+RUN ./mvnw clean package -DskipTests
 
+
+# ---------- Runtime Stage ----------
+FROM openjdk:17-jdk-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the built JAR from build stage
+COPY --from=build /app/target/sample-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose app port
 EXPOSE 8083
 
 # Run the jar
-CMD ["java", "-jar", "target/sample-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
 
 ## Use the Maven image with JDK 17 for the build stage
 #FROM maven:3.8.5-openjdk-17 AS build
