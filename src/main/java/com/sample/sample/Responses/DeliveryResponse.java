@@ -1,5 +1,7 @@
 package com.sample.sample.Responses;
 
+import java.time.LocalDateTime;
+
 public class DeliveryResponse {
     private String trackingId;
     private String status;
@@ -9,6 +11,9 @@ public class DeliveryResponse {
     private String agentPhone;
     private String trackingWebSocketUrl;
     private Integer estimatedMinutes;
+    private LocalDateTime assignedAt;
+    private LocalDateTime deliveredAt;
+
 
 
     public String getTrackingId() {
@@ -17,6 +22,22 @@ public class DeliveryResponse {
 
     public void setTrackingId(String trackingId) {
         this.trackingId = trackingId;
+    }
+
+    public LocalDateTime getAssignedAt() {
+        return assignedAt;
+    }
+
+    public void setAssignedAt(LocalDateTime assignedAt) {
+        this.assignedAt = assignedAt;
+    }
+
+    public LocalDateTime getDeliveredAt() {
+        return deliveredAt;
+    }
+
+    public void setDeliveredAt(LocalDateTime deliveredAt) {
+        this.deliveredAt = deliveredAt;
     }
 
     public String getStatus() {

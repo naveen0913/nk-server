@@ -110,13 +110,13 @@ public class OrderService {
             oi.setOrder(order);
             oi.setProduct(ci.getProduct());
             oi.setOrderquantity(ci.getCartQuantity());
-            oi.setPrice(ci.getProduct().getPrice());
+            oi.setPrice(ci.getProduct().getDiscountPrice());
             if (order.getOrderItems() == null) {
                 order.setOrderItems(new ArrayList<>());
             }
             order.getOrderItems().add(oi);
 
-            Integer itemTotal = (int) Math.round(ci.getProduct().getPrice() * ci.getCartQuantity());
+            Integer itemTotal = (int) Math.round(ci.getProduct().getDiscountPrice() * ci.getCartQuantity());
             total = total.add(BigDecimal.valueOf(itemTotal));
         }
         order.setOrderTotal(total);
@@ -289,7 +289,6 @@ public class OrderService {
             paymentDTO.setRazorpayOrderId(payment.getRazorpayOrderId());
             paymentDTO.setPaymentId(payment.getPaymentId());
             paymentDTO.setSignature(payment.getSignature());
-//            paymentDTO.setAmount(payment.getAmount());
             paymentDTO.setCurrency(payment.getCurrency());
             paymentDTO.setReceipt(payment.getReceipt());
             paymentDTO.setStatus(payment.getStatus().toString());
@@ -436,12 +435,12 @@ public class OrderService {
             itemDTO.setTotalPrice(item.getPrice());
 
             if (item.getProduct() != null) {
-                String baseUrl = "http://localhost:8083";
+
                 List<ImageResponse.ProductImagesResponse> imageResponses = item.getProduct().getProductImages()
                         .stream()
                         .map(image -> new ImageResponse.ProductImagesResponse(
                                 image.getImageId(),
-                                baseUrl + image.getImageUrl(),
+                                image.getImageUrl(),
                                 item.getProduct().getProductId()
                         ))
                         .collect(Collectors.toList());
@@ -542,7 +541,6 @@ public class OrderService {
             paymentDTO.setRazorpayOrderId(payment.getRazorpayOrderId());
             paymentDTO.setPaymentId(payment.getPaymentId());
             paymentDTO.setSignature(payment.getSignature());
-//            paymentDTO.setAmount(payment.getAmount());
             paymentDTO.setCurrency(payment.getCurrency());
             paymentDTO.setReceipt(payment.getReceipt());
             paymentDTO.setStatus(payment.getStatus().toString());
@@ -567,6 +565,16 @@ public class OrderService {
                 userAddressDTO.setLongitude(ua.getLongitude());
             }
 
+            Delivery delivery = order.getDelivery();
+            DeliveryResponse response = new DeliveryResponse();
+            response.setAgentName(order.getDelivery().getAgent().getAgentName());
+            response.setAgentPhone(order.getDelivery().getAgent().getPhone());
+            response.setLatitude(order.getDelivery().getCurrentLatitude());
+            response.setLongitude(order.getDelivery().getCurrentLongitude());
+            response.setStatus(order.getDelivery().getDeliveryStatus());
+            response.setTrackingId(order.getDelivery().getTrackingId());
+            response.setAssignedAt(order.getDelivery().getAssignedAt());
+            response.setDeliveredAt(order.getDelivery().getDeliveredAt());
 
             OrdersResponse dto = new OrdersResponse();
             dto.setId(order.getId());
@@ -580,6 +588,7 @@ public class OrderService {
             dto.setPayment(paymentDTO);
             dto.setAccountDetails(accountDTO);
             dto.setUserAddress(userAddressDTO);
+            dto.setDeliveryResponse(response);
 
             List<UserOrdereditemsResponse> userOrdereditemsResponses = order.getOrderItems().stream().map(item -> {
                 UserOrdereditemsResponse itemDTO = new UserOrdereditemsResponse();
@@ -588,12 +597,12 @@ public class OrderService {
                 itemDTO.setTotalPrice(item.getPrice());
 
                 if (item.getProduct() != null) {
-                    String baseUrl = "http://localhost:8083";
+//                    String baseUrl = "http://localhost:8083";
                     List<ImageResponse.ProductImagesResponse> imageResponses = item.getProduct().getProductImages()
                             .stream()
                             .map(image -> new ImageResponse.ProductImagesResponse(
                                     image.getImageId(),
-                                    baseUrl + image.getImageUrl(),
+                                    image.getImageUrl(),
                                     item.getProduct().getProductId()
                             ))
                             .collect(Collectors.toList());

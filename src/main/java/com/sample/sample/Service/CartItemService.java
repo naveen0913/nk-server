@@ -7,6 +7,7 @@ import com.sample.sample.Responses.CartItemResponse;
 import com.sample.sample.Responses.CartResponse;
 import com.sample.sample.Responses.ImageResponse;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -81,15 +82,55 @@ public class CartItemService {
         return cart;
     }
 
+//    public Cart mergeCart(String userId, String sessionId) {
+//        // Find active guest cart
+//        Optional<Cart> guestCartOpt = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE);
+//
+//        if (guestCartOpt.isEmpty()) {
+//            throw new RuntimeException("Guest cart not found");
+//        }
+//        Cart guestCart = guestCartOpt.get();
+//        // Find or create user's active cart
+//        User user = userRepo.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        Cart userCart = cartRepo.findByUserAndStatus(user, Cart.Status.ACTIVE)
+//                .orElseGet(() -> {
+//                    Cart c = new Cart();
+//                    c.setUser(user);
+//                    c.setStatus(Cart.Status.ACTIVE);
+//                    return cartRepo.save(c);
+//                });
+//        // Merge items
+//        for (CartItem guestItem : guestCart.getItems()) {
+//            CartItem existingItem = cartItemRepository.findByCartAndProduct(userCart, guestItem.getProduct())
+//                    .orElseGet(() -> {
+//                        CartItem ci = new CartItem();
+//                        ci.setCart(userCart);
+//                        ci.setProduct(guestItem.getProduct());
+//                        ci.setCartQuantity(0);
+//                        return ci;
+//                    });
+//
+//            existingItem.setCartQuantity(existingItem.getCartQuantity() + guestItem.getCartQuantity());
+//            cartItemRepository.save(existingItem);
+//        }
+//        // Mark guest cart as COMPLETED
+//        guestCart.setStatus(Cart.Status.COMPLETED);
+//        cartRepo.save(guestCart);
+//        return userCart;
+//    }
+
+    @Transactional
     public Cart mergeCart(String userId, String sessionId) {
-        // Find active guest cart
         Optional<Cart> guestCartOpt = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE);
 
         if (guestCartOpt.isEmpty()) {
-            throw new RuntimeException("Guest cart not found");
+            return cartRepo.findByUserAndStatus(new User(userId), Cart.Status.ACTIVE)
+                    .orElseThrow(() -> new RuntimeException("No cart found for user or session"));
         }
+
         Cart guestCart = guestCartOpt.get();
-        // Find or create user's active cart
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -100,7 +141,7 @@ public class CartItemService {
                     c.setStatus(Cart.Status.ACTIVE);
                     return cartRepo.save(c);
                 });
-        // Merge items
+
         for (CartItem guestItem : guestCart.getItems()) {
             CartItem existingItem = cartItemRepository.findByCartAndProduct(userCart, guestItem.getProduct())
                     .orElseGet(() -> {
@@ -114,21 +155,26 @@ public class CartItemService {
             existingItem.setCartQuantity(existingItem.getCartQuantity() + guestItem.getCartQuantity());
             cartItemRepository.save(existingItem);
         }
-        // Mark guest cart as COMPLETED
+
         guestCart.setStatus(Cart.Status.COMPLETED);
         cartRepo.save(guestCart);
         return userCart;
     }
 
     public CartResponse getCart(String userId, String sessionId) {
-        Cart cart;
+        Cart cart = null;
 
         if (userId != null) {
             cart = cartRepo.findByUserAndStatus(new User(userId), Cart.Status.ACTIVE)
                     .orElse(null);
-        } else {
-            cart = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE)
-                    .orElse(null);
+
+            // merge if session cart exists
+            Optional<Cart> guestCartOpt = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE);
+            if (guestCartOpt.isPresent()) {
+                cart = mergeCart(userId, sessionId);
+            }
+        } else if (sessionId != null) {
+            cart = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE).orElse(null);
         }
 
         if (cart == null) {
@@ -139,7 +185,6 @@ public class CartItemService {
                 .map(item -> new CartItemResponse(
                         item.getCartItemId(),
                         item.getCartQuantity(),
-
                         new ImageResponse(
                                 item.getProduct().getProductId(),
                                 item.getProduct().getProductName(),
@@ -166,22 +211,24 @@ public class CartItemService {
                         )
                 ))
                 .toList();
+
         String userIdFromCart = (cart.getUser() != null) ? cart.getUser().getId() : null;
 
-        return new CartResponse(cart.getCartId(),
+        return new CartResponse(
+                cart.getCartId(),
                 userIdFromCart,
                 cart.getSessionId(),
                 cart.getStatus().name(),
-                itemResponses);
+                itemResponses
+        );
     }
 
     private List<ImageResponse.ProductImagesResponse> productImageResponse(Products product) {
-        String baseUrl = "http://localhost:8083";
         List<ImageResponse.ProductImagesResponse> imageResponses = product.getProductImages()
                 .stream()
                 .map(image -> new ImageResponse.ProductImagesResponse(
                         image.getImageId(),
-                        baseUrl + image.getImageUrl(),
+                        image.getImageUrl(),
                         product.getProductId()
                 ))
                 .collect(Collectors.toList());
@@ -273,9 +320,6 @@ public class CartItemService {
 
         return new AuthResponse(HttpStatus.OK.value(), "updated",null);
     }
-
-
-
 
 
 }

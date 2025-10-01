@@ -46,25 +46,25 @@ public class CartItemController {
         }
     }
 
-    @PostMapping("/merge/cart")
-    public ResponseEntity<AuthResponse> mergeCart(
-            @RequestParam String userId,
-            @RequestParam String sessionId) {
-        try {
-            Cart mergedCart = cartItemService.mergeCart(userId, sessionId);
-            return ResponseEntity.ok(
-                    new AuthResponse(HttpStatus.OK.value(), "Guest cart merged successfully", mergedCart)
-            );
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(
-                    new AuthResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null)
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred", null)
-            );
-        }
-    }
+//    @PostMapping("/merge/cart")
+//    public ResponseEntity<AuthResponse> mergeCart(
+//            @RequestParam String userId,
+//            @RequestParam String sessionId) {
+//        try {
+//            Cart mergedCart = cartItemService.mergeCart(userId, sessionId);
+//            return ResponseEntity.ok(
+//                    new AuthResponse(HttpStatus.OK.value(), "Guest cart merged successfully", mergedCart)
+//            );
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.badRequest().body(
+//                    new AuthResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), null)
+//            );
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+//                    new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred", null)
+//            );
+//        }
+//    }
 
     @GetMapping("/items")
     public ResponseEntity<?> getCartItems(

@@ -60,12 +60,11 @@ public class WishlistService {
         // Map Wishlist entities to WishlistResponse DTOs
         List<WishlistResponse> wishlistResponses = wishlistItems.stream().map(wishlist -> {
             Products product = wishlist.getProduct();
-            String baseUrl = "http://localhost:8083";
             List<ImageResponse.ProductImagesResponse> imageResponses = product.getProductImages()
                     .stream()
                     .map(image -> new ImageResponse.ProductImagesResponse(
                             image.getImageId(),
-                            baseUrl + image.getImageUrl(),
+                            image.getImageUrl(),
                             product.getProductId()
                     ))
                     .collect(Collectors.toList());

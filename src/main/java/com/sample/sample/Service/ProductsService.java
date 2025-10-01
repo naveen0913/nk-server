@@ -34,6 +34,9 @@ public class ProductsService {
     @Autowired
     private UserOrderedItemRepository userOrderedItemRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     public AuthResponse addProduct(String name, String description,String category,double price,double discountPrice,String subCategory,String pTag,boolean inStock,Long totalQuantity,Long availableQuantity,String weight,String weightUnit,String attributeName,String attributeValue, MultipartFile[] files) throws IOException {
 
         Products product = new Products();
@@ -59,17 +62,19 @@ public class ProductsService {
         product.setCustomProductId(customProductId);
         product.setProductStatus(productStatus.active);
         List<ProductImages> imagesList = new ArrayList<>();
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
-        Files.createDirectories(uploadPath);
+//        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+//        Files.createDirectories(uploadPath);
 
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
-                String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                Path filePath = uploadPath.resolve(filename);
-                Files.write(filePath, file.getBytes());
+//                String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+//                Path filePath = uploadPath.resolve(filename);
+//                Files.write(filePath, file.getBytes());
+                String cloudinaryFile = cloudinaryService.uploadFile(file);
 
                 ProductImages images = new ProductImages();
-                images.setImageUrl("/uploads/" + filename);
+//                images.setImageUrl("/uploads/" + filename);
+                images.setImageUrl(cloudinaryFile);
                 images.setProducts(product);
                 imagesList.add(images);
                 product.setProductImages(imagesList);
@@ -87,7 +92,6 @@ public class ProductsService {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "products not found", null);
         }
         List<ImageResponse> responseList = new ArrayList<>();
-//        String baseUrl = "http://localhost:8083";
         for (Products product : productList) {
             List<ImageResponse.ProductImagesResponse> imageResponses = product.getProductImages()
                     .stream()
@@ -133,7 +137,6 @@ public class ProductsService {
         if (!existedProduct.isPresent()) {
             return new AuthResponse(HttpStatus.NOT_FOUND.value(), "product not found", null);
         }
-//        String baseUrl = "http://localhost:8083";
         List<ImageResponse.ProductImagesResponse> imageResponses = existedProduct.get().getProductImages()
                 .stream()
                 .map(image -> new ImageResponse.ProductImagesResponse(
