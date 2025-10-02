@@ -21,13 +21,6 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.assignDeliveryAgent(request));
     }
 
-    @PostMapping("/update-location")
-    public ResponseEntity<?> updateLocation(@RequestBody LocationDTO request) {
-        return ResponseEntity.ok(deliveryService.updateLocation(
-                request.getTrackingId(), request.getLatitude(), request.getLongitude(), request.getStatus()
-        ));
-    }
-
     @GetMapping("/status/{orderId}")
     public ResponseEntity<?> getStatus(@PathVariable String orderId) {
         return ResponseEntity.ok(deliveryService.getDeliveryStatus(orderId));

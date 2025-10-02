@@ -82,44 +82,6 @@ public class CartItemService {
         return cart;
     }
 
-//    public Cart mergeCart(String userId, String sessionId) {
-//        // Find active guest cart
-//        Optional<Cart> guestCartOpt = cartRepo.findBySessionIdAndStatus(sessionId, Cart.Status.ACTIVE);
-//
-//        if (guestCartOpt.isEmpty()) {
-//            throw new RuntimeException("Guest cart not found");
-//        }
-//        Cart guestCart = guestCartOpt.get();
-//        // Find or create user's active cart
-//        User user = userRepo.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        Cart userCart = cartRepo.findByUserAndStatus(user, Cart.Status.ACTIVE)
-//                .orElseGet(() -> {
-//                    Cart c = new Cart();
-//                    c.setUser(user);
-//                    c.setStatus(Cart.Status.ACTIVE);
-//                    return cartRepo.save(c);
-//                });
-//        // Merge items
-//        for (CartItem guestItem : guestCart.getItems()) {
-//            CartItem existingItem = cartItemRepository.findByCartAndProduct(userCart, guestItem.getProduct())
-//                    .orElseGet(() -> {
-//                        CartItem ci = new CartItem();
-//                        ci.setCart(userCart);
-//                        ci.setProduct(guestItem.getProduct());
-//                        ci.setCartQuantity(0);
-//                        return ci;
-//                    });
-//
-//            existingItem.setCartQuantity(existingItem.getCartQuantity() + guestItem.getCartQuantity());
-//            cartItemRepository.save(existingItem);
-//        }
-//        // Mark guest cart as COMPLETED
-//        guestCart.setStatus(Cart.Status.COMPLETED);
-//        cartRepo.save(guestCart);
-//        return userCart;
-//    }
 
     @Transactional
     public Cart mergeCart(String userId, String sessionId) {

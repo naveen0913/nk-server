@@ -495,7 +495,7 @@ public class OrderService {
             dr.setLongitude(delivery.getCurrentLongitude());
             dr.setAgentName(delivery.getAgent().getAgentName());
             dr.setAgentPhone(delivery.getAgent().getPhone());
-            dr.setTrackingWebSocketUrl("ws://localhost:8080/ws/topic/delivery/" + delivery.getTrackingId());
+            dr.setTrackingWebSocketUrl("ws://localhost:8083/ws/topic/delivery/" + delivery.getTrackingId());
 
 
             if (order.getUserAddress() != null &&
@@ -567,14 +567,18 @@ public class OrderService {
 
             Delivery delivery = order.getDelivery();
             DeliveryResponse response = new DeliveryResponse();
-            response.setAgentName(order.getDelivery().getAgent().getAgentName());
-            response.setAgentPhone(order.getDelivery().getAgent().getPhone());
-            response.setLatitude(order.getDelivery().getCurrentLatitude());
-            response.setLongitude(order.getDelivery().getCurrentLongitude());
-            response.setStatus(order.getDelivery().getDeliveryStatus());
-            response.setTrackingId(order.getDelivery().getTrackingId());
-            response.setAssignedAt(order.getDelivery().getAssignedAt());
-            response.setDeliveredAt(order.getDelivery().getDeliveredAt());
+
+            if (delivery!=null) {
+                response.setAgentName(order.getDelivery().getAgent().getAgentName());
+                response.setAgentPhone(order.getDelivery().getAgent().getPhone());
+                response.setLatitude(order.getDelivery().getCurrentLatitude());
+                response.setLongitude(order.getDelivery().getCurrentLongitude());
+                response.setStatus(order.getDelivery().getDeliveryStatus());
+                response.setTrackingId(order.getDelivery().getTrackingId());
+                response.setAssignedAt(order.getDelivery().getAssignedAt());
+                response.setDeliveredAt(order.getDelivery().getDeliveredAt());
+                response.setTrackingWebSocketUrl("ws://localhost:8083/ws/topic/delivery/" + delivery.getTrackingId());
+            }
 
             OrdersResponse dto = new OrdersResponse();
             dto.setId(order.getId());

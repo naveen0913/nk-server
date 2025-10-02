@@ -95,4 +95,20 @@ public class DeliveryResponse {
     public void setEstimatedMinutes(Integer estimatedMinutes) {
         this.estimatedMinutes = estimatedMinutes;
     }
+
+    public DeliveryResponse() {
+    }
+
+    public DeliveryResponse(String trackingId, String status, double latitude, double longitude, String agentName, String agentPhone, String trackingWebSocketUrl, Integer estimatedMinutes, LocalDateTime assignedAt, LocalDateTime deliveredAt) {
+        this.trackingId = trackingId;
+        this.status = status;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.agentName = agentName;
+        this.agentPhone = agentPhone;
+        this.trackingWebSocketUrl = trackingWebSocketUrl;
+        this.estimatedMinutes = estimatedMinutes;
+        this.assignedAt = assignedAt;
+        this.deliveredAt = deliveredAt;
+    }
 }
