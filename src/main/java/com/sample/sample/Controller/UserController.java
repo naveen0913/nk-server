@@ -123,7 +123,7 @@ public class UserController {
     public ResponseEntity<?> logoutUser() {
         ResponseCookie cookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
-                .secure(false) // set true in production
+                .secure(true) // set true in production
                 .path("/")
                 .maxAge(0) // delete cookie immediately
                 .sameSite("Strict")
