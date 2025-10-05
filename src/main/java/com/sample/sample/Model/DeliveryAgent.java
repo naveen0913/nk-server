@@ -19,6 +19,7 @@ public class DeliveryAgent {
     private boolean active;
     private Double latitude;
     private Double longitude;
+    private String password;
 
     @OneToMany(mappedBy = "agent")
     @JsonIgnore
@@ -86,5 +87,13 @@ public class DeliveryAgent {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

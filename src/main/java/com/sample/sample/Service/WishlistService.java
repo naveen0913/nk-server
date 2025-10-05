@@ -115,6 +115,29 @@ public class WishlistService {
     }
 
     @Transactional
+    public AuthResponse removeWishlistByProduct(Long pId, String userId) {
+        // 1. Check if user exists
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // 2. Check if product exists
+        Products product = productRepo.findById(pId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        // 3. Find the wishlist item for this user and product
+        Wishlist wishlist = wishlistRepo.findByUserAndProduct(user, product)
+                .orElseThrow(() -> new EntityNotFoundException("Wishlist item not found for this product"));
+
+        product.setWishlisted(false);
+
+        // 5. Delete the wishlist item
+        wishlistRepo.delete(wishlist);
+
+        return new AuthResponse(HttpStatus.OK.value(), "Wishlist item deleted successfully", null);
+    }
+
+
+    @Transactional
     public AuthResponse deleteAllWishlistItems(String userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));

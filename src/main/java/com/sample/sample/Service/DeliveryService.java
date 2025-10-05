@@ -1,6 +1,8 @@
 package com.sample.sample.Service;
 
 import com.sample.sample.DTO.DeliveryRequest;
+import com.sample.sample.DTO.LoginDTO;
+import com.sample.sample.JWT.JwtUtil;
 import com.sample.sample.Model.*;
 import com.sample.sample.Repository.DeliveryAgentRepo;
 import com.sample.sample.Repository.DeliveryRepo;
@@ -9,6 +11,8 @@ import com.sample.sample.Responses.AgentResponse;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Responses.DeliveryResponse;
 import com.sample.sample.configuration.DistanceUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,9 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class DeliveryService {
@@ -35,6 +37,9 @@ public class DeliveryService {
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private final Random random = new Random();
     private static final double DEFAULT_LATITUDE = 17.4000; // example warehouse
@@ -125,12 +130,13 @@ public class DeliveryService {
         return mapToResponse(delivery, delivery.getOrder());
     }
 
-    public AuthResponse addNewDeliveryAgent(String name,String email,String phone,boolean status){
+    public AuthResponse addNewDeliveryAgent(String name,String email,String phone,boolean status,String password){
         DeliveryAgent deliveryAgent = new DeliveryAgent();
         deliveryAgent.setAgentName(name);
         deliveryAgent.setEmail(email);
         deliveryAgent.setPhone(phone);
         deliveryAgent.setActive(status);
+        deliveryAgent.setPassword(password);
         deliveryAgentRepo.save(deliveryAgent);
         return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
     }
@@ -142,5 +148,60 @@ public class DeliveryService {
         }
         return new AuthResponse(HttpStatus.OK.value(),"no agents right now",deliveryAgents);
     }
+
+    public AuthResponse agentLogin(LoginDTO dto) {
+        Optional<DeliveryAgent> existedAgent = deliveryAgentRepo.findByEmail(dto.getEmail());
+        if (existedAgent.isEmpty()){
+            return new AuthResponse(HttpStatus.NOT_FOUND.value(),"no agents right now",null);
+        }
+        DeliveryAgent agent = existedAgent.get();
+        if (!dto.getPassword().equals(agent.getPassword())) {
+            return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "Incorrect password! Try again", null);
+        }
+        String token = jwtUtil.generateToken(agent.getEmail());
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("user", agent);
+        responseBody.put("token", token);
+        return new AuthResponse(HttpStatus.OK.value(), "Login success", responseBody);
+    }
+
+    public AuthResponse getUserFromRequest(HttpServletRequest request) {
+        try {
+            // 1. Get JWT token from cookie
+            String token = extractJwtFromCookies(request);
+            if (token == null || token.isEmpty()) {
+                return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Missing token", null);
+            }
+
+            String email = jwtUtil.extractEmail(token);
+            if (email == null || !jwtUtil.validateToken(token, email)) {
+                return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid or expired token", null);
+            }
+
+            DeliveryAgent existed = deliveryAgentRepo.findByEmail(email).orElse(null);
+            if (existed == null) {
+                return new AuthResponse(HttpStatus.NOT_FOUND.value(), "Agent not found", null);
+            }
+
+            return new AuthResponse(HttpStatus.OK.value(), "Success", existed);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error: " + e.getMessage(), null);
+        }
+    }
+
+    private String extractJwtFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if ("token".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+
 
 }

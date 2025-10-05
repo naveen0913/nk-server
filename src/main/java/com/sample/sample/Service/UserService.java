@@ -33,7 +33,7 @@ public class UserService {
     private MailService mailService;
 
     @Autowired
-    private AccountDetailsRepository    accountDetailsRepository;
+    private AccountDetailsRepository accountDetailsRepository;
 
     public AuthResponse registerUser(SignupDTO signUpDTO, boolean isAdmin) {
         Optional<User> existedUser = userRepository.findByEmail(signUpDTO.getEmail());
@@ -58,7 +58,6 @@ public class UserService {
         accountDetailsRepository.save(accountDetails);
 
         mailService.sendAccountCreationMail(newUser.getEmail(), newUser.getUsername());
-
 
 
         return new AuthResponse(HttpStatus.CREATED.value(), "created", null);
@@ -133,8 +132,6 @@ public class UserService {
 
         userRepository.save(user);
 
-
-
 //        mailService.sendProfileUpdateMail(user.getEmail(), user.getUsername());
         return new AuthResponse(HttpStatus.OK.value(), "User updated successfully", user);
     }
@@ -199,46 +196,45 @@ public class UserService {
         user.setPasswordUpdatedTime(LocalDateTime.now());
 
         userRepository.save(user);
-      mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
+        mailService.sendResetSuccessMail(user.getEmail(), user.getUsername());
     }
 
 
-        public AuthResponse getUserFromRequest(HttpServletRequest request) {
-            try {
-                // 1. Get JWT token from cookie
-                String token = extractJwtFromCookies(request);
-                if (token == null || token.isEmpty()) {
-                    return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Missing token", null);
-                }
+    public AuthResponse getUserFromRequest(HttpServletRequest request) {
+        try {
+            // 1. Get JWT token from cookie
+            String token = extractJwtFromCookies(request);
+            if (token == null || token.isEmpty()) {
+                return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Missing token", null);
+            }
 
-                String email = jwtUtil.extractEmail(token);
-                if (email == null || !jwtUtil.validateToken(token, email)) {
-                    return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid or expired token", null);
-                }
+            String email = jwtUtil.extractEmail(token);
+            if (email == null || !jwtUtil.validateToken(token, email)) {
+                return new AuthResponse(HttpStatus.UNAUTHORIZED.value(), "Invalid or expired token", null);
+            }
 
-                User existed = userRepository.findByEmail(email).orElse(null);
-                if (existed == null) {
-                    return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
-                }
+            User existed = userRepository.findByEmail(email).orElse(null);
+            if (existed == null) {
+                return new AuthResponse(HttpStatus.NOT_FOUND.value(), "User not found", null);
+            }
 
-                return new AuthResponse(HttpStatus.OK.value(), "Success", existed);
+            return new AuthResponse(HttpStatus.OK.value(), "Success", existed);
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error: " + e.getMessage(), null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new AuthResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error: " + e.getMessage(), null);
+        }
+    }
+
+    private String extractJwtFromCookies(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if ("token".equals(cookie.getName())) {
+                return cookie.getValue();
             }
         }
-
-        private String extractJwtFromCookies(HttpServletRequest request) {
-            if (request.getCookies() == null) return null;
-            for (Cookie cookie : request.getCookies()) {
-                if ("token".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-            return null;
+        return null;
     }
-
 
 
 }

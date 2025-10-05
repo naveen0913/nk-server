@@ -40,4 +40,13 @@ public class WishlistController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @DeleteMapping("/remove/{productId}/{userId}")
+    public ResponseEntity<AuthResponse> removeWishlistByProduct(
+            @PathVariable Long productId,
+            @PathVariable String userId) {
+
+        AuthResponse response = wishlistService.removeWishlistByProduct(productId, userId);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
 }
