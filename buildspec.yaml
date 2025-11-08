@@ -3,7 +3,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - ./mvnw clean install
+      - mvnw clean install
       - echo Logging in to Amazon ECR...
       - aws --version
       - REPOSITORY_URI=488606382412.dkr.ecr.ap-south-1.amazonaws.com/nk-server
