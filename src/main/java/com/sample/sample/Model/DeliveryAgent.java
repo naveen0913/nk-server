@@ -2,7 +2,10 @@ package com.sample.sample.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +23,36 @@ public class DeliveryAgent {
     private Double latitude;
     private Double longitude;
     private String password;
+    private String vehicleNo;
+    private String vehicleType;
+    private String role;
+    private boolean shiftStarted;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     @OneToMany(mappedBy = "agent")
     @JsonIgnore
     private List<Delivery> deliveries = new ArrayList<>();
+
+    public boolean isShiftStarted() {
+        return shiftStarted;
+    }
+
+    public void setShiftStarted(boolean shiftStarted) {
+        this.shiftStarted = shiftStarted;
+    }
 
     public Long getId() {
         return id;
@@ -43,6 +72,22 @@ public class DeliveryAgent {
 
     public String getPhone() {
         return phone;
+    }
+
+    public String getVehicleNo() {
+        return vehicleNo;
+    }
+
+    public void setVehicleNo(String vehicleNo) {
+        this.vehicleNo = vehicleNo;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     public void setPhone(String phone) {
@@ -95,5 +140,21 @@ public class DeliveryAgent {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -11,6 +11,7 @@ import com.sample.sample.Responses.AgentResponse;
 import com.sample.sample.Responses.AuthResponse;
 import com.sample.sample.Responses.DeliveryResponse;
 import com.sample.sample.configuration.DistanceUtils;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,13 +131,18 @@ public class DeliveryService {
         return mapToResponse(delivery, delivery.getOrder());
     }
 
-    public AuthResponse addNewDeliveryAgent(String name,String email,String phone,boolean status,String password){
+    public AuthResponse addNewDeliveryAgent(String name,String email,String phone,boolean status,String password,String vNo,String vType){
         DeliveryAgent deliveryAgent = new DeliveryAgent();
         deliveryAgent.setAgentName(name);
         deliveryAgent.setEmail(email);
         deliveryAgent.setPhone(phone);
         deliveryAgent.setActive(status);
         deliveryAgent.setPassword(password);
+        deliveryAgent.setVehicleNo(vNo);
+        deliveryAgent.setVehicleType(vType);
+        deliveryAgent.setCreatedAt(LocalDateTime.now());
+        deliveryAgent.setRole("agent");
+        deliveryAgent.setShiftStarted(false);
         deliveryAgentRepo.save(deliveryAgent);
         return new AuthResponse(HttpStatus.CREATED.value(), "created",null);
     }
@@ -161,7 +167,7 @@ public class DeliveryService {
         String token = jwtUtil.generateToken(agent.getEmail());
 
         Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("user", agent);
+        responseBody.put("agent", agent);
         responseBody.put("token", token);
         return new AuthResponse(HttpStatus.OK.value(), "Login success", responseBody);
     }
@@ -202,6 +208,14 @@ public class DeliveryService {
         return null;
     }
 
+    public AuthResponse startDeliveryAgentShift(Long agentId){
+        DeliveryAgent agent = deliveryAgentRepo.findById(agentId).orElseThrow(()->new EntityNotFoundException("Agent Not found with Id"));
+        if (agent.isShiftStarted()==true){
+            return new AuthResponse(HttpStatus.BAD_REQUEST.value(), "Agent Shift started already",null);
+        }
+        agent.setShiftStarted(true);
+        return new AuthResponse(HttpStatus.OK.value(), "Agent Shift Updated",null);
+    }
 
 
 }

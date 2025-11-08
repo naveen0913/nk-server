@@ -38,14 +38,17 @@ public class DeliveryController {
             @RequestParam(value = "email") String email,
             @RequestParam(value = "phone") String phone,
             @RequestParam(value = "status") boolean status,
-            @RequestParam(value = "password") String password
-    ){
-        AuthResponse authResponse = deliveryService.addNewDeliveryAgent(name,email,phone,status,password);
+            @RequestParam(value = "password") String password,
+            @RequestParam(value = "vehicleNo") String vehicleNo,
+            @RequestParam(value = "vehicleType") String vehicleType
+
+    ) {
+        AuthResponse authResponse = deliveryService.addNewDeliveryAgent(name, email, phone, status, password, vehicleNo, vehicleType);
         return ResponseEntity.status(authResponse.getCode()).body(authResponse);
     }
 
     @GetMapping("/agent/all")
-    public ResponseEntity<?> getDeliveryAgents(){
+    public ResponseEntity<?> getDeliveryAgents() {
         AuthResponse response = deliveryService.getAllDeliveryAgents();
         return ResponseEntity.status(response.getCode()).body(response);
     }
